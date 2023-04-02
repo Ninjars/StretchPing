@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,24 +16,55 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
     val viewState: StateFlow<ActiveTimerViewState> =
         stateFlow.toViewState(viewModelScope) { ActiveTimerStateToViewState(it) }
 
-    override fun accept(t: Event?) {
-        TODO("Not yet implemented")
+    override fun accept(event: Event) {
+        val currentState = stateFlow.value
+        viewModelScope.launch {
+            val command = EventToCommand(currentState, event)
+            val newState = ActiveTimerStateUpdater(currentState, command)
+            stateFlow.compareAndSet(currentState, newState)
+        }
     }
 
     sealed class Event {
+        object Start : Event()
+        object Pause : Event()
+        object Reset : Event()
+    }
 
+    sealed class Command {
+        data class StartSegment(
+            val startMillis: Long,
+            val segmentSpec: State.SegmentSpec,
+        ) : Command()
+
+        data class ResumeSegment(
+            val startMillis: Long,
+            val startFraction: Float,
+            val remainingDurationMillis: Long,
+            val pausedSegment: State.ActiveSegment,
+        ) : Command()
+
+        data class PauseSegment(
+            val pauseMillis: Long,
+            val runningSegment: State.ActiveSegment,
+        ) : Command()
+
+        object ResetToStart : Command()
     }
 
     data class State(
+        val initialRepeatCount: Int = -1,
+        val fullSequence: List<SegmentSpec> = emptyList(),
+        val queuedSegments: List<SegmentSpec> = emptyList(),
         val activeSegment: ActiveSegment? = null,
-        val repeatCount: Int = -1,
-        val queuedSegments: ArrayDeque<SegmentSpec> = ArrayDeque(),
+        val repeatsRemaining: Int = -1,
     ) {
         data class ActiveSegment(
             val startedAtTime: Long,
             val startedAtFraction: Float,
             val endAtTime: Long,
             val pausedAtFraction: Float?,
+            val pausedAtTime: Long?,
             val mode: SegmentSpec.Mode,
         )
 

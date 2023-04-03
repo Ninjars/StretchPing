@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">StretchPing</string>
+
+    <string name="timer_start">Start</string>
 </resources>

@@ -13,7 +13,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import jez.stretchping.ui.theme.StretchPingTheme
+import kotlin.math.max
 
 private const val ArcStartDeg = 120f
 private const val ArcSweepDeg = 300f
@@ -50,23 +54,26 @@ private fun CountdownTimer(
     start: Long,
     end: Long,
 ) {
-    val anim = remember(startAtFraction, end) {
+    val begin = remember(startAtFraction, end) { System.currentTimeMillis() }
+    val duration = max(0, (end - start).toInt())
+    val anim = remember(begin) {
         TargetBasedAnimation(
             animationSpec = tween(
-                durationMillis = (end - System.currentTimeMillis()).toInt(),
+                durationMillis = duration,
                 easing = LinearEasing,
             ),
             typeConverter = Float.VectorConverter,
-            initialValue = start.toFloat(),
-            targetValue = end.toFloat(),
+            initialValue = startAtFraction,
+            targetValue = 1f,
         )
     }
-    var animationValue = startAtFraction
+    var animationValue by remember { mutableStateOf(startAtFraction) }
     LaunchedEffect(anim) {
+        val firstFrame = withFrameMillis { it }
         do {
-            val timeNow = withFrameMillis { it }
-            animationValue = startAtFraction + anim.getValueFromNanos(timeNow * 1000)
-        } while (timeNow <= end)
+            val elapsed = withFrameMillis { it - firstFrame }
+            animationValue = startAtFraction + anim.getValueFromNanos(elapsed * 1000000)
+        } while (elapsed <= duration)
     }
     ArcProgressBar(progress = animationValue)
 }

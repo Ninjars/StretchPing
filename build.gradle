@@ -2,7 +2,7 @@ buildscript {
     ext {
         compose_ui_version = '1.4'
         kotlin_version = "1.8.10"
-        hilt_version = "2.43.2"
+        hilt_version = "2.44"
         lifecycle_version = "2.5.1"
     }
     dependencies {

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ private fun ActiveTimerScreen(
     eventHandler: (Event) -> Unit,
 ) {
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
     ) {
         Spacer(modifier = Modifier.weight(1f))
@@ -74,7 +76,8 @@ fun BigPlayButton(eventHandler: (Event) -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Rounded.PlayArrow,
-            contentDescription = stringResource(id = R.string.timer_start)
+            contentDescription = stringResource(id = R.string.timer_start),
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

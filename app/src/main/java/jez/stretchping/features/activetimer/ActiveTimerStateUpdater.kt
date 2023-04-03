@@ -12,7 +12,17 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
             is Command.ResetToStart -> resetToStart(state)
+            is Command.EnqueueSegments -> enqueueSegments(state, command.segments)
         }
+
+    private fun enqueueSegments(
+        state: State,
+        segments: List<State.SegmentSpec>
+    ): State =
+        state.copy(
+            fullSequence = segments,
+            queuedSegments = segments,
+        )
 
     private fun resetToStart(state: State): State =
         state.copy(

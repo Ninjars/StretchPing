@@ -4,6 +4,7 @@ import androidx.core.util.Consumer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jez.stretchping.features.activetimer.ActiveTimerVM.State.SegmentSpec.Mode
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,24 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
     private val stateFlow = MutableStateFlow(State())
     val viewState: StateFlow<ActiveTimerViewState> =
         stateFlow.toViewState(viewModelScope) { ActiveTimerStateToViewState(it) }
+
+    init {
+        stateFlow.value = ActiveTimerStateUpdater(
+            stateFlow.value,
+            Command.EnqueueSegments(
+                listOf(
+                    State.SegmentSpec(
+                        durationSeconds = 5,
+                        mode = Mode.Transition,
+                    ),
+                    State.SegmentSpec(
+                        durationSeconds = 30,
+                        mode = Mode.Stretch,
+                    )
+                )
+            )
+        )
+    }
 
     override fun accept(event: Event) {
         val currentState = stateFlow.value
@@ -32,6 +51,10 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
     }
 
     sealed class Command {
+        data class EnqueueSegments(
+            val segments: List<State.SegmentSpec>,
+        ) : Command()
+
         data class StartSegment(
             val startMillis: Long,
             val segmentSpec: State.SegmentSpec,
@@ -65,7 +88,7 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
             val endAtTime: Long,
             val pausedAtFraction: Float?,
             val pausedAtTime: Long?,
-            val mode: SegmentSpec.Mode,
+            val mode: Mode,
         )
 
         data class SegmentSpec(

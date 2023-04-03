@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewModel() {
+class ActiveTimerVM @Inject constructor(
+    private val eventScheduler: EventScheduler,
+) : Consumer<ActiveTimerVM.Event>, ViewModel() {
     private val stateFlow = MutableStateFlow(State())
     val viewState: StateFlow<ActiveTimerViewState> =
         stateFlow.toViewState(viewModelScope) { ActiveTimerStateToViewState(it) }
@@ -41,6 +43,10 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
             val command = EventToCommand(currentState, event)
             val newState = ActiveTimerStateUpdater(currentState, command)
             stateFlow.compareAndSet(currentState, newState)
+
+            command?.let {
+                eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
+            }
         }
     }
 
@@ -48,6 +54,7 @@ class ActiveTimerVM @Inject constructor() : Consumer<ActiveTimerVM.Event>, ViewM
         object Start : Event()
         object Pause : Event()
         object Reset : Event()
+        object OnSectionCompleted : Event()
     }
 
     sealed class Command {

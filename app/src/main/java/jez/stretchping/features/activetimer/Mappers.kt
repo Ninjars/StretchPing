@@ -22,6 +22,7 @@ internal object EventToCommand : (State, Event) -> Command? {
                 } else {
                     start(state.queuedSegments)
                 }
+            is Event.OnSectionCompleted -> start(state.queuedSegments)
             is Event.Reset -> Command.ResetToStart
         }
 

@@ -13,6 +13,8 @@ data class ActiveTimerState(
     val pausedAtFraction: Float?,
     val mode: Mode,
 ) {
+    val isPaused = pausedAtFraction != null
+
     enum class Mode {
         Stretch,
         Transition,

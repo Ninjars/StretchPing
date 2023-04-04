@@ -2,4 +2,6 @@
     <string name="app_name">StretchPing</string>
 
     <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
 </resources>

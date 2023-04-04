@@ -93,10 +93,11 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
 
     private fun State.ActiveSegment.toPaused(currentTimeMillis: Long): State.ActiveSegment {
         val scalingFactor = 1f - startedAtFraction
-        val currentFraction = (currentTimeMillis - startedAtTime) / (endAtTime - startedAtTime)
+        val currentFraction =
+            (currentTimeMillis - startedAtTime).toDouble() / (endAtTime - startedAtTime).toDouble()
         return copy(
             pausedAtTime = currentTimeMillis,
-            pausedAtFraction = startedAtFraction + scalingFactor * currentFraction,
+            pausedAtFraction = (startedAtFraction + scalingFactor * currentFraction).toFloat(),
         )
     }
 }

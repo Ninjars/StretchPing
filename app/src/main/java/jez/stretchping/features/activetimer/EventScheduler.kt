@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Integer.min
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 class EventScheduler @Inject constructor(
     private val soundManager: SoundManager,
@@ -32,14 +32,14 @@ class EventScheduler @Inject constructor(
             is ActiveTimerVM.Command.ResumeSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
-                    (executedCommand.remainingDurationMillis / 1000).toInt(),
+                    executedCommand.remainingDurationMillis,
                     executedCommand.pausedSegment.mode,
                     eventConsumer,
                 )
             is ActiveTimerVM.Command.StartSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
-                    executedCommand.segmentSpec.durationSeconds,
+                    executedCommand.segmentSpec.durationSeconds * 1000L,
                     executedCommand.segmentSpec.mode,
                     eventConsumer,
                 )
@@ -53,13 +53,13 @@ class EventScheduler @Inject constructor(
 
     private suspend fun scheduleNextSegmentEvents(
         coroutineScope: CoroutineScope,
-        seconds: Int,
+        durationMillis: Long,
         segmentMode: Mode,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         jobs.add(
             coroutineScope.launch {
-                delay(seconds.seconds)
+                delay(durationMillis.milliseconds)
                 eventConsumer.accept(ActiveTimerVM.Event.OnSectionCompleted)
                 soundManager.playSound(
                     when (segmentMode) {
@@ -71,25 +71,25 @@ class EventScheduler @Inject constructor(
         )
         enqueueCountdownPings(
             coroutineScope = coroutineScope,
-            durationSeconds = seconds,
+            durationMillis = durationMillis,
             pingCount = 5,
-            pingInterval = when (segmentMode) {
+            pingIntervalMillis = when (segmentMode) {
                 Mode.Stretch -> 2
                 Mode.Transition -> 1
-            },
+            } * 1000L,
         )
     }
 
     private suspend fun enqueueCountdownPings(
         coroutineScope: CoroutineScope,
-        durationSeconds: Int,
+        durationMillis: Long,
         pingCount: Int,
-        pingInterval: Int,
+        pingIntervalMillis: Long,
     ) {
-        (1..(min(pingCount, durationSeconds / pingInterval))).forEach {
+        (1..(min(pingCount, (durationMillis / pingIntervalMillis).toInt()))).forEach {
             jobs.add(
                 coroutineScope.launch {
-                    delay((durationSeconds - it * pingInterval).seconds)
+                    delay((durationMillis - it * pingIntervalMillis).milliseconds)
                     soundManager.playSound(GameSoundEffect.CountdownBeep)
                 }
             )

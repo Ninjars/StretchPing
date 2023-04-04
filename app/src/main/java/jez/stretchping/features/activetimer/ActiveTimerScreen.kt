@@ -1,19 +1,17 @@
 package jez.stretchping.features.activetimer
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -31,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import jez.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
+import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer
 import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.previewState
@@ -53,7 +52,7 @@ private fun ActiveTimerScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        MainContent(eventHandler) { state.value }
+        MainContent { state.value }
         Spacer(modifier = Modifier.weight(1f))
         Controls(
             eventHandler = eventHandler,
@@ -69,11 +68,6 @@ private fun Controls(
     stateProvider: () -> ActiveTimerState?,
 ) {
     val timerState = stateProvider()
-    if (timerState == null) {
-        Box(modifier)
-        return
-    }
-
     Row(
         modifier = modifier
             .fillMaxSize()
@@ -81,39 +75,61 @@ private fun Controls(
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (timerState.isPaused) {
-            CircleButton(
-                onClick = { eventHandler(Event.Reset) },
-                imageVector = Icons.Rounded.Undo,
-                contentDescription = stringResource(id = R.string.timer_resume),
-                modifier = Modifier
-                    .fillMaxHeight(0.75f)
-                    .aspectRatio(1f),
-            )
-            CircleButton(
-                onClick = { eventHandler(Event.Start) },
-                imageVector = Icons.Rounded.PlayArrow,
-                contentDescription = stringResource(id = R.string.timer_resume),
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f),
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight(0.75f)
-                    .aspectRatio(1f),
-            )
-        } else {
-            CircleButton(
-                onClick = { eventHandler(Event.Pause) },
-                imageVector = Icons.Rounded.Pause,
-                contentDescription = stringResource(id = R.string.timer_pause),
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f),
-            )
+        Crossfade(targetState = timerState?.isPaused == true) {
+            if (it) {
+                CircleButton(
+                    onClick = { eventHandler(Event.Reset) },
+                    imageVector = Icons.Rounded.Undo,
+                    contentDescription = stringResource(id = R.string.timer_resume),
+                    modifier = Modifier
+                        .fillMaxHeight(0.75f)
+                        .aspectRatio(1f),
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxHeight(0.75f)
+                        .aspectRatio(1f),
+                )
+            }
         }
+
+        MainButton(
+            eventHandler = eventHandler,
+            state = timerState,
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+        )
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxHeight(0.75f)
+                .aspectRatio(1f),
+        )
     }
+}
+
+@Composable
+private fun MainButton(
+    eventHandler: (Event) -> Unit,
+    state: ActiveTimerState?,
+    modifier: Modifier = Modifier,
+) {
+    val isPlay = state == null || state.isPaused
+    CircleButton(
+        onClick = if (isPlay) {
+            { eventHandler(Event.Start) }
+        } else {
+            { eventHandler(Event.Pause) }
+        },
+        imageVector = when {
+            isPlay -> Icons.Rounded.PlayArrow
+            else -> Icons.Rounded.Pause
+        },
+        contentDescription = stringResource(id = R.string.timer_start),
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -128,17 +144,19 @@ private fun CircleButton(
         shape = CircleShape,
         modifier = modifier
     ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize()
-        )
+
+        Crossfade(targetState = imageVector) {
+            Icon(
+                imageVector = it,
+                contentDescription = contentDescription,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
 @Composable
 private fun MainContent(
-    eventHandler: (Event) -> Unit,
     stateProvider: () -> ActiveTimerViewState
 ) {
     val state = stateProvider()
@@ -151,23 +169,7 @@ private fun MainContent(
             pausedAtFraction = activeTimer.pausedAtFraction
         )
     } else {
-        BigPlayButton(eventHandler)
-    }
-}
-
-@Composable
-fun BigPlayButton(eventHandler: (Event) -> Unit) {
-    IconButton(
-        onClick = { eventHandler(Event.Start) },
-        modifier = Modifier
-            .fillMaxWidth(0.5f)
-            .aspectRatio(1f)
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.PlayArrow,
-            contentDescription = stringResource(id = R.string.timer_start),
-            modifier = Modifier.fillMaxSize()
-        )
+        ArcProgressBar(progress = 0f)
     }
 }
 

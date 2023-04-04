@@ -79,7 +79,7 @@ private fun CountdownTimer(
 }
 
 @Composable
-private fun ArcProgressBar(
+fun ArcProgressBar(
     progress: Float,
 ) {
     val arcForeground = MaterialTheme.colors.secondary

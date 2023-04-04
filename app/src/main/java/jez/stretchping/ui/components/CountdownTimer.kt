@@ -72,7 +72,7 @@ private fun CountdownTimer(
         val firstFrame = withFrameMillis { it }
         do {
             val elapsed = withFrameMillis { it - firstFrame }
-            animationValue = startAtFraction + anim.getValueFromNanos(elapsed * 1000000)
+            animationValue = anim.getValueFromNanos(elapsed * 1000000)
         } while (elapsed <= duration)
     }
     ArcProgressBar(progress = animationValue)

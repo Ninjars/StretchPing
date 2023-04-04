@@ -1,6 +1,7 @@
 package jez.stretchping.features.activetimer
 
 import androidx.core.util.Consumer
+import jez.stretchping.audio.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -8,7 +9,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
-class EventScheduler @Inject constructor() {
+class EventScheduler @Inject constructor(
+    private val soundManager: SoundManager,
+) {
     private val jobs: MutableList<Job> = mutableListOf()
 
     suspend fun planFutureActions(
@@ -51,5 +54,9 @@ class EventScheduler @Inject constructor() {
                 eventConsumer.accept(ActiveTimerVM.Event.OnSectionCompleted)
             }
         )
+    }
+
+    fun dispose() {
+        soundManager.dispose()
     }
 }

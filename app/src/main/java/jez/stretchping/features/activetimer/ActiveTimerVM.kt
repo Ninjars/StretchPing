@@ -50,6 +50,11 @@ class ActiveTimerVM @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        eventScheduler.dispose()
+        super.onCleared()
+    }
+
     sealed class Event {
         object Start : Event()
         object Pause : Event()

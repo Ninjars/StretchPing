@@ -21,6 +21,7 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -31,8 +32,8 @@ import kotlin.math.max
 
 private const val ArcStartDeg = 120f
 private const val ArcSweepDeg = 300f
-private val ArcBackThickness = 6.dp
-private val ArcForeThickness = 10.dp
+private val ArcBackThickness = 4.dp
+private val ArcForeThickness = 12.dp
 
 @Composable
 fun CountdownTimer(
@@ -90,13 +91,20 @@ fun ArcProgressBar(
             .fillMaxWidth(0.8f)
             .aspectRatio(1f)
     ) {
+        val originOffset = Offset(ArcForeThickness.toPx(), ArcForeThickness.toPx())
+        val arcBoundsSize = Size(
+            size.width - (ArcForeThickness * 2).toPx(),
+            size.height - (ArcForeThickness * 2).toPx()
+        )
+
         // Background Arc
         drawArc(
             color = arcBackground,
             startAngle = ArcStartDeg,
             sweepAngle = ArcSweepDeg,
             useCenter = false,
-            topLeft = Offset(ArcForeThickness.toPx(), ArcForeThickness.toPx()),
+            topLeft = originOffset,
+            size = arcBoundsSize,
             style = Stroke(
                 width = ArcBackThickness.toPx(),
                 cap = StrokeCap.Round,
@@ -109,7 +117,8 @@ fun ArcProgressBar(
             startAngle = ArcStartDeg,
             sweepAngle = ArcSweepDeg * progress,
             useCenter = false,
-            topLeft = Offset(ArcForeThickness.toPx(), ArcForeThickness.toPx()),
+            topLeft = originOffset,
+            size = arcBoundsSize,
             style = Stroke(
                 width = ArcForeThickness.toPx(),
                 cap = StrokeCap.Round,

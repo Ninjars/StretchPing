@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
@@ -44,6 +45,7 @@ import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer
 import jez.stretchping.ui.theme.StretchPingTheme
+import jez.stretchping.utils.observeLifecycle
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 
@@ -51,6 +53,7 @@ import jez.stretchping.utils.rememberEventConsumer
 fun ActiveTimerScreen(
     viewModel: ActiveTimerVM
 ) {
+    viewModel.observeLifecycle(LocalLifecycleOwner.current.lifecycle)
     ActiveTimerScreen(viewModel.viewState.collectAsState(), rememberEventConsumer(viewModel))
 }
 

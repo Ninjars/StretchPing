@@ -1,6 +1,8 @@
 package jez.stretchping.features.activetimer
 
 import androidx.core.util.Consumer
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
-) : Consumer<ActiveTimerVM.Event>, ViewModel() {
+) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val stateFlow = MutableStateFlow(State())
     val viewState: StateFlow<ActiveTimerViewState> =
         stateFlow.toViewState(viewModelScope) { ActiveTimerStateToViewState(it) }
@@ -48,6 +50,11 @@ class ActiveTimerVM @Inject constructor(
                 eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
             }
         }
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        accept(Event.Pause)
+        super.onPause(owner)
     }
 
     override fun onCleared() {

@@ -1,7 +1,15 @@
 package jez.stretchping.features.activetimer
 
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +22,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -26,8 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import jez.stretchping.R
+import jez.stretchping.features.activetimer.ActiveTimerState.Mode
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer
@@ -161,15 +173,72 @@ private fun MainContent(
 ) {
     val state = stateProvider()
     val activeTimer = state.activeTimer
-    if (activeTimer != null) {
-        CountdownTimer(
-            start = activeTimer.start,
-            startAtFraction = activeTimer.startAtFraction,
-            end = activeTimer.end,
-            pausedAtFraction = activeTimer.pausedAtFraction
+    Box(
+        contentAlignment = Alignment.Center,
+    ) {
+        if (activeTimer != null) {
+            CountdownTimer(
+                start = activeTimer.start,
+                startAtFraction = activeTimer.startAtFraction,
+                end = activeTimer.end,
+                pausedAtFraction = activeTimer.pausedAtFraction
+            )
+        } else {
+            ArcProgressBar(progress = 0f)
+        }
+
+        state.segmentDescription?.let {
+            TextContent(it)
+        }
+    }
+}
+
+@StringRes
+private fun Mode.toStringRes(): Int =
+    when (this) {
+        Mode.Stretch -> R.string.mode_stretch
+        Mode.Transition -> R.string.mode_transition
+    }
+
+@Composable
+private fun TextContent(
+    state: SegmentDescription,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        AnimatedText(
+            text = stringResource(state.mode.toStringRes()),
+            fontSize = 24.sp
         )
-    } else {
-        ArcProgressBar(progress = 0f)
+        AnimatedText(
+            text = state.duration,
+            fontSize = 72.sp
+        )
+        AnimatedText(
+            text = state.repsRemaining,
+            fontSize = 18.sp
+        )
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun AnimatedText(
+    text: String,
+    fontSize: TextUnit,
+) {
+    AnimatedContent(
+        targetState = text,
+        transitionSpec = {
+            fadeIn(animationSpec = tween(250, delayMillis = 45)) with
+                    fadeOut(animationSpec = tween(90))
+        }
+    ) {
+        Text(
+            text = it,
+            fontSize = fontSize,
+        )
     }
 }
 
@@ -189,7 +258,12 @@ private fun ActiveTimerScreenPreview() {
                             startAtFraction = 0f,
                             end = 100,
                             pausedAtFraction = 0.33f,
-                            mode = ActiveTimerState.Mode.Stretch,
+                            mode = Mode.Stretch,
+                        ),
+                        segmentDescription = SegmentDescription(
+                            mode = Mode.Stretch,
+                            duration = "30",
+                            repsRemaining = "∞",
                         )
                     )
                 }

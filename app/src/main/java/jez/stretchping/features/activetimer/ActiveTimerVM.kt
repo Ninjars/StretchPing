@@ -100,8 +100,10 @@ class ActiveTimerVM @Inject constructor(
             val endAtTime: Long,
             val pausedAtFraction: Float?,
             val pausedAtTime: Long?,
-            val mode: Mode,
-        )
+            val spec: SegmentSpec,
+        ) {
+            val mode = spec.mode
+        }
 
         data class SegmentSpec(
             val durationSeconds: Int,

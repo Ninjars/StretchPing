@@ -60,7 +60,7 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             endAtTime = startMillis + segmentSpec.durationSeconds.toMillis(),
             pausedAtFraction = null,
             pausedAtTime = null,
-            mode = segmentSpec.mode,
+            spec = segmentSpec,
         )
 
     private fun Int.toMillis() = this * 1000

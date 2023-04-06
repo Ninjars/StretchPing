@@ -67,17 +67,30 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun ActiveTimerVM.State.toSegmentDescription(): SegmentDescription? {
-        val segment =
-            activeSegment?.spec
-                ?: fullSequence.firstOrNull { it.mode != SegmentSpec.Mode.Transition }
+    private fun ActiveTimerVM.State.toSegmentDescription(): SegmentDescription {
+        val segmentLength =
+            activeSegment?.spec?.durationSeconds
+                ?: activeSegmentLength
+        val segmentMode =
+            activeSegment?.mode?.map() ?: ActiveTimerState.Mode.Stretch
 
-        return segment?.let {
-            SegmentDescription(
-                mode = it.mode.map(),
-                duration = it.durationSeconds.toString(),
-                repsRemaining = if (repeatsRemaining < 0) "∞" else repeatsRemaining.toString(),
-            )
+        return SegmentDescription(
+            mode = segmentMode,
+            duration = segmentLength.toDurationString(),
+            repsRemaining = repeatsRemaining.toRepCountString()
+        )
+    }
+
+    private fun Int.toRepCountString() = if (this < 0) "∞" else this.toString()
+
+    private fun Int.toDurationString(): String {
+        val value = Integer.max(this, 0)
+        val minutes = value / 60
+        val seconds = value % 60
+        return if (minutes == 0) {
+            "${seconds}s"
+        } else {
+            "$minutes:$seconds"
         }
     }
 }

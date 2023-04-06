@@ -267,7 +267,8 @@ private fun ActiveTimerScreenPreview() {
                             mode = Mode.Stretch,
                             duration = "30",
                             repsRemaining = "∞",
-                        )
+                        ),
+                        editTimerState = null,
                     )
                 }
             ) {}

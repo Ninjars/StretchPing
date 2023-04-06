@@ -82,7 +82,8 @@ class ActiveTimerVM @Inject constructor(
 
     data class State(
         val initialRepeatCount: Int = -1,
-        val fullSequence: List<SegmentSpec> = emptyList(),
+        val activeSegmentLength: Int = 30,
+        val transitionLength: Int = 5,
         val queuedSegments: List<SegmentSpec> = emptyList(),
         val activeSegment: ActiveSegment? = null,
         val repeatsRemaining: Int = -1,

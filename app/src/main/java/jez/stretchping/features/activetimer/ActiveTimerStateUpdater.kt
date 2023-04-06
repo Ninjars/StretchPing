@@ -12,36 +12,46 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
             is Command.ResetToStart -> resetToStart(state)
-            is Command.EnqueueSegments -> enqueueSegments(state, command.segments)
+            is Command.EnqueueSegments -> enqueueSegments(state)
         }
 
     private fun enqueueSegments(
         state: State,
-        segments: List<State.SegmentSpec>
     ): State =
         state.copy(
-            fullSequence = segments,
-            queuedSegments = segments,
+            queuedSegments = state.createSegments(),
+        )
+
+    private fun State.createSegments(): List<State.SegmentSpec> =
+        listOf(
+            State.SegmentSpec(
+                durationSeconds = transitionLength,
+                mode = State.SegmentSpec.Mode.Transition,
+            ),
+            State.SegmentSpec(
+                durationSeconds = activeSegmentLength,
+                mode = State.SegmentSpec.Mode.Stretch,
+            ),
         )
 
     private fun resetToStart(state: State): State =
         state.copy(
             activeSegment = null,
-            queuedSegments = state.fullSequence,
+            queuedSegments = state.createSegments(),
             repeatsRemaining = state.initialRepeatCount,
         )
 
     private fun startNextSegment(state: State, command: Command.StartSegment): State {
         assert(state.queuedSegments.first() == command.segmentSpec)
-        var remainingSegments = state.queuedSegments.drop(1)
-
         var repeatsRemaining = state.repeatsRemaining
-        if (remainingSegments.isEmpty()) {
-            when {
-                repeatsRemaining < 0 -> remainingSegments = state.fullSequence
-                repeatsRemaining > 0 -> {
-                    repeatsRemaining--
-                    remainingSegments = state.fullSequence
+        val remainingSegments = state.queuedSegments.drop(1).let {
+            it.ifEmpty {
+                when (repeatsRemaining) {
+                    0 -> emptyList()
+                    else -> {
+                        repeatsRemaining--
+                        state.createSegments()
+                    }
                 }
             }
         }

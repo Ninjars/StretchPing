@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jez.stretchping.features.activetimer.ActiveTimerVM.State.SegmentSpec.Mode
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,18 +23,7 @@ class ActiveTimerVM @Inject constructor(
     init {
         stateFlow.value = ActiveTimerStateUpdater(
             stateFlow.value,
-            Command.EnqueueSegments(
-                listOf(
-                    State.SegmentSpec(
-                        durationSeconds = 5,
-                        mode = Mode.Transition,
-                    ),
-                    State.SegmentSpec(
-                        durationSeconds = 30,
-                        mode = Mode.Stretch,
-                    )
-                )
-            )
+            Command.EnqueueSegments
         )
     }
 
@@ -70,9 +58,7 @@ class ActiveTimerVM @Inject constructor(
     }
 
     sealed class Command {
-        data class EnqueueSegments(
-            val segments: List<State.SegmentSpec>,
-        ) : Command()
+        object EnqueueSegments : Command()
 
         data class StartSegment(
             val startMillis: Long,

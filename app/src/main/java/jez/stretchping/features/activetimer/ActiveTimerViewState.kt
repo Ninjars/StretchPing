@@ -3,6 +3,7 @@ package jez.stretchping.features.activetimer
 import jez.stretchping.features.activetimer.ActiveTimerVM.State.SegmentSpec
 
 data class ActiveTimerViewState(
+    val editTimerState: EditTimerState?,
     val activeTimer: ActiveTimerState?,
     val segmentDescription: SegmentDescription?,
 )
@@ -11,6 +12,11 @@ data class SegmentDescription(
     val mode: ActiveTimerState.Mode,
     val duration: String,
     val repsRemaining: String,
+)
+
+data class EditTimerState(
+    val activeDurationSeconds: Int,
+    val repCount: Int,
 )
 
 data class ActiveTimerState(
@@ -33,7 +39,18 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
         ActiveTimerViewState(
             activeTimer = state.activeSegment?.toState(),
             segmentDescription = state.toSegmentDescription(),
+            editTimerState = state.toEditTimerState(),
         )
+
+    private fun ActiveTimerVM.State.toEditTimerState(): EditTimerState? =
+        if (activeSegment == null) {
+            EditTimerState(
+                activeDurationSeconds = activeSegmentLength,
+                repCount = repeatsRemaining,
+            )
+        } else {
+            null
+        }
 
     private fun ActiveTimerVM.State.ActiveSegment.toState(): ActiveTimerState =
         ActiveTimerState(

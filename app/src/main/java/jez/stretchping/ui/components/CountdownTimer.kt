@@ -43,9 +43,8 @@ private fun CountdownTimer(
     end: Long,
     modifier: Modifier = Modifier,
 ) {
-    val begin = remember(startAtFraction, end) { System.currentTimeMillis() }
     val duration = max(0, (end - start).toInt())
-    val anim = remember(begin) {
+    val anim = remember(startAtFraction, end) {
         TargetBasedAnimation(
             animationSpec = tween(
                 durationMillis = duration,

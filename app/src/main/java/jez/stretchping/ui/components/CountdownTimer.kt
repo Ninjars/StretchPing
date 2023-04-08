@@ -42,7 +42,8 @@ private fun CountdownTimer(
         start.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = durationMillis.toInt(),
+                // the subtraction here is a hack to deal with a small difference in scheduler from animation
+                durationMillis = durationMillis.toInt() - 100,
                 easing = LinearEasing,
             ),
         )

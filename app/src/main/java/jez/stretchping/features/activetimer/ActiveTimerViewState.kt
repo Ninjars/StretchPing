@@ -10,14 +10,21 @@ data class ActiveTimerViewState(
 
 data class SegmentDescription(
     val mode: ActiveTimerState.Mode,
-    val duration: String,
+    val duration: Duration,
     val repsRemaining: String,
 )
 
 data class EditTimerState(
-    val activeDurationSeconds: Int,
+    val activeDuration: Duration,
     val repCount: Int,
 )
+
+data class Duration(
+    val minutes: Int,
+    val seconds: Int,
+) {
+    fun asSeconds() = minutes * 60 + seconds
+}
 
 data class ActiveTimerState(
     val start: Long,
@@ -45,7 +52,7 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
     private fun ActiveTimerVM.State.toEditTimerState(): EditTimerState? =
         if (activeSegment == null) {
             EditTimerState(
-                activeDurationSeconds = activeSegmentLength,
+                activeDuration = activeSegmentLength.toDuration(),
                 repCount = repeatsCompleted,
             )
         } else {
@@ -76,21 +83,17 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
 
         return SegmentDescription(
             mode = segmentMode,
-            duration = segmentLength.toDurationString(),
+            duration = segmentLength.toDuration(),
             repsRemaining = (targetRepeatCount - repeatsCompleted).toRepCountString()
         )
     }
 
     private fun Int.toRepCountString() = if (this < 0) "∞" else this.toString()
 
-    private fun Int.toDurationString(): String {
+    private fun Int.toDuration(): Duration {
         val value = Integer.max(this, 0)
         val minutes = value / 60
         val seconds = value % 60
-        return if (minutes == 0) {
-            "${seconds}s"
-        } else {
-            "$minutes:$seconds"
-        }
+        return Duration(minutes, seconds)
     }
 }

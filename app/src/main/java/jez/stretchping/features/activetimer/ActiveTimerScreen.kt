@@ -35,6 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -212,24 +217,51 @@ private fun TextContent(
     ) {
         AnimatedText(
             text = stringResource(state.mode.toStringRes()),
-            fontSize = 24.sp
-        )
-        AnimatedText(
-            text = state.duration,
-            fontSize = 72.sp
-        )
+        ) {
+            Text(
+                text = it,
+                fontSize = 24.sp
+            )
+        }
+        Row {
+            AnimatedText(
+                text = state.duration.asSeconds().toString(),
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontSize = 72.sp)) {
+                            append(it)
+                        }
+                        withStyle(SpanStyle(fontSize = 30.sp)) {
+                            append("s")
+                        }
+                    },
+                )
+            }
+        }
         AnimatedText(
             text = state.repsRemaining,
-            fontSize = 18.sp
-        )
+        ) {
+            Text(
+                text = it,
+                fontSize = 18.sp,
+            )
+        }
     }
 }
+
+@StringRes
+private fun Mode.toStringRes(): Int =
+    when (this) {
+        Mode.Stretch -> R.string.mode_stretch
+        Mode.Transition -> R.string.mode_transition
+    }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun AnimatedText(
     text: String,
-    fontSize: TextUnit,
+    content: @Composable (String) -> Unit
 ) {
     AnimatedContent(
         targetState = text,
@@ -238,10 +270,7 @@ private fun AnimatedText(
                     fadeOut(animationSpec = tween(90))
         }
     ) {
-        Text(
-            text = it,
-            fontSize = fontSize,
-        )
+        content(it)
     }
 }
 
@@ -265,7 +294,7 @@ private fun ActiveTimerScreenPreview() {
                         ),
                         segmentDescription = SegmentDescription(
                             mode = Mode.Stretch,
-                            duration = "30",
+                            duration = Duration(1, 15),
                             repsRemaining = "∞",
                         ),
                         editTimerState = null,

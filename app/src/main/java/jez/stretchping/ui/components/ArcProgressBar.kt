@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import java.lang.Float.min
 
 private const val ArcStartDeg = 120f
 private const val ArcSweepDeg = 300f
@@ -54,7 +55,7 @@ fun ArcProgressBar(
         drawArc(
             color = arcForeground,
             startAngle = ArcStartDeg,
-            sweepAngle = ArcSweepDeg * progress,
+            sweepAngle = ArcSweepDeg * min(progress, 1f),
             useCenter = false,
             topLeft = originOffset,
             size = arcBoundsSize,

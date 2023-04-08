@@ -42,6 +42,8 @@ class EventScheduler @Inject constructor(
                     executedCommand.segmentSpec.mode,
                     eventConsumer,
                 )
+            is ActiveTimerVM.Command.UpdateActiveSegmentLength,
+            is ActiveTimerVM.Command.UpdateTargetRepCount -> Unit
         }
     }
 

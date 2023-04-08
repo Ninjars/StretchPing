@@ -2,7 +2,6 @@ package jez.stretchping.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,13 +21,13 @@ private val ArcForeThickness = 12.dp
 @Composable
 fun ArcProgressBar(
     progress: Float,
+    modifier: Modifier = Modifier,
 ) {
     val arcForeground = MaterialTheme.colors.secondary
     val arcBackground = Color.LightGray
 
     Canvas(
-        modifier = Modifier
-            .fillMaxWidth(0.8f)
+        modifier = modifier
             .aspectRatio(1f)
     ) {
         val originOffset = Offset(ArcForeThickness.toPx(), ArcForeThickness.toPx())

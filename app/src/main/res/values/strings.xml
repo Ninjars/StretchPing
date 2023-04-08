@@ -7,4 +7,7 @@
 
     <string name="mode_stretch">Stretch</string>
     <string name="mode_transition">Break</string>
+
+    <string name="stretch_duration">Stretch Seconds</string>
+    <string name="rep_count">Times to Repeat</string>
 </resources>

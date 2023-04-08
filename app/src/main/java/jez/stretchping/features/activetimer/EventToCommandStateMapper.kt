@@ -17,17 +17,34 @@ internal object EventToCommand : (State, Event) -> Command? {
                     )
                 }
             is Event.Start ->
-                if (state.activeSegment != null) {
-                    resume(state.activeSegment)
-                } else {
-                    start(state)
+                when {
+                    state.activeSegmentLength <= 0 -> null
+                    state.activeSegment != null -> resume(state.activeSegment)
+                    else -> start(state)
                 }
             is Event.OnSectionCompleted -> if (state.isAtEnd()) {
-                Command.ResetToStart(state.createSegments())
+                Command.ResetToStart
             } else {
                 start(state)
             }
-            is Event.Reset -> Command.ResetToStart(state.createSegments())
+            is Event.Reset -> Command.ResetToStart
+            is Event.SetDuration -> event.duration.toFlooredInt()?.let {
+                Command.UpdateActiveSegmentLength(it)
+            }
+            is Event.SetRepCount -> event.count.toFlooredInt()?.let {
+                Command.UpdateTargetRepCount(it)
+            }
+        }
+
+    private fun String.toFlooredInt(): Int? =
+        if (this.isEmpty()) {
+            Int.MIN_VALUE
+        } else {
+            try {
+                this.toFloat().toInt()
+            } catch (e: NumberFormatException) {
+                null
+            }
         }
 
     private fun start(state: State): Command {

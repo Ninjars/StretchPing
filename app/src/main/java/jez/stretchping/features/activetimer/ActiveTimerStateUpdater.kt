@@ -11,18 +11,21 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.PauseSegment -> pauseActiveSegment(state, command)
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
-            is Command.ResetToStart -> resetToStart(state, command.segments)
+            is Command.ResetToStart -> resetToStart(state)
+            is Command.UpdateActiveSegmentLength -> state.copy(activeSegmentLength = command.seconds)
+            is Command.UpdateTargetRepCount -> state.copy(targetRepeatCount = command.count)
         }
 
-    private fun resetToStart(state: State, segments: List<State.SegmentSpec>): State =
+    private fun resetToStart(state: State): State =
         state.copy(
             activeSegment = null,
-            queuedSegments = segments,
-            repeatsCompleted = state.targetRepeatCount,
+            queuedSegments = emptyList(),
+            repeatsCompleted = 0,
         )
 
     private fun startNextSegment(state: State, command: Command.StartSegment): State =
         state.copy(
+            targetRepeatCount = if (state.targetRepeatCount <= 0) -1 else state.targetRepeatCount,
             activeSegment = command.toActiveSegment(),
             queuedSegments = command.queuedSegments,
             repeatsCompleted = if (command.queuedSegments.isEmpty()) {

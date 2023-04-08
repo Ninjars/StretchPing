@@ -48,6 +48,8 @@ class ActiveTimerVM @Inject constructor(
         object Pause : Event()
         object Reset : Event()
         object OnSectionCompleted : Event()
+        data class SetDuration(val duration: String) : Event()
+        data class SetRepCount(val count: String) : Event()
     }
 
     sealed class Command {
@@ -69,9 +71,11 @@ class ActiveTimerVM @Inject constructor(
             val runningSegment: State.ActiveSegment,
         ) : Command()
 
-        data class ResetToStart(
-            val segments: List<State.SegmentSpec>,
-        ) : Command()
+        object ResetToStart : Command()
+
+        data class UpdateTargetRepCount(val count: Int) : Command()
+
+        data class UpdateActiveSegmentLength(val seconds: Int) : Command()
     }
 
     data class State(

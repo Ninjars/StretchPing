@@ -15,8 +15,8 @@ data class SegmentDescription(
 )
 
 data class EditTimerState(
-    val activeDuration: Duration,
-    val repCount: Int,
+    val activeDuration: String,
+    val repCount: String,
 )
 
 data class Duration(
@@ -52,8 +52,15 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
     private fun ActiveTimerVM.State.toEditTimerState(): EditTimerState? =
         if (activeSegment == null) {
             EditTimerState(
-                activeDuration = activeSegmentLength.toDuration(),
-                repCount = repeatsCompleted,
+                activeDuration = when (activeSegmentLength) {
+                    Int.MIN_VALUE -> ""
+                    else -> activeSegmentLength.toString()
+                },
+                repCount = when {
+                    targetRepeatCount == Int.MIN_VALUE -> ""
+                    targetRepeatCount < 1 -> "∞"
+                    else -> targetRepeatCount.toString()
+                }
             )
         } else {
             null

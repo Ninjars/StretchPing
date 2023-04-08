@@ -27,11 +27,12 @@ fun CountdownTimer(
     startAtFraction: Float,
     end: Long,
     pausedAtFraction: Float?,
+    modifier: Modifier = Modifier,
 ) {
     if (pausedAtFraction != null) {
-        ArcProgressBar(progress = pausedAtFraction)
+        ArcProgressBar(progress = pausedAtFraction, modifier = modifier)
     } else {
-        CountdownTimer(startAtFraction, start, end)
+        CountdownTimer(startAtFraction, start, end, modifier)
     }
 }
 
@@ -40,6 +41,7 @@ private fun CountdownTimer(
     startAtFraction: Float,
     start: Long,
     end: Long,
+    modifier: Modifier = Modifier,
 ) {
     val begin = remember(startAtFraction, end) { System.currentTimeMillis() }
     val duration = max(0, (end - start).toInt())
@@ -62,7 +64,7 @@ private fun CountdownTimer(
             animationValue = anim.getValueFromNanos(elapsed * 1000000)
         } while (elapsed <= duration)
     }
-    ArcProgressBar(progress = animationValue)
+    ArcProgressBar(progress = animationValue, modifier = modifier)
 }
 
 @Preview

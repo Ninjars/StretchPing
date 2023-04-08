@@ -211,9 +211,8 @@ private fun MainContent(
             ) {
                 state.activeTimer?.run {
                     CountdownTimer(
-                        start = start,
                         startAtFraction = startAtFraction,
-                        end = end,
+                        durationMillis = durationMillis,
                         pausedAtFraction = pausedAtFraction,
                         modifier = Modifier.fillMaxWidth(0.9f),
                     )
@@ -406,9 +405,8 @@ private fun ActiveTimerScreenPreview() {
                 state = previewState {
                     ActiveTimerViewState(
                         activeTimer = ActiveTimerState(
-                            start = 0,
                             startAtFraction = 0f,
-                            end = 100,
+                            durationMillis = 100,
                             pausedAtFraction = 0.33f,
                             mode = Mode.Stretch,
                         ),

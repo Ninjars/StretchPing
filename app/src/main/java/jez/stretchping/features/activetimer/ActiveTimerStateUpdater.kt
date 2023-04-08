@@ -52,17 +52,15 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             activeSegment = command.pausedSegment.toResumed(
                 command.startMillis,
                 command.startFraction,
-                command.remainingDurationMillis,
             )
         )
 
     private fun State.ActiveSegment.toResumed(
         currentTimeMillis: Long,
         currentFraction: Float,
-        remainingDurationMillis: Long
     ): State.ActiveSegment {
         return copy(
-            endAtTime = currentTimeMillis + remainingDurationMillis,
+            endAtTime = currentTimeMillis + this.remainingDurationMillis,
             startedAtTime = currentTimeMillis,
             startedAtFraction = currentFraction,
             pausedAtFraction = null,

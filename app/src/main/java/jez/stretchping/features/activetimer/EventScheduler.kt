@@ -31,7 +31,7 @@ class EventScheduler @Inject constructor(
             is ActiveTimerVM.Command.ResumeSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
-                    executedCommand.remainingDurationMillis,
+                    executedCommand.pausedSegment.remainingDurationMillis,
                     executedCommand.pausedSegment.mode,
                     eventConsumer,
                 )

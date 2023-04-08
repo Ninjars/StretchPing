@@ -63,7 +63,6 @@ class ActiveTimerVM @Inject constructor(
         data class ResumeSegment(
             val startMillis: Long,
             val startFraction: Float,
-            val remainingDurationMillis: Long,
             val pausedSegment: State.ActiveSegment,
         ) : Command()
 
@@ -96,6 +95,7 @@ class ActiveTimerVM @Inject constructor(
             val spec: SegmentSpec,
         ) {
             val mode = spec.mode
+            val remainingDurationMillis = endAtTime - (pausedAtTime ?: startedAtTime)
         }
 
         data class SegmentSpec(

@@ -72,8 +72,6 @@ internal object EventToCommand : (State, Event) -> Command? {
             Command.ResumeSegment(
                 startMillis = System.currentTimeMillis(),
                 startFraction = activeSegment.pausedAtFraction,
-                remainingDurationMillis = activeSegment.endAtTime - (activeSegment.pausedAtTime
-                    ?: activeSegment.startedAtTime),
                 pausedSegment = activeSegment,
             )
         }

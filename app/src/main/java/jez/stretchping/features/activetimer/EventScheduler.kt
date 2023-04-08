@@ -23,7 +23,6 @@ class EventScheduler @Inject constructor(
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         when (executedCommand) {
-            is ActiveTimerVM.Command.EnqueueSegments -> Unit
             is ActiveTimerVM.Command.PauseSegment,
             is ActiveTimerVM.Command.ResetToStart -> {
                 clearAllJobs()

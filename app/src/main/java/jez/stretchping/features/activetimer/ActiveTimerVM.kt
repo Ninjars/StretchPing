@@ -20,13 +20,6 @@ class ActiveTimerVM @Inject constructor(
     val viewState: StateFlow<ActiveTimerViewState> =
         stateFlow.toViewState(viewModelScope) { ActiveTimerStateToViewState(it) }
 
-    init {
-        stateFlow.value = ActiveTimerStateUpdater(
-            stateFlow.value,
-            Command.EnqueueSegments
-        )
-    }
-
     override fun accept(event: Event) {
         val currentState = stateFlow.value
         viewModelScope.launch {
@@ -58,11 +51,10 @@ class ActiveTimerVM @Inject constructor(
     }
 
     sealed class Command {
-        object EnqueueSegments : Command()
-
         data class StartSegment(
             val startMillis: Long,
             val segmentSpec: State.SegmentSpec,
+            val queuedSegments: List<State.SegmentSpec>,
         ) : Command()
 
         data class ResumeSegment(
@@ -77,16 +69,18 @@ class ActiveTimerVM @Inject constructor(
             val runningSegment: State.ActiveSegment,
         ) : Command()
 
-        object ResetToStart : Command()
+        data class ResetToStart(
+            val segments: List<State.SegmentSpec>,
+        ) : Command()
     }
 
     data class State(
-        val initialRepeatCount: Int = -1,
+        val targetRepeatCount: Int = -1,
         val activeSegmentLength: Int = 30,
         val transitionLength: Int = 5,
         val queuedSegments: List<SegmentSpec> = emptyList(),
         val activeSegment: ActiveSegment? = null,
-        val repeatsRemaining: Int = -1,
+        val repeatsCompleted: Int = 0,
     ) {
         data class ActiveSegment(
             val startedAtTime: Long,

@@ -20,18 +20,27 @@ internal object EventToCommand : (State, Event) -> Command? {
                 if (state.activeSegment != null) {
                     resume(state.activeSegment)
                 } else {
-                    start(state.queuedSegments)
+                    start(state)
                 }
-            is Event.OnSectionCompleted -> start(state.queuedSegments)
-            is Event.Reset -> Command.ResetToStart
+            is Event.OnSectionCompleted -> if (state.isAtEnd()) {
+                Command.ResetToStart(state.createSegments())
+            } else {
+                start(state)
+            }
+            is Event.Reset -> Command.ResetToStart(state.createSegments())
         }
 
-    private fun start(queuedSegments: List<State.SegmentSpec>): Command? =
-        if (queuedSegments.isEmpty()) {
-            null
-        } else {
-            Command.StartSegment(System.currentTimeMillis(), queuedSegments.first())
-        }
+    private fun start(state: State): Command {
+        val currentSegments =
+            state.queuedSegments.takeIf { it.isNotEmpty() } ?: state.createSegments()
+        val nextSegment = currentSegments.first()
+        val queuedSegments = currentSegments.drop(1)
+        return Command.StartSegment(
+            System.currentTimeMillis(),
+            nextSegment,
+            queuedSegments,
+        )
+    }
 
 
     private fun resume(activeSegment: State.ActiveSegment): Command? =
@@ -46,4 +55,19 @@ internal object EventToCommand : (State, Event) -> Command? {
                 pausedSegment = activeSegment,
             )
         }
+
+    private fun State.isAtEnd(): Boolean =
+        targetRepeatCount > 0 && repeatsCompleted == targetRepeatCount && queuedSegments.isEmpty()
+
+    private fun State.createSegments(): List<State.SegmentSpec> =
+        listOf(
+            State.SegmentSpec(
+                durationSeconds = transitionLength,
+                mode = State.SegmentSpec.Mode.Transition,
+            ),
+            State.SegmentSpec(
+                durationSeconds = activeSegmentLength,
+                mode = State.SegmentSpec.Mode.Stretch,
+            ),
+        )
 }

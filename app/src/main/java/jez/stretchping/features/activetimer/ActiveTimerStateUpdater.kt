@@ -11,57 +11,26 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.PauseSegment -> pauseActiveSegment(state, command)
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
-            is Command.ResetToStart -> resetToStart(state)
-            is Command.EnqueueSegments -> enqueueSegments(state)
+            is Command.ResetToStart -> resetToStart(state, command.segments)
         }
 
-    private fun enqueueSegments(
-        state: State,
-    ): State =
-        state.copy(
-            queuedSegments = state.createSegments(),
-        )
-
-    private fun State.createSegments(): List<State.SegmentSpec> =
-        listOf(
-            State.SegmentSpec(
-                durationSeconds = transitionLength,
-                mode = State.SegmentSpec.Mode.Transition,
-            ),
-            State.SegmentSpec(
-                durationSeconds = activeSegmentLength,
-                mode = State.SegmentSpec.Mode.Stretch,
-            ),
-        )
-
-    private fun resetToStart(state: State): State =
+    private fun resetToStart(state: State, segments: List<State.SegmentSpec>): State =
         state.copy(
             activeSegment = null,
-            queuedSegments = state.createSegments(),
-            repeatsRemaining = state.initialRepeatCount,
+            queuedSegments = segments,
+            repeatsCompleted = state.targetRepeatCount,
         )
 
-    private fun startNextSegment(state: State, command: Command.StartSegment): State {
-        assert(state.queuedSegments.first() == command.segmentSpec)
-        var repeatsRemaining = state.repeatsRemaining
-        val remainingSegments = state.queuedSegments.drop(1).let {
-            it.ifEmpty {
-                when (repeatsRemaining) {
-                    0 -> emptyList()
-                    else -> {
-                        repeatsRemaining--
-                        state.createSegments()
-                    }
-                }
-            }
-        }
-
-        return state.copy(
+    private fun startNextSegment(state: State, command: Command.StartSegment): State =
+        state.copy(
             activeSegment = command.toActiveSegment(),
-            queuedSegments = remainingSegments,
-            repeatsRemaining = repeatsRemaining
+            queuedSegments = command.queuedSegments,
+            repeatsCompleted = if (command.queuedSegments.isEmpty()) {
+                state.repeatsCompleted + 1
+            } else {
+                state.repeatsCompleted
+            },
         )
-    }
 
     private fun Command.StartSegment.toActiveSegment(): State.ActiveSegment =
         State.ActiveSegment(

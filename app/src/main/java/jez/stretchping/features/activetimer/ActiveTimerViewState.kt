@@ -46,7 +46,7 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
         if (activeSegment == null) {
             EditTimerState(
                 activeDurationSeconds = activeSegmentLength,
-                repCount = repeatsRemaining,
+                repCount = repeatsCompleted,
             )
         } else {
             null
@@ -77,7 +77,7 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
         return SegmentDescription(
             mode = segmentMode,
             duration = segmentLength.toDurationString(),
-            repsRemaining = repeatsRemaining.toRepCountString()
+            repsRemaining = (targetRepeatCount - repeatsCompleted).toRepCountString()
         )
     }
 

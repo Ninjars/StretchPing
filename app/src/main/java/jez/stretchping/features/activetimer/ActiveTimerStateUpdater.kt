@@ -20,7 +20,7 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
         state.copy(
             activeSegment = null,
             queuedSegments = emptyList(),
-            repeatsCompleted = 0,
+            repeatsCompleted = -1,
         )
 
     private fun startNextSegment(state: State, command: Command.StartSegment): State =
@@ -28,7 +28,7 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             targetRepeatCount = if (state.targetRepeatCount <= 0) -1 else state.targetRepeatCount,
             activeSegment = command.toActiveSegment(),
             queuedSegments = command.queuedSegments,
-            repeatsCompleted = if (command.queuedSegments.isEmpty()) {
+            repeatsCompleted = if (command.isNewRep) {
                 state.repeatsCompleted + 1
             } else {
                 state.repeatsCompleted

@@ -57,6 +57,7 @@ class ActiveTimerVM @Inject constructor(
             val startMillis: Long,
             val segmentSpec: State.SegmentSpec,
             val queuedSegments: List<State.SegmentSpec>,
+            val isNewRep: Boolean,
         ) : Command()
 
         data class ResumeSegment(
@@ -84,7 +85,7 @@ class ActiveTimerVM @Inject constructor(
         val transitionLength: Int = 5,
         val queuedSegments: List<SegmentSpec> = emptyList(),
         val activeSegment: ActiveSegment? = null,
-        val repeatsCompleted: Int = 0,
+        val repeatsCompleted: Int = -1,
     ) {
         data class ActiveSegment(
             val startedAtTime: Long,

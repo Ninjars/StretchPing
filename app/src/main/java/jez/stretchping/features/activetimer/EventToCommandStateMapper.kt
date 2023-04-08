@@ -48,14 +48,19 @@ internal object EventToCommand : (State, Event) -> Command? {
         }
 
     private fun start(state: State): Command {
+        var isNewRep = false
         val currentSegments =
-            state.queuedSegments.takeIf { it.isNotEmpty() } ?: state.createSegments()
+            state.queuedSegments.takeIf { it.isNotEmpty() }
+                ?: state.createSegments().also {
+                    isNewRep = true
+                }
         val nextSegment = currentSegments.first()
         val queuedSegments = currentSegments.drop(1)
         return Command.StartSegment(
             System.currentTimeMillis(),
             nextSegment,
             queuedSegments,
+            isNewRep,
         )
     }
 
@@ -74,7 +79,7 @@ internal object EventToCommand : (State, Event) -> Command? {
         }
 
     private fun State.isAtEnd(): Boolean =
-        targetRepeatCount > 0 && repeatsCompleted == targetRepeatCount && queuedSegments.isEmpty()
+        targetRepeatCount > 0 && repeatsCompleted == targetRepeatCount - 1 && queuedSegments.isEmpty()
 
     private fun State.createSegments(): List<State.SegmentSpec> =
         listOf(

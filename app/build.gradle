@@ -70,6 +70,7 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest"
 
     implementation "com.jakewharton.timber:timber:5.0.1"
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // Dagger
     kapt "com.google.dagger:dagger-compiler:$hilt_version"

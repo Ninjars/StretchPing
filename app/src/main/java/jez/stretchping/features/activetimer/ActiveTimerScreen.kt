@@ -66,6 +66,7 @@ import jez.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerState.Mode
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.ui.components.CountdownTimer
+import jez.stretchping.ui.components.TriStateToggle
 import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.observeLifecycle
 import jez.stretchping.utils.previewState
@@ -306,6 +307,14 @@ private fun EditableConfig(
             },
         ) {
             eventHandler(Event.SetRepCount(it))
+        }
+
+        // Theme Selection
+        TriStateToggle(
+            states = state.themeState.options,
+            selectedIndex = state.themeState.selectedIndex,
+        ) {
+            eventHandler(Event.UpdateTheme(it))
         }
     }
 }

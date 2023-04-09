@@ -1,11 +1,11 @@
 package jez.stretchping.features.activetimer
 
+import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState
 import jez.stretchping.features.activetimer.ActiveTimerVM.Command
-import jez.stretchping.features.activetimer.ActiveTimerVM.State
 
-internal object ActiveTimerStateUpdater : (State, Command?) -> State {
+internal object ActiveTimerStateUpdater : (ActiveState, Command?) -> ActiveState {
 
-    override fun invoke(state: State, command: Command?): State =
+    override fun invoke(state: ActiveState, command: Command?): ActiveState =
         when (command) {
             null -> state
             is Command.PauseSegment -> pauseActiveSegment(state, command)
@@ -17,14 +17,14 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.UpdateTargetRepCount -> state.copy(targetRepeatCount = command.count)
         }
 
-    private fun resetToStart(state: State): State =
+    private fun resetToStart(state: ActiveState): ActiveState =
         state.copy(
             activeSegment = null,
             queuedSegments = emptyList(),
             repeatsCompleted = -1,
         )
 
-    private fun startNextSegment(state: State, command: Command.StartSegment): State =
+    private fun startNextSegment(state: ActiveState, command: Command.StartSegment): ActiveState =
         state.copy(
             targetRepeatCount = if (state.targetRepeatCount <= 0) -1 else state.targetRepeatCount,
             activeSegment = command.toActiveSegment(),
@@ -36,8 +36,8 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             },
         )
 
-    private fun Command.StartSegment.toActiveSegment(): State.ActiveSegment =
-        State.ActiveSegment(
+    private fun Command.StartSegment.toActiveSegment(): ActiveState.ActiveSegment =
+        ActiveState.ActiveSegment(
             startedAtTime = startMillis,
             startedAtFraction = 0f,
             endAtTime = startMillis + segmentSpec.durationSeconds.toMillis(),
@@ -48,7 +48,10 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
 
     private fun Int.toMillis() = this * 1000
 
-    private fun resumePausedSegment(state: State, command: Command.ResumeSegment): State =
+    private fun resumePausedSegment(
+        state: ActiveState,
+        command: Command.ResumeSegment
+    ): ActiveState =
         state.copy(
             activeSegment = command.pausedSegment.toResumed(
                 command.startMillis,
@@ -56,10 +59,10 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             )
         )
 
-    private fun State.ActiveSegment.toResumed(
+    private fun ActiveState.ActiveSegment.toResumed(
         currentTimeMillis: Long,
         currentFraction: Float,
-    ): State.ActiveSegment {
+    ): ActiveState.ActiveSegment {
         return copy(
             endAtTime = currentTimeMillis + this.remainingDurationMillis,
             startedAtTime = currentTimeMillis,
@@ -69,10 +72,10 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
         )
     }
 
-    private fun pauseActiveSegment(state: State, command: Command.PauseSegment): State =
+    private fun pauseActiveSegment(state: ActiveState, command: Command.PauseSegment): ActiveState =
         state.copy(activeSegment = command.runningSegment.toPaused(command.pauseMillis))
 
-    private fun State.ActiveSegment.toPaused(currentTimeMillis: Long): State.ActiveSegment {
+    private fun ActiveState.ActiveSegment.toPaused(currentTimeMillis: Long): ActiveState.ActiveSegment {
         val scalingFactor = 1f - startedAtFraction
         val currentFraction =
             (currentTimeMillis - startedAtTime).toDouble() / (endAtTime - startedAtTime).toDouble()

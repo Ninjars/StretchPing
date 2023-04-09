@@ -1,11 +1,11 @@
 package jez.stretchping.features.activetimer
 
+import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState
 import jez.stretchping.features.activetimer.ActiveTimerVM.Command
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
-import jez.stretchping.features.activetimer.ActiveTimerVM.State
 
-internal object EventToCommand : (State, Event) -> Command? {
-    override fun invoke(state: State, event: Event): Command? =
+internal object EventToCommand : (ActiveState, Event) -> Command? {
+    override fun invoke(state: ActiveState, event: Event): Command? =
         when (event) {
             is Event.Pause ->
                 if (state.activeSegment == null || state.activeSegment.pausedAtFraction != null) {
@@ -37,6 +37,7 @@ internal object EventToCommand : (State, Event) -> Command? {
             is Event.SetRepCount -> event.count.toFlooredInt()?.let {
                 Command.UpdateTargetRepCount(it)
             }
+            is Event.UpdateTheme -> null
         }
 
     private fun String.toFlooredInt(): Int? =
@@ -50,7 +51,7 @@ internal object EventToCommand : (State, Event) -> Command? {
             }
         }
 
-    private fun start(state: State): Command {
+    private fun start(state: ActiveState): Command {
         var isNewRep = false
         val currentSegments =
             state.queuedSegments.takeIf { it.isNotEmpty() }
@@ -68,7 +69,7 @@ internal object EventToCommand : (State, Event) -> Command? {
     }
 
 
-    private fun resume(activeSegment: State.ActiveSegment): Command? =
+    private fun resume(activeSegment: ActiveState.ActiveSegment): Command? =
         if (activeSegment.pausedAtFraction == null) {
             null
         } else {
@@ -79,18 +80,18 @@ internal object EventToCommand : (State, Event) -> Command? {
             )
         }
 
-    private fun State.isAtEnd(): Boolean =
+    private fun ActiveState.isAtEnd(): Boolean =
         targetRepeatCount > 0 && repeatsCompleted == targetRepeatCount - 1 && queuedSegments.isEmpty()
 
-    private fun State.createSegments(): List<State.SegmentSpec> =
+    private fun ActiveState.createSegments(): List<ActiveState.SegmentSpec> =
         listOf(
-            State.SegmentSpec(
+            ActiveState.SegmentSpec(
                 durationSeconds = transitionLength,
-                mode = State.SegmentSpec.Mode.Transition,
+                mode = ActiveState.SegmentSpec.Mode.Transition,
             ),
-            State.SegmentSpec(
+            ActiveState.SegmentSpec(
                 durationSeconds = activeSegmentLength,
-                mode = State.SegmentSpec.Mode.Stretch,
+                mode = ActiveState.SegmentSpec.Mode.Stretch,
             ),
         )
 }

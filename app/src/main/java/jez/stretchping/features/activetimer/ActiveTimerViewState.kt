@@ -1,6 +1,7 @@
 package jez.stretchping.features.activetimer
 
-import jez.stretchping.features.activetimer.ActiveTimerVM.State.SegmentSpec
+import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec
+import jez.stretchping.persistence.ThemeMode
 
 data class ActiveTimerViewState(
     val editTimerState: EditTimerState?,
@@ -18,7 +19,13 @@ data class EditTimerState(
     val activeDuration: String,
     val breakDuration: String,
     val repCount: String,
-)
+    val themeState: ThemeState,
+) {
+    data class ThemeState(
+        val options: List<String>,
+        val selectedIndex: Int,
+    )
+}
 
 data class Duration(
     val minutes: Int,
@@ -41,15 +48,19 @@ data class ActiveTimerState(
     }
 }
 
-internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTimerViewState {
-    override fun invoke(state: ActiveTimerVM.State): ActiveTimerViewState =
+internal object ActiveTimerStateToViewState :
+        (ActiveTimerVM.ActiveState, ThemeMode) -> ActiveTimerViewState {
+    override fun invoke(
+        state: ActiveTimerVM.ActiveState,
+        themeMode: ThemeMode
+    ): ActiveTimerViewState =
         ActiveTimerViewState(
             activeTimer = state.activeSegment?.toState(),
             segmentDescription = state.toSegmentDescription(),
-            editTimerState = state.toEditTimerState(),
+            editTimerState = state.toEditTimerState(themeMode),
         )
 
-    private fun ActiveTimerVM.State.toEditTimerState(): EditTimerState? =
+    private fun ActiveTimerVM.ActiveState.toEditTimerState(themeMode: ThemeMode): EditTimerState? =
         if (activeSegment == null) {
             EditTimerState(
                 activeDuration = when (activeSegmentLength) {
@@ -64,13 +75,20 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
                     targetRepeatCount == Int.MIN_VALUE -> ""
                     targetRepeatCount < 1 -> "∞"
                     else -> targetRepeatCount.toString()
-                }
+                },
+                themeState = createThemeState(themeMode),
             )
         } else {
             null
         }
 
-    private fun ActiveTimerVM.State.ActiveSegment.toState(): ActiveTimerState =
+    private fun createThemeState(themeMode: ThemeMode): EditTimerState.ThemeState =
+        EditTimerState.ThemeState(
+            options = ThemeMode.values().map { it.toString() },
+            selectedIndex = themeMode.ordinal,
+        )
+
+    private fun ActiveTimerVM.ActiveState.ActiveSegment.toState(): ActiveTimerState =
         ActiveTimerState(
             startAtFraction = startedAtFraction,
             durationMillis = remainingDurationMillis,
@@ -84,7 +102,7 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun ActiveTimerVM.State.toSegmentDescription(): SegmentDescription {
+    private fun ActiveTimerVM.ActiveState.toSegmentDescription(): SegmentDescription {
         val segmentLength =
             activeSegment?.spec?.durationSeconds
                 ?: activeSegmentLength

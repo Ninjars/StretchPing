@@ -3,7 +3,7 @@ package jez.stretchping.features.activetimer
 import androidx.core.util.Consumer
 import jez.stretchping.audio.GameSoundEffect
 import jez.stretchping.audio.SoundManager
-import jez.stretchping.features.activetimer.ActiveTimerVM.State.SegmentSpec.Mode
+import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec.Mode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

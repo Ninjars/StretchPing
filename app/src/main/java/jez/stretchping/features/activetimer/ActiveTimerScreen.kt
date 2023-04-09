@@ -183,9 +183,9 @@ private fun CircleButton(
     Button(
         onClick = onClick,
         shape = CircleShape,
+        contentPadding = PaddingValues(8.dp),
         modifier = modifier
     ) {
-
         Crossfade(targetState = imageVector) {
             Icon(
                 imageVector = it,

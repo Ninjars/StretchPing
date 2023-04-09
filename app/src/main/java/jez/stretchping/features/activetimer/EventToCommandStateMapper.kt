@@ -8,7 +8,7 @@ internal object EventToCommand : (State, Event) -> Command? {
     override fun invoke(state: State, event: Event): Command? =
         when (event) {
             is Event.Pause ->
-                if (state.activeSegment == null) {
+                if (state.activeSegment == null || state.activeSegment.pausedAtFraction != null) {
                     null
                 } else {
                     Command.PauseSegment(

@@ -8,6 +8,9 @@ import androidx.core.util.Consumer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 
+/**
+ * Hook a lifecycle observer to a lifecycle, removing it when the lifecycle is disposed.
+ */
 @SuppressLint("ComposableNaming")
 @Composable
 fun <LO : LifecycleObserver> LO.observeLifecycle(lifecycle: Lifecycle) {
@@ -19,6 +22,10 @@ fun <LO : LifecycleObserver> LO.observeLifecycle(lifecycle: Lifecycle) {
     }
 }
 
+/**
+ * Convenience function to wrap an event consumer lambda in a form which will be
+ * treated as Stable by Jetpack Compose and avoid introducing unnecessary recompositions.
+ */
 @Composable
 fun <T> rememberEventConsumer(consumer: Consumer<T>) =
     remember<(T) -> Unit>(consumer) { { consumer.accept(it) } }

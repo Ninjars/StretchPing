@@ -28,8 +28,11 @@ internal object EventToCommand : (State, Event) -> Command? {
                 start(state)
             }
             is Event.Reset -> Command.ResetToStart
-            is Event.SetDuration -> event.duration.toFlooredInt()?.let {
+            is Event.SetStretchDuration -> event.duration.toFlooredInt()?.let {
                 Command.UpdateActiveSegmentLength(it)
+            }
+            is Event.SetBreakDuration -> event.duration.toFlooredInt()?.let {
+                Command.UpdateBreakSegmentLength(it)
             }
             is Event.SetRepCount -> event.count.toFlooredInt()?.let {
                 Command.UpdateTargetRepCount(it)

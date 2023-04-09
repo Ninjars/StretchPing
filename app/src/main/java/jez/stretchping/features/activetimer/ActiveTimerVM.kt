@@ -48,7 +48,8 @@ class ActiveTimerVM @Inject constructor(
         object Pause : Event()
         object Reset : Event()
         object OnSectionCompleted : Event()
-        data class SetDuration(val duration: String) : Event()
+        data class SetStretchDuration(val duration: String) : Event()
+        data class SetBreakDuration(val duration: String) : Event()
         data class SetRepCount(val count: String) : Event()
     }
 
@@ -76,6 +77,8 @@ class ActiveTimerVM @Inject constructor(
         data class UpdateTargetRepCount(val count: Int) : Command()
 
         data class UpdateActiveSegmentLength(val seconds: Int) : Command()
+
+        data class UpdateBreakSegmentLength(val seconds: Int) : Command()
     }
 
     data class State(

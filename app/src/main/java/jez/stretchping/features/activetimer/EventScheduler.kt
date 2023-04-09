@@ -43,6 +43,7 @@ class EventScheduler @Inject constructor(
                     eventConsumer,
                 )
             is ActiveTimerVM.Command.UpdateActiveSegmentLength,
+            is ActiveTimerVM.Command.UpdateBreakSegmentLength,
             is ActiveTimerVM.Command.UpdateTargetRepCount -> Unit
         }
     }

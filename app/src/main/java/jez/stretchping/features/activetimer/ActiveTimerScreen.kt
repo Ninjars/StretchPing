@@ -267,11 +267,30 @@ private fun EditableConfig(
                 Text(stringResource(id = R.string.stretch_duration))
             },
         ) {
-            eventHandler(Event.SetDuration(it))
+            eventHandler(Event.SetStretchDuration(it))
+        }
+
+        // Edit Transition Duration
+        SelectOnFocusTextField(
+            text = state.breakDuration,
+            textStyle = LocalTextStyle.current.copy(
+                fontSize = 30.sp
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = KeyboardActions {
+                focusManager.moveFocus(FocusDirection.Next)
+            },
+            label = {
+                Text(stringResource(id = R.string.transition_duration))
+            },
+        ) {
+            eventHandler(Event.SetBreakDuration(it))
         }
 
         // Edit Rep Count
-        // Edit Stretch Duration
         val repCount = state.repCount
         SelectOnFocusTextField(
             text = repCount,

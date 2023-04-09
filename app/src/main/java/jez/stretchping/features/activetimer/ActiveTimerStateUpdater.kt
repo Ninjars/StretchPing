@@ -13,6 +13,7 @@ internal object ActiveTimerStateUpdater : (State, Command?) -> State {
             is Command.StartSegment -> startNextSegment(state, command)
             is Command.ResetToStart -> resetToStart(state)
             is Command.UpdateActiveSegmentLength -> state.copy(activeSegmentLength = command.seconds)
+            is Command.UpdateBreakSegmentLength -> state.copy(transitionLength = command.seconds)
             is Command.UpdateTargetRepCount -> state.copy(targetRepeatCount = command.count)
         }
 

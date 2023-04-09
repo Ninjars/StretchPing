@@ -16,6 +16,7 @@ data class SegmentDescription(
 
 data class EditTimerState(
     val activeDuration: String,
+    val breakDuration: String,
     val repCount: String,
 )
 
@@ -54,6 +55,10 @@ internal object ActiveTimerStateToViewState : (ActiveTimerVM.State) -> ActiveTim
                 activeDuration = when (activeSegmentLength) {
                     Int.MIN_VALUE -> ""
                     else -> activeSegmentLength.toString()
+                },
+                breakDuration = when (transitionLength) {
+                    Int.MIN_VALUE -> ""
+                    else -> transitionLength.toString()
                 },
                 repCount = when {
                     targetRepeatCount == Int.MIN_VALUE -> ""

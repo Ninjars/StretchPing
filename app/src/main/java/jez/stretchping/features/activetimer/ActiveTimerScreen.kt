@@ -242,7 +242,7 @@ private fun EditableConfig(
     eventHandler: (Event) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth(0.9f)

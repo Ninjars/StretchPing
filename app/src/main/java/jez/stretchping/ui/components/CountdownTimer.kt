@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import jez.stretchping.ui.theme.StretchPingTheme
+import jez.stretchping.utils.KeepScreenOn
 
 @Composable
 fun CountdownTimer(
@@ -35,6 +36,7 @@ private fun CountdownTimer(
     durationMillis: Long,
     modifier: Modifier = Modifier,
 ) {
+    KeepScreenOn()
     val start = remember(startAtFraction, durationMillis) {
         Animatable(startAtFraction)
     }

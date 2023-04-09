@@ -16,10 +16,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -68,6 +69,9 @@ import jez.stretchping.utils.observeLifecycle
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 
+private const val SecondaryButtonSize = 60
+private const val PrimaryButtonSize = 84
+
 @Composable
 fun ActiveTimerScreen(
     viewModel: ActiveTimerVM
@@ -86,12 +90,19 @@ private fun ActiveTimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-        MainContent(eventHandler) { state.value }
-        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.weight(1f),
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            MainContent(eventHandler) { state.value }
+            Spacer(modifier = Modifier.weight(1f))
+        }
         Controls(
             eventHandler = eventHandler,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
         ) { state.value.activeTimer }
     }
 }
@@ -105,8 +116,7 @@ private fun Controls(
     val timerState = stateProvider()
     Row(
         modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
+            .padding(48.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -117,14 +127,12 @@ private fun Controls(
                     imageVector = Icons.Rounded.Undo,
                     contentDescription = stringResource(id = R.string.timer_resume),
                     modifier = Modifier
-                        .fillMaxHeight(0.75f)
-                        .aspectRatio(1f),
+                        .size(SecondaryButtonSize.dp),
                 )
             } else {
                 Spacer(
                     modifier = Modifier
-                        .fillMaxHeight(0.75f)
-                        .aspectRatio(1f),
+                        .size(SecondaryButtonSize.dp),
                 )
             }
         }
@@ -133,14 +141,12 @@ private fun Controls(
             eventHandler = eventHandler,
             state = timerState,
             modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f)
+                .size(PrimaryButtonSize.dp)
         )
 
         Spacer(
             modifier = Modifier
-                .fillMaxHeight(0.75f)
-                .aspectRatio(1f),
+                .size(SecondaryButtonSize.dp),
         )
     }
 }

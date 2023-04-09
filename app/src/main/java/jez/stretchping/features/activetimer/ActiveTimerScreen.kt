@@ -92,13 +92,11 @@ private fun ActiveTimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f),
         ) {
-            Spacer(modifier = Modifier.weight(1f))
             MainContent(eventHandler) { state.value }
-            Spacer(modifier = Modifier.weight(1f))
         }
         Controls(
             eventHandler = eventHandler,

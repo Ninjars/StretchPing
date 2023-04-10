@@ -24,6 +24,7 @@ data class EditTimerState(
     val breakDuration: String,
     val repCount: String,
     val themeState: ThemeState,
+    val canStart: Boolean,
 ) {
     data class ThemeState(
         val optionStringResources: List<Int>,
@@ -85,6 +86,7 @@ internal object StateToViewState :
                     else -> repCount.toString()
                 },
                 themeState = createThemeState(themeMode),
+                canStart = activeSegmentLength > 0 && transitionLength > 0 && repCount > Int.MIN_VALUE,
             )
         } else {
             null

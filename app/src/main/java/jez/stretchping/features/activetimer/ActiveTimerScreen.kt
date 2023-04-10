@@ -134,7 +134,7 @@ private fun ActiveTimerScreen(
         ) {
             Controls(
                 eventHandler = eventHandler,
-            ) { state.value.activeTimer }
+            ) { state.value }
         }
     }
 }
@@ -224,9 +224,10 @@ private fun Title(
 private fun Controls(
     eventHandler: (Event) -> Unit,
     modifier: Modifier = Modifier,
-    stateProvider: () -> ActiveTimerState?,
+    stateProvider: () -> ActiveTimerViewState,
 ) {
-    val timerState = stateProvider()
+    val state = stateProvider()
+    val timerState = state.activeTimer
     Row(
         modifier = modifier
             .padding(48.dp),
@@ -257,6 +258,7 @@ private fun Controls(
         MainButton(
             eventHandler = eventHandler,
             state = timerState,
+            enabled = state.editTimerState?.canStart ?: true,
             modifier = Modifier
                 .size(PrimaryButtonSize.dp)
         )
@@ -272,6 +274,7 @@ private fun Controls(
 private fun MainButton(
     eventHandler: (Event) -> Unit,
     state: ActiveTimerState?,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val isPlay = state == null || state.isPaused
@@ -286,6 +289,7 @@ private fun MainButton(
             else -> Icons.Rounded.Pause
         },
         contentDescription = stringResource(id = R.string.timer_start),
+        enabled = enabled,
         modifier = modifier,
     )
 }
@@ -296,6 +300,7 @@ private fun CircleButton(
     imageVector: ImageVector,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors()
 ) {
     Button(
@@ -303,6 +308,7 @@ private fun CircleButton(
         shape = CircleShape,
         colors = colors,
         contentPadding = PaddingValues(8.dp),
+        enabled = enabled,
         modifier = modifier
     ) {
         Crossfade(targetState = imageVector) {

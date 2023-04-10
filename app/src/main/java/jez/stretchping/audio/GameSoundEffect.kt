@@ -34,8 +34,8 @@ class GameSoundEffectPlayer {
             .map {
                 when (it) {
                     Back, Stop -> R.raw.puzzle_success_xylophone_2_two_note_decline_low_wet_stereo
-                    ActiveSection -> R.raw.puzzle_success_xylophone_2_stab_wet_stereo
-                    TransitionSection -> R.raw.puzzle_success_xylophone_2_two_note_climb_bright_wet_stereo
+                    ActiveSection -> R.raw.puzzle_success_xylophone_1_three_note_wet_stereo
+                    TransitionSection -> R.raw.puzzle_success_xylophone_1_two_note_fast_wet_stereo
                     CountdownBeep -> R.raw.puzzle_success_xylophone_2_one_note_wet_stereo
                 }
             }.map {

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -349,8 +348,7 @@ private fun EditableConfig(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .aspectRatio(1f),
+            .fillMaxWidth(0.9f),
     ) {
         val focusManager = LocalFocusManager.current
 
@@ -413,11 +411,17 @@ private fun EditableConfig(
         }
 
         // Theme Selection
-        TriStateToggle(
-            states = state.themeState.optionStringResources.map { stringResource(id = it) },
-            selectedIndex = state.themeState.selectedIndex,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            eventHandler(Event.UpdateTheme(it))
+            Text(text = stringResource(id = R.string.theme_title))
+            TriStateToggle(
+                states = state.themeState.optionStringResources.map { stringResource(id = it) },
+                selectedIndex = state.themeState.selectedIndex,
+            ) {
+                eventHandler(Event.UpdateTheme(it))
+            }
         }
     }
 }

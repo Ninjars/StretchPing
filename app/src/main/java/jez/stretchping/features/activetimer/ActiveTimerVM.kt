@@ -10,8 +10,10 @@ import jez.stretchping.persistence.Settings
 import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,21 +22,45 @@ class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
     private val settings: Settings,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
-    private val stateFlow = MutableStateFlow(ActiveState())
+    private val activeStateFlow = MutableStateFlow(ActiveState())
+    private val combinedState = combine(
+        activeStateFlow,
+        settings.repCount,
+        settings.activityDuration,
+        settings.transitionDuration,
+        settings.themeMode
+    ) { activeState, repCount, activityDuration, transitionDuration, themeMode ->
+        State(
+            activeState = activeState,
+            repCount = repCount,
+            activeSegmentLength = activityDuration,
+            transitionLength = transitionDuration,
+            themeMode = themeMode
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        State()
+    )
+
     val viewState: StateFlow<ActiveTimerViewState> =
-        stateFlow.combine(settings.themeMode) { activeState, theme ->
-            State(activeState, theme)
-        }.toViewState(
+        combinedState.toViewState(
             scope = viewModelScope,
-            initial = State(stateFlow.value, ThemeMode.System)
-        ) { state -> ActiveTimerStateToViewState(state.activeState, state.themeMode) }
+            initial = State(
+                activeState = activeStateFlow.value,
+                repCount = -1,
+                activeSegmentLength = 0,
+                transitionLength = 0,
+                themeMode = ThemeMode.System
+            )
+        ) { state -> StateToViewState(state) }
 
     override fun accept(event: Event) {
-        val currentState = stateFlow.value
+        val currentState = combinedState.value
         viewModelScope.launch {
             val command = EventToCommand(currentState, event)
-            val newState = ActiveTimerStateUpdater(currentState, command)
-            stateFlow.compareAndSet(currentState, newState)
+            val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
+            activeStateFlow.compareAndSet(activeStateFlow.value, newActiveState)
 
             command?.let {
                 eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
@@ -50,6 +76,12 @@ class ActiveTimerVM @Inject constructor(
         when (command) {
             is SettingsCommand.SetThemeMode ->
                 settings.setThemeMode(command.mode)
+            is SettingsCommand.SetActivityDuration ->
+                settings.setActivityDuration(command.duration)
+            is SettingsCommand.SetTransitionDuration ->
+                settings.setTransitionDuration(command.duration)
+            is SettingsCommand.SetRepCount ->
+                settings.setRepCount(command.count)
         }
     }
 
@@ -76,6 +108,9 @@ class ActiveTimerVM @Inject constructor(
 
     sealed class SettingsCommand {
         data class SetThemeMode(val mode: ThemeMode) : SettingsCommand()
+        data class SetActivityDuration(val duration: Int) : SettingsCommand()
+        data class SetTransitionDuration(val duration: Int) : SettingsCommand()
+        data class SetRepCount(val count: Int) : SettingsCommand()
     }
 
     sealed class Command {
@@ -98,27 +133,20 @@ class ActiveTimerVM @Inject constructor(
         ) : Command()
 
         object ResetToStart : Command()
-
-        data class UpdateTargetRepCount(val count: Int) : Command()
-
-        data class UpdateActiveSegmentLength(val seconds: Int) : Command()
-
-        data class UpdateBreakSegmentLength(val seconds: Int) : Command()
     }
 
     data class State(
         val activeState: ActiveState = ActiveState(),
-        val themeMode: ThemeMode,
+        val repCount: Int = -1,
+        val activeSegmentLength: Int = 30,
+        val transitionLength: Int = 5,
+        val themeMode: ThemeMode = ThemeMode.System,
     )
 
     data class ActiveState(
-        val targetRepeatCount: Int = -1,
-        val activeSegmentLength: Int = 30,
-        val transitionLength: Int = 5,
         val queuedSegments: List<SegmentSpec> = emptyList(),
         val activeSegment: ActiveSegment? = null,
         val repeatsCompleted: Int = -1,
-        val themeMode: ThemeMode = ThemeMode.System,
     ) {
         data class ActiveSegment(
             val startedAtTime: Long,

@@ -48,20 +48,19 @@ data class ActiveTimerState(
     }
 }
 
-internal object ActiveTimerStateToViewState :
-        (ActiveTimerVM.ActiveState, ThemeMode) -> ActiveTimerViewState {
+internal object StateToViewState :
+        (ActiveTimerVM.State) -> ActiveTimerViewState {
     override fun invoke(
-        state: ActiveTimerVM.ActiveState,
-        themeMode: ThemeMode
+        state: ActiveTimerVM.State,
     ): ActiveTimerViewState =
         ActiveTimerViewState(
-            activeTimer = state.activeSegment?.toState(),
+            activeTimer = state.activeState.activeSegment?.toState(),
             segmentDescription = state.toSegmentDescription(),
-            editTimerState = state.toEditTimerState(themeMode),
+            editTimerState = state.toEditTimerState(state.themeMode),
         )
 
-    private fun ActiveTimerVM.ActiveState.toEditTimerState(themeMode: ThemeMode): EditTimerState? =
-        if (activeSegment == null) {
+    private fun ActiveTimerVM.State.toEditTimerState(themeMode: ThemeMode): EditTimerState? =
+        if (activeState.activeSegment == null) {
             EditTimerState(
                 activeDuration = when (activeSegmentLength) {
                     Int.MIN_VALUE -> ""
@@ -72,9 +71,9 @@ internal object ActiveTimerStateToViewState :
                     else -> transitionLength.toString()
                 },
                 repCount = when {
-                    targetRepeatCount == Int.MIN_VALUE -> ""
-                    targetRepeatCount < 1 -> "∞"
-                    else -> targetRepeatCount.toString()
+                    repCount == Int.MIN_VALUE -> ""
+                    repCount < 1 -> "∞"
+                    else -> repCount.toString()
                 },
                 themeState = createThemeState(themeMode),
             )
@@ -102,17 +101,17 @@ internal object ActiveTimerStateToViewState :
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun ActiveTimerVM.ActiveState.toSegmentDescription(): SegmentDescription {
+    private fun ActiveTimerVM.State.toSegmentDescription(): SegmentDescription {
         val segmentLength =
-            activeSegment?.spec?.durationSeconds
+            activeState.activeSegment?.spec?.durationSeconds
                 ?: activeSegmentLength
         val segmentMode =
-            activeSegment?.mode?.map() ?: ActiveTimerState.Mode.Stretch
+            activeState.activeSegment?.mode?.map() ?: ActiveTimerState.Mode.Stretch
 
         return SegmentDescription(
             mode = segmentMode,
             duration = segmentLength.toDuration(),
-            repsRemaining = (targetRepeatCount - repeatsCompleted).toRepCountString()
+            repsRemaining = (repCount - activeState.repeatsCompleted).toRepCountString()
         )
     }
 

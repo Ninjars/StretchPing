@@ -31,6 +31,39 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
+    val activityDuration: Flow<Int> = context.dataStore.data
+        .map {
+            it[ActivityDurationPref] ?: 30
+        }
+
+    suspend fun setActivityDuration(durationSeconds: Int) {
+        context.dataStore.edit {
+            it[ActivityDurationPref] = durationSeconds
+        }
+    }
+
+    val transitionDuration: Flow<Int> = context.dataStore.data
+        .map {
+            it[TransitionDurationPref] ?: 5
+        }
+
+    suspend fun setTransitionDuration(durationSeconds: Int) {
+        context.dataStore.edit {
+            it[TransitionDurationPref] = durationSeconds
+        }
+    }
+
+    val repCount: Flow<Int> = context.dataStore.data
+        .map {
+            it[RepCountPref] ?: -1
+        }
+
+    suspend fun setRepCount(count: Int) {
+        context.dataStore.edit {
+            it[RepCountPref] = count
+        }
+    }
+
     private fun ThemeMode.toInt() = when (this) {
         ThemeMode.System -> 0
         ThemeMode.Light -> 1
@@ -45,5 +78,8 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
 
     private companion object {
         val ThemePref = intPreferencesKey("ThemePref")
+        val ActivityDurationPref = intPreferencesKey("ActivityDuration")
+        val TransitionDurationPref = intPreferencesKey("TransitionDuration")
+        val RepCountPref = intPreferencesKey("RepCountDuration")
     }
 }

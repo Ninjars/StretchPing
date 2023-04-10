@@ -2,11 +2,14 @@ package jez.stretchping.features.activetimer
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -93,18 +96,46 @@ private fun ActiveTimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        LoadingTransitionAnimator(
             modifier = Modifier.weight(1f),
+            isVisible = { !state.value.isLoading },
         ) {
-            MainContent(eventHandler) { state.value }
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                MainContent(eventHandler) { state.value }
+            }
         }
-        Controls(
-            eventHandler = eventHandler,
+        LoadingTransitionAnimator(
             modifier = Modifier
                 .wrapContentHeight()
-                .fillMaxWidth()
-        ) { state.value.activeTimer }
+                .fillMaxWidth(),
+            isVisible = { !state.value.isLoading },
+        ) {
+            Controls(
+                eventHandler = eventHandler,
+            ) { state.value.activeTimer }
+        }
+    }
+}
+
+@Composable
+private fun LoadingTransitionAnimator(
+    isVisible: () -> Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = isVisible(),
+        enter = fadeIn() + slideInVertically(
+            initialOffsetY = { it },
+        ),
+        exit = fadeOut() + slideOutVertically(
+            targetOffsetY = { it },
+        )
+    ) {
+        content()
     }
 }
 
@@ -204,6 +235,8 @@ private fun MainContent(
     stateProvider: () -> ActiveTimerViewState,
 ) {
     val state = stateProvider()
+    if (state.isLoading) return
+
     AnimatedContent(
         contentAlignment = Alignment.Center,
         targetState = state.activeTimer != null,

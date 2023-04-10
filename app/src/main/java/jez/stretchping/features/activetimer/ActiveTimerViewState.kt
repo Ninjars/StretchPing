@@ -1,13 +1,16 @@
 package jez.stretchping.features.activetimer
 
 import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec
+import jez.stretchping.features.activetimer.ActiveTimerVM.State
 import jez.stretchping.persistence.ThemeMode
 
 data class ActiveTimerViewState(
     val editTimerState: EditTimerState?,
     val activeTimer: ActiveTimerState?,
     val segmentDescription: SegmentDescription?,
-)
+) {
+    val isLoading = editTimerState == null && activeTimer == null && segmentDescription == null
+}
 
 data class SegmentDescription(
     val mode: ActiveTimerState.Mode,
@@ -49,17 +52,22 @@ data class ActiveTimerState(
 }
 
 internal object StateToViewState :
-        (ActiveTimerVM.State) -> ActiveTimerViewState {
+        (State) -> ActiveTimerViewState {
     override fun invoke(
-        state: ActiveTimerVM.State,
+        state: State,
     ): ActiveTimerViewState =
-        ActiveTimerViewState(
-            activeTimer = state.activeState.activeSegment?.toState(),
-            segmentDescription = state.toSegmentDescription(),
-            editTimerState = state.toEditTimerState(state.themeMode),
-        )
+        when (state) {
+            is State.Loading ->
+                ActiveTimerViewState(null, null, null)
+            is State.Active ->
+                ActiveTimerViewState(
+                    activeTimer = state.activeState.activeSegment?.toState(),
+                    segmentDescription = state.toSegmentDescription(),
+                    editTimerState = state.toEditTimerState(state.themeMode),
+                )
+        }
 
-    private fun ActiveTimerVM.State.toEditTimerState(themeMode: ThemeMode): EditTimerState? =
+    private fun State.Active.toEditTimerState(themeMode: ThemeMode): EditTimerState? =
         if (activeState.activeSegment == null) {
             EditTimerState(
                 activeDuration = when (activeSegmentLength) {
@@ -101,7 +109,7 @@ internal object StateToViewState :
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun ActiveTimerVM.State.toSegmentDescription(): SegmentDescription {
+    private fun State.Active.toSegmentDescription(): SegmentDescription {
         val segmentLength =
             activeState.activeSegment?.spec?.durationSeconds
                 ?: activeSegmentLength

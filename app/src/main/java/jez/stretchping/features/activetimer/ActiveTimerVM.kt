@@ -30,7 +30,7 @@ class ActiveTimerVM @Inject constructor(
         settings.transitionDuration,
         settings.themeMode
     ) { activeState, repCount, activityDuration, transitionDuration, themeMode ->
-        State(
+        State.Active(
             activeState = activeState,
             repCount = repCount,
             activeSegmentLength = activityDuration,
@@ -40,31 +40,30 @@ class ActiveTimerVM @Inject constructor(
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        State()
+        State.Loading
     )
 
     val viewState: StateFlow<ActiveTimerViewState> =
         combinedState.toViewState(
             scope = viewModelScope,
-            initial = State(
-                activeState = activeStateFlow.value,
-                repCount = -1,
-                activeSegmentLength = 0,
-                transitionLength = 0,
-                themeMode = ThemeMode.System
-            )
+            initial = State.Loading
         ) { state -> StateToViewState(state) }
 
     override fun accept(event: Event) {
         val currentState = combinedState.value
         viewModelScope.launch {
-            val command = EventToCommand(currentState, event)
-            val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
-            activeStateFlow.compareAndSet(activeStateFlow.value, newActiveState)
 
-            command?.let {
-                eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
+            if (currentState is State.Active) {
+                val command = EventToCommand(currentState, event)
+                val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
+
+                activeStateFlow.compareAndSet(activeStateFlow.value, newActiveState)
+
+                command?.let {
+                    eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
+                }
             }
+
 
             EventToSettingsUpdate(event)?.let {
                 updateSettings(it)
@@ -135,13 +134,16 @@ class ActiveTimerVM @Inject constructor(
         object ResetToStart : Command()
     }
 
-    data class State(
-        val activeState: ActiveState = ActiveState(),
-        val repCount: Int = -1,
-        val activeSegmentLength: Int = 30,
-        val transitionLength: Int = 5,
-        val themeMode: ThemeMode = ThemeMode.System,
-    )
+    sealed class State {
+        object Loading : State()
+        data class Active(
+            val activeState: ActiveState = ActiveState(),
+            val repCount: Int = -1,
+            val activeSegmentLength: Int = 30,
+            val transitionLength: Int = 5,
+            val themeMode: ThemeMode = ThemeMode.System,
+        ) : State()
+    }
 
     data class ActiveState(
         val queuedSegments: List<SegmentSpec> = emptyList(),

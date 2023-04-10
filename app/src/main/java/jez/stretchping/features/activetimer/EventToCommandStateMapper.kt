@@ -5,8 +5,8 @@ import jez.stretchping.features.activetimer.ActiveTimerVM.Command
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.ActiveTimerVM.State
 
-internal object EventToCommand : (State, Event) -> Command? {
-    override fun invoke(state: State, event: Event): Command? {
+internal object EventToCommand : (State.Active, Event) -> Command? {
+    override fun invoke(state: State.Active, event: Event): Command? {
         val activeSegment = state.activeState.activeSegment
         return when (event) {
             is Event.Pause ->
@@ -36,7 +36,7 @@ internal object EventToCommand : (State, Event) -> Command? {
         }
     }
 
-    private fun start(state: State): Command {
+    private fun start(state: State.Active): Command {
         var isNewRep = false
         val currentSegments =
             state.activeState.queuedSegments.takeIf { it.isNotEmpty() }
@@ -65,10 +65,10 @@ internal object EventToCommand : (State, Event) -> Command? {
             )
         }
 
-    private fun State.isAtEnd(): Boolean =
+    private fun State.Active.isAtEnd(): Boolean =
         repCount > 0 && activeState.repeatsCompleted == repCount - 1 && activeState.queuedSegments.isEmpty()
 
-    private fun State.createSegments(): List<ActiveState.SegmentSpec> =
+    private fun State.Active.createSegments(): List<ActiveState.SegmentSpec> =
         listOf(
             ActiveState.SegmentSpec(
                 durationSeconds = transitionLength,

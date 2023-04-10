@@ -37,6 +37,8 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -44,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -56,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -229,6 +233,10 @@ private fun Controls(
                     contentDescription = stringResource(id = R.string.timer_resume),
                     modifier = Modifier
                         .size(SecondaryButtonSize.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                    )
                 )
             } else {
                 Spacer(
@@ -280,10 +288,12 @@ private fun CircleButton(
     imageVector: ImageVector,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    colors: ButtonColors = ButtonDefaults.buttonColors()
 ) {
     Button(
         onClick = onClick,
         shape = CircleShape,
+        colors = colors,
         contentPadding = PaddingValues(8.dp),
         modifier = modifier
     ) {
@@ -466,6 +476,12 @@ private fun SelectOnFocusTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = true,
+        colors = with(MaterialTheme.colorScheme) {
+            TextFieldDefaults.textFieldColors(
+                containerColor = secondaryContainer,
+                textColor = onSecondaryContainer,
+            )
+        },
     )
 }
 

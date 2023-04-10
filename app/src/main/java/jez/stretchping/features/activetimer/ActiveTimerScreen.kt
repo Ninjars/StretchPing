@@ -5,9 +5,13 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -47,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -74,6 +80,7 @@ import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.observeLifecycle
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
+import kotlinx.coroutines.delay
 
 private const val SecondaryButtonSize = 60
 private const val PrimaryButtonSize = 84
@@ -96,6 +103,8 @@ private fun ActiveTimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
     ) {
+        Spacer(modifier = Modifier.height(36.dp))
+        Title(modifier = Modifier.fillMaxWidth())
         LoadingTransitionAnimator(
             modifier = Modifier.weight(1f),
             isVisible = { !state.value.isLoading },
@@ -125,9 +134,20 @@ private fun LoadingTransitionAnimator(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    /*
+    * awkward setup to always show the entry animation even if loading is
+    * so fast that it's set by the first frame.
+    */
+    val makeVisible = isVisible()
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(makeVisible) {
+        delay(500)
+        visible = makeVisible
+    }
+
     AnimatedVisibility(
         modifier = modifier,
-        visible = isVisible(),
+        visible = visible,
         enter = fadeIn() + slideInVertically(
             initialOffsetY = { it },
         ),
@@ -136,6 +156,56 @@ private fun LoadingTransitionAnimator(
         )
     ) {
         content()
+    }
+}
+
+@Composable
+private fun Title(
+    modifier: Modifier = Modifier,
+) {
+    var visible1 by remember { mutableStateOf(false) }
+    var visible2 by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        visible1 = true
+        delay(500)
+        visible2 = true
+    }
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        AnimatedVisibility(
+            visible = visible1,
+            enter = slideInHorizontally(
+                animationSpec = spring(
+                    stiffness = Spring.StiffnessLow,
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                ),
+                initialOffsetX = { -it * 4 }
+            ),
+        ) {
+            Text(
+                text = stringResource(id = R.string.title_part_1),
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        }
+        AnimatedVisibility(
+            visible = visible2,
+            enter = expandHorizontally(
+                animationSpec = spring(
+                    stiffness = Spring.StiffnessMediumLow,
+                    dampingRatio = Spring.DampingRatioHighBouncy,
+                ),
+                expandFrom = Alignment.Start,
+                clip = false,
+            ),
+        ) {
+            Text(
+                text = stringResource(id = R.string.title_part_2),
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        }
     }
 }
 

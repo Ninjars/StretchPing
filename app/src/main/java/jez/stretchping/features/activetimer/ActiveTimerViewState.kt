@@ -1,5 +1,6 @@
 package jez.stretchping.features.activetimer
 
+import jez.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec
 import jez.stretchping.features.activetimer.ActiveTimerVM.State
 import jez.stretchping.persistence.ThemeMode
@@ -25,7 +26,7 @@ data class EditTimerState(
     val themeState: ThemeState,
 ) {
     data class ThemeState(
-        val options: List<String>,
+        val optionStringResources: List<Int>,
         val selectedIndex: Int,
     )
 }
@@ -90,10 +91,20 @@ internal object StateToViewState :
         }
 
     private fun createThemeState(themeMode: ThemeMode): EditTimerState.ThemeState =
-        EditTimerState.ThemeState(
-            options = ThemeMode.values().map { it.toString() },
-            selectedIndex = themeMode.ordinal,
-        )
+        with(ThemeMode.displayValues) {
+            EditTimerState.ThemeState(
+                optionStringResources = this.map { it.toStringResId() },
+                selectedIndex = this.indexOf(themeMode),
+            )
+        }
+
+    private fun ThemeMode.toStringResId() =
+        when (this) {
+            ThemeMode.Unset -> -1
+            ThemeMode.System -> R.string.theme_system
+            ThemeMode.Light -> R.string.theme_light
+            ThemeMode.Dark -> R.string.theme_dark
+        }
 
     private fun ActiveTimerVM.ActiveState.ActiveSegment.toState(): ActiveTimerState =
         ActiveTimerState(

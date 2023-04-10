@@ -8,7 +8,7 @@ import java.lang.Integer.max
 internal object EventToSettingsUpdate : (Event) -> SettingsCommand? {
     override fun invoke(event: Event): SettingsCommand? =
         when (event) {
-            is Event.UpdateTheme -> SettingsCommand.SetThemeMode(ThemeMode.values()[event.themeModeIndex])
+            is Event.UpdateTheme -> SettingsCommand.SetThemeMode(ThemeMode.displayValues[event.themeModeIndex])
             is Event.SetRepCount -> event.count.toFlooredInt()?.let {
                 SettingsCommand.SetRepCount(max(-1, it))
             }

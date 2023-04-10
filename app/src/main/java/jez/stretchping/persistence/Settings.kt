@@ -13,8 +13,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class ThemeMode {
-    System, Light, Dark,
+    Unset, System, Light, Dark;
+
+    companion object {
+        val displayValues = listOf(System, Light, Dark)
+    }
 }
+
 
 @Singleton
 class Settings @Inject constructor(@ApplicationContext private val context: Context) {
@@ -22,7 +27,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data
         .map {
-            (it[ThemePref] ?: 0).toThemeMode()
+            it[ThemePref]?.toThemeMode() ?: ThemeMode.System
         }
 
     suspend fun setThemeMode(mode: ThemeMode) {
@@ -65,15 +70,17 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
     }
 
     private fun ThemeMode.toInt() = when (this) {
-        ThemeMode.System -> 0
-        ThemeMode.Light -> 1
-        ThemeMode.Dark -> 2
+        ThemeMode.Unset -> 0
+        ThemeMode.System -> 1
+        ThemeMode.Light -> 2
+        ThemeMode.Dark -> 3
     }
 
     private fun Int.toThemeMode() = when (this) {
-        1 -> ThemeMode.Light
-        2 -> ThemeMode.Dark
-        else -> ThemeMode.System
+        1 -> ThemeMode.System
+        2 -> ThemeMode.Light
+        3 -> ThemeMode.Dark
+        else -> ThemeMode.Unset
     }
 
     private companion object {

@@ -344,7 +344,7 @@ private fun EditableConfig(
 
         // Theme Selection
         TriStateToggle(
-            states = state.themeState.options,
+            states = state.themeState.optionStringResources.map { stringResource(id = it) },
             selectedIndex = state.themeState.selectedIndex,
         ) {
             eventHandler(Event.UpdateTheme(it))

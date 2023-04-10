@@ -11,4 +11,8 @@
     <string name="stretch_duration">Stretch Seconds</string>
     <string name="transition_duration">Break Seconds</string>
     <string name="rep_count">Times to Repeat</string>
+
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>

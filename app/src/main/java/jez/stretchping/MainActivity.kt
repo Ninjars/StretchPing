@@ -7,6 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,14 +40,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val themeMode = settings.themeMode.collectAsState(initial = ThemeMode.System)
-
-            StretchPingTheme(
-                isDarkTheme = when (themeMode.value) {
-                    ThemeMode.System -> isSystemInDarkTheme()
-                    ThemeMode.Light -> false
-                    ThemeMode.Dark -> true
-                }
+            val themeModeState = settings.themeMode.collectAsState(initial = ThemeMode.Unset)
+            ThemedContent(
+                themeMode = themeModeState.value,
             ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -62,6 +58,27 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun ThemedContent(
+        themeMode: ThemeMode,
+        content: @Composable () -> Unit,
+    ) {
+        val isDarkTheme = when (themeMode) {
+            ThemeMode.Unset,
+            ThemeMode.System -> isSystemInDarkTheme()
+            ThemeMode.Light -> false
+            ThemeMode.Dark -> true
+        }
+
+        if (themeMode != ThemeMode.Unset) {
+            StretchPingTheme(
+                isDarkTheme = isDarkTheme
+            ) {
+                content()
             }
         }
     }

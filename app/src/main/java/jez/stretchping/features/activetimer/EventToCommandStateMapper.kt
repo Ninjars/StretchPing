@@ -29,9 +29,9 @@ internal object EventToCommand : (State.Active, Event) -> Command? {
                 start(state)
             }
             is Event.Reset -> Command.ResetToStart
-            is Event.SetStretchDuration,
-            is Event.SetBreakDuration,
-            is Event.SetRepCount,
+            is Event.UpdateStretchDuration,
+            is Event.UpdateBreakDuration,
+            is Event.UpdateRepCount,
             is Event.UpdateTheme -> null
         }
     }

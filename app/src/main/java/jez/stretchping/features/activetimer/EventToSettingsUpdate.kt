@@ -3,20 +3,19 @@ package jez.stretchping.features.activetimer
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.ActiveTimerVM.SettingsCommand
 import jez.stretchping.persistence.ThemeMode
-import java.lang.Integer.max
 
 internal object EventToSettingsUpdate : (Event) -> SettingsCommand? {
     override fun invoke(event: Event): SettingsCommand? =
         when (event) {
             is Event.UpdateTheme -> SettingsCommand.SetThemeMode(ThemeMode.displayValues[event.themeModeIndex])
-            is Event.SetRepCount -> event.count.toFlooredInt()?.let {
-                SettingsCommand.SetRepCount(max(-1, it))
+            is Event.UpdateRepCount -> event.count.toFlooredInt()?.let {
+                SettingsCommand.SetRepCount(it)
             }
-            is Event.SetStretchDuration -> event.duration.toFlooredInt()?.let {
-                SettingsCommand.SetActivityDuration(max(0, it))
+            is Event.UpdateStretchDuration -> event.duration.toFlooredInt()?.let {
+                SettingsCommand.SetActivityDuration(it)
             }
-            is Event.SetBreakDuration -> event.duration.toFlooredInt()?.let {
-                SettingsCommand.SetTransitionDuration(max(0, it))
+            is Event.UpdateBreakDuration -> event.duration.toFlooredInt()?.let {
+                SettingsCommand.SetTransitionDuration(it)
             }
             is Event.OnSectionCompleted,
             is Event.Pause,

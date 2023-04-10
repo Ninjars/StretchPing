@@ -387,7 +387,7 @@ private fun EditableConfig(
                 Text(stringResource(id = R.string.stretch_duration))
             },
         ) {
-            eventHandler(Event.SetStretchDuration(it))
+            eventHandler(Event.UpdateStretchDuration(it))
         }
 
         // Edit Transition Duration
@@ -407,7 +407,7 @@ private fun EditableConfig(
                 Text(stringResource(id = R.string.transition_duration))
             },
         ) {
-            eventHandler(Event.SetBreakDuration(it))
+            eventHandler(Event.UpdateBreakDuration(it))
         }
 
         // Edit Rep Count
@@ -425,7 +425,7 @@ private fun EditableConfig(
                 Text(stringResource(id = R.string.rep_count))
             },
         ) {
-            eventHandler(Event.SetRepCount(it))
+            eventHandler(Event.UpdateRepCount(it))
         }
 
         // Theme Selection
@@ -455,7 +455,20 @@ private fun SelectOnFocusTextField(
     onValueChanged: (String) -> Unit,
 ) {
     val fieldState = remember { mutableStateOf(TextFieldValue(text)) }
-    fieldState.value = fieldState.value.copy(text = text)
+
+    val newTextRange = with(fieldState.value) {
+        if (text != this.text) {
+            val oldPosition = this.selection.end
+            val newPosition = oldPosition + text.length - this.text.length
+            TextRange(newPosition)
+        } else {
+            fieldState.value.selection
+        }
+    }
+    fieldState.value = fieldState.value.copy(
+        text = text,
+        selection = newTextRange
+    )
 
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()

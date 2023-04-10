@@ -130,7 +130,7 @@ internal object StateToViewState :
         return SegmentDescription(
             mode = segmentMode,
             duration = segmentLength.toDuration(),
-            repsRemaining = (repCount - activeState.repeatsCompleted).toRepCountString()
+            repsRemaining = if (repCount < 1) "∞" else (repCount - activeState.repeatsCompleted).toRepCountString()
         )
     }
 

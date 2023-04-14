@@ -17,25 +17,49 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+private data class CombinedSettings(
+    val repCount: Int,
+    val activityDuration: Int,
+    val transitionDuration: Int,
+    val activePingsCount: Int,
+    val transitionPingsCount: Int,
+)
+
 @HiltViewModel
 class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
     private val settings: Settings,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val activeStateFlow = MutableStateFlow(ActiveState())
-    private val combinedState = combine(
-        activeStateFlow,
+    private val settingsState = combine(
         settings.repCount,
         settings.activityDuration,
         settings.transitionDuration,
+        settings.activePingsCount,
+        settings.transitionPingsCount,
+    ) { repCount, activityDuration, transitionDuration, activePingsCount, transitionPingsCount ->
+        CombinedSettings(
+            repCount = repCount,
+            activityDuration = activityDuration,
+            transitionDuration = transitionDuration,
+            activePingsCount = activePingsCount,
+            transitionPingsCount = transitionPingsCount,
+        )
+    }
+    private val combinedState = combine(
+        activeStateFlow,
+        settingsState,
         settings.themeMode
-    ) { activeState, repCount, activityDuration, transitionDuration, themeMode ->
+    ) { activeState, settingsState, themeMode ->
         State.Active(
             activeState = activeState,
-            repCount = repCount,
-            activeSegmentLength = activityDuration,
-            transitionLength = transitionDuration,
-            themeMode = themeMode
+            repCount = settingsState.repCount,
+            activeSegmentLength = settingsState.activityDuration,
+            transitionLength = settingsState.transitionDuration,
+            transitionPings = settingsState.transitionPingsCount,
+            activePings = settingsState.activePingsCount,
+            themeMode = themeMode,
         )
     }.stateIn(
         viewModelScope,
@@ -60,7 +84,15 @@ class ActiveTimerVM @Inject constructor(
                 activeStateFlow.compareAndSet(activeStateFlow.value, newActiveState)
 
                 command?.let {
-                    eventScheduler.planFutureActions(this, it, this@ActiveTimerVM)
+                    eventScheduler.planFutureActions(
+                        coroutineScope = this,
+                        eventsConfiguration = EventsConfiguration(
+                            currentState.activePings,
+                            currentState.transitionPings
+                        ),
+                        executedCommand = it,
+                        eventConsumer = this@ActiveTimerVM
+                    )
                 }
             }
 
@@ -138,10 +170,12 @@ class ActiveTimerVM @Inject constructor(
         object Loading : State()
         data class Active(
             val activeState: ActiveState = ActiveState(),
-            val repCount: Int = -1,
-            val activeSegmentLength: Int = 30,
-            val transitionLength: Int = 5,
-            val themeMode: ThemeMode = ThemeMode.System,
+            val repCount: Int,
+            val activeSegmentLength: Int,
+            val transitionLength: Int,
+            val activePings: Int,
+            val transitionPings: Int,
+            val themeMode: ThemeMode,
         ) : State()
     }
 

@@ -20,7 +20,6 @@ enum class ThemeMode {
     }
 }
 
-
 @Singleton
 class Settings @Inject constructor(@ApplicationContext private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -69,6 +68,28 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
+    val transitionPingsCount: Flow<Int> = context.dataStore.data
+        .map {
+            it[TransitionPingsPref] ?: 3
+        }
+
+    suspend fun setTransitionPingsCount(count: Int) {
+        context.dataStore.edit {
+            it[TransitionPingsPref] = count
+        }
+    }
+
+    val activePingsCount: Flow<Int> = context.dataStore.data
+        .map {
+            it[ActivePingsPref] ?: 5
+        }
+
+    suspend fun setActivePingsCount(count: Int) {
+        context.dataStore.edit {
+            it[ActivePingsPref] = count
+        }
+    }
+
     private fun ThemeMode.toInt() = when (this) {
         ThemeMode.Unset -> 0
         ThemeMode.System -> 1
@@ -88,5 +109,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         val ActivityDurationPref = intPreferencesKey("ActivityDuration")
         val TransitionDurationPref = intPreferencesKey("TransitionDuration")
         val RepCountPref = intPreferencesKey("RepCountDuration")
+        val TransitionPingsPref = intPreferencesKey("TransitionPings")
+        val ActivePingsPref = intPreferencesKey("ActivePings")
     }
 }

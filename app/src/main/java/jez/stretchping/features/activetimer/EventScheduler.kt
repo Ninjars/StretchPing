@@ -12,6 +12,11 @@ import java.lang.Integer.min
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
+data class EventsConfiguration(
+    val activePings: Int,
+    val transitionPings: Int,
+)
+
 class EventScheduler @Inject constructor(
     private val soundManager: SoundManager,
 ) {
@@ -19,6 +24,7 @@ class EventScheduler @Inject constructor(
 
     suspend fun planFutureActions(
         coroutineScope: CoroutineScope,
+        eventsConfiguration: EventsConfiguration,
         executedCommand: ActiveTimerVM.Command,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
@@ -31,6 +37,7 @@ class EventScheduler @Inject constructor(
             is ActiveTimerVM.Command.ResumeSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
+                    eventsConfiguration,
                     executedCommand.pausedSegment.remainingDurationMillis,
                     executedCommand.pausedSegment.mode,
                     eventConsumer,
@@ -38,6 +45,7 @@ class EventScheduler @Inject constructor(
             is ActiveTimerVM.Command.StartSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
+                    eventsConfiguration,
                     executedCommand.segmentSpec.durationSeconds * 1000L,
                     executedCommand.segmentSpec.mode,
                     eventConsumer,
@@ -52,6 +60,7 @@ class EventScheduler @Inject constructor(
 
     private suspend fun scheduleNextSegmentEvents(
         coroutineScope: CoroutineScope,
+        eventsConfiguration: EventsConfiguration,
         durationMillis: Long,
         segmentMode: Mode,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
@@ -71,9 +80,12 @@ class EventScheduler @Inject constructor(
         enqueueCountdownPings(
             coroutineScope = coroutineScope,
             durationMillis = durationMillis,
-            pingCount = 5,
+            pingCount = when (segmentMode) {
+                Mode.Stretch -> eventsConfiguration.activePings
+                Mode.Transition -> eventsConfiguration.transitionPings
+            },
             pingIntervalMillis = when (segmentMode) {
-                Mode.Stretch -> 2
+                Mode.Stretch -> 1
                 Mode.Transition -> 1
             } * 1000L,
         )

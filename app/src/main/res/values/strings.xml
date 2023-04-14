@@ -15,6 +15,7 @@
     <string name="active_ping_title_count">Stretch Count-Out Pings</string>
     <string name="transition_ping_title_count">Break Count-Out Pings</string>
     <string name="rep_count">Times to Repeat</string>
+    <string name="settings">Settings</string>
 
     <string name="theme_title">Theme</string>
     <string name="theme_system">System</string>

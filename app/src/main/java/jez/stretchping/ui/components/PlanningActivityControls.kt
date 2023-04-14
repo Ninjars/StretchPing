@@ -1,14 +1,30 @@
 package jez.stretchping.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,8 +35,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -109,36 +127,83 @@ fun PlanningActivityControls(
             eventHandler(ActiveTimerVM.Event.UpdateRepCount(it))
         }
 
-        // Edit number of pings during active sections
-        IntSliderControl(
+        AdvancedSettings(
+            state = state,
+            eventHandler = eventHandler,
             modifier = Modifier.fillMaxWidth(),
-            title = stringResource(R.string.active_ping_title_count),
-            value = state.activePings,
-            onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateActivePings(it)) },
-            maxValue = 10.coerceAtMost(state.activeDuration.toIntOrNull() ?: Int.MAX_VALUE),
         )
+    }
+}
 
-        // Edit number of pings during transition sections
-        IntSliderControl(
-            modifier = Modifier.fillMaxWidth(),
-            title = stringResource(R.string.transition_ping_title_count),
-            value = state.transitionPings,
-            onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateTransitionPings(it)) },
-            maxValue = 10.coerceAtMost(state.transitionDuration.toIntOrNull() ?: Int.MAX_VALUE),
-        )
-
-        // Theme Selection
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+@Composable
+private fun AdvancedSettings(
+    state: EditTimerState,
+    eventHandler: (ActiveTimerVM.Event) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var showSettings by remember { mutableStateOf(false) }
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        AnimatedVisibility(
+            modifier = Modifier.clipToBounds(),
+            visible = showSettings,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
         ) {
-            Text(text = stringResource(id = R.string.theme_title))
-            TriStateToggle(
-                states = state.themeState.optionStringResources.map { stringResource(id = it) },
-                selectedIndex = state.themeState.selectedIndex,
-            ) {
-                eventHandler(ActiveTimerVM.Event.UpdateTheme(it))
+            Column() {
+                // Edit number of pings during active sections
+                IntSliderControl(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.active_ping_title_count),
+                    value = state.activePings,
+                    onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateActivePings(it)) },
+                    maxValue = 10.coerceAtMost(state.activeDuration.toIntOrNull() ?: Int.MAX_VALUE),
+                )
+
+                // Edit number of pings during transition sections
+                IntSliderControl(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.transition_ping_title_count),
+                    value = state.transitionPings,
+                    onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateTransitionPings(it)) },
+                    maxValue = 10.coerceAtMost(
+                        state.transitionDuration.toIntOrNull() ?: Int.MAX_VALUE
+                    ),
+                )
+
+                // Theme Selection
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(text = stringResource(id = R.string.theme_title))
+                    TriStateToggle(
+                        states = state.themeState.optionStringResources.map { stringResource(id = it) },
+                        selectedIndex = state.themeState.selectedIndex,
+                    ) {
+                        eventHandler(ActiveTimerVM.Event.UpdateTheme(it))
+                    }
+                }
             }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { showSettings = !showSettings },
+            shape = CircleShape,
+            contentPadding = PaddingValues(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary,
+            ),
+            modifier = Modifier.size(56.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Settings,
+                contentDescription = stringResource(R.string.settings),
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }

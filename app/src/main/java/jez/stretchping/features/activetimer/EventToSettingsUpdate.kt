@@ -17,6 +17,8 @@ internal object EventToSettingsUpdate : (Event) -> SettingsCommand? {
             is Event.UpdateTransitionDuration -> event.duration.toFlooredInt()?.let {
                 SettingsCommand.SetTransitionDuration(it)
             }
+            is Event.UpdateActivePings -> SettingsCommand.SetActivePings(event.count)
+            is Event.UpdateTransitionPings -> SettingsCommand.SetTransitionPings(event.count)
             is Event.OnSectionCompleted,
             is Event.Pause,
             is Event.Reset,

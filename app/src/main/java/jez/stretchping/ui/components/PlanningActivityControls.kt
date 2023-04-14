@@ -45,12 +45,13 @@ fun PlanningActivityControls(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth(0.9f),
+            .fillMaxWidth(0.8f),
     ) {
         val focusManager = LocalFocusManager.current
 
         // Edit Stretch Duration
         SelectOnFocusTextField(
+            modifier = Modifier.fillMaxWidth(),
             text = state.activeDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -71,6 +72,7 @@ fun PlanningActivityControls(
 
         // Edit Transition Duration
         SelectOnFocusTextField(
+            modifier = Modifier.fillMaxWidth(),
             text = state.transitionDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -90,9 +92,9 @@ fun PlanningActivityControls(
         }
 
         // Edit Rep Count
-        val repCount = state.repCount
         SelectOnFocusTextField(
-            text = repCount,
+            modifier = Modifier.fillMaxWidth(),
+            text = state.repCount,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
             ),
@@ -106,6 +108,24 @@ fun PlanningActivityControls(
         ) {
             eventHandler(ActiveTimerVM.Event.UpdateRepCount(it))
         }
+
+        // Edit number of pings during active sections
+        IntSliderControl(
+            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.active_ping_title_count),
+            value = state.activePings,
+            onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateActivePings(it)) },
+            maxValue = 10.coerceAtMost(state.activeDuration.toIntOrNull() ?: Int.MAX_VALUE),
+        )
+
+        // Edit number of pings during transition sections
+        IntSliderControl(
+            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.transition_ping_title_count),
+            value = state.transitionPings,
+            onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateTransitionPings(it)) },
+            maxValue = 10.coerceAtMost(state.transitionDuration.toIntOrNull() ?: Int.MAX_VALUE),
+        )
 
         // Theme Selection
         Row(
@@ -127,6 +147,7 @@ fun PlanningActivityControls(
 @Composable
 private fun SelectOnFocusTextField(
     text: String,
+    modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
@@ -165,6 +186,7 @@ private fun SelectOnFocusTextField(
     }
 
     TextField(
+        modifier = modifier,
         interactionSource = interactionSource,
         value = fieldState.value,
         label = label,

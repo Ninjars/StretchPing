@@ -12,6 +12,8 @@
 
     <string name="active_duration">Stretch Seconds</string>
     <string name="transition_duration">Break Seconds</string>
+    <string name="active_ping_title_count">Stretch Count-Out Pings</string>
+    <string name="transition_ping_title_count">Break Count-Out Pings</string>
     <string name="rep_count">Times to Repeat</string>
 
     <string name="theme_title">Theme</string>

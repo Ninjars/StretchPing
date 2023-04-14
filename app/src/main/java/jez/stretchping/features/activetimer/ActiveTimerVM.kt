@@ -113,6 +113,10 @@ class ActiveTimerVM @Inject constructor(
                 settings.setTransitionDuration(command.duration)
             is SettingsCommand.SetRepCount ->
                 settings.setRepCount(command.count)
+            is SettingsCommand.SetActivePings ->
+                settings.setActivePingsCount(command.count)
+            is SettingsCommand.SetTransitionPings ->
+                settings.setTransitionPingsCount(command.count)
         }
     }
 
@@ -133,6 +137,8 @@ class ActiveTimerVM @Inject constructor(
         object OnSectionCompleted : Event()
         data class UpdateActiveDuration(val duration: String) : Event()
         data class UpdateTransitionDuration(val duration: String) : Event()
+        data class UpdateActivePings(val count: Int) : Event()
+        data class UpdateTransitionPings(val count: Int) : Event()
         data class UpdateRepCount(val count: String) : Event()
         data class UpdateTheme(val themeModeIndex: Int) : Event()
     }
@@ -142,6 +148,8 @@ class ActiveTimerVM @Inject constructor(
         data class SetActivityDuration(val duration: Int) : SettingsCommand()
         data class SetTransitionDuration(val duration: Int) : SettingsCommand()
         data class SetRepCount(val count: Int) : SettingsCommand()
+        data class SetActivePings(val count: Int) : SettingsCommand()
+        data class SetTransitionPings(val count: Int) : SettingsCommand()
     }
 
     sealed class Command {

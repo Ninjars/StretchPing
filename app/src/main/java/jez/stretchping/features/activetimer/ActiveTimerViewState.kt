@@ -24,6 +24,8 @@ data class EditTimerState(
     val transitionDuration: String,
     val repCount: String,
     val themeState: ThemeState,
+    val activePings: Int,
+    val transitionPings: Int,
     val canStart: Boolean,
 ) {
     data class ThemeState(
@@ -85,6 +87,8 @@ internal object StateToViewState :
                     repCount < 1 -> "∞"
                     else -> repCount.toString()
                 },
+                activePings = activePings,
+                transitionPings = transitionPings,
                 themeState = createThemeState(themeMode),
                 canStart = activeSegmentLength > 0 && transitionLength > 0 && repCount > Int.MIN_VALUE,
             )

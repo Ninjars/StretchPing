@@ -10,15 +10,17 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
@@ -63,7 +65,8 @@ fun PlanningActivityControls(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth(0.8f),
+            .fillMaxWidth(0.8f)
+            .verticalScroll(rememberScrollState()),
     ) {
         val focusManager = LocalFocusManager.current
 
@@ -152,7 +155,7 @@ private fun AdvancedSettings(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut(),
         ) {
-            Column() {
+            Column {
                 // Edit number of pings during active sections
                 IntSliderControl(
                     modifier = Modifier.fillMaxWidth(),
@@ -174,17 +177,18 @@ private fun AdvancedSettings(
                 )
 
                 // Theme Selection
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                Text(
+                    text = stringResource(R.string.theme_title),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                TriStateToggle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    states = state.themeState.optionStringResources.map { stringResource(id = it) },
+                    selectedIndex = state.themeState.selectedIndex,
                 ) {
-                    Text(text = stringResource(id = R.string.theme_title))
-                    TriStateToggle(
-                        states = state.themeState.optionStringResources.map { stringResource(id = it) },
-                        selectedIndex = state.themeState.selectedIndex,
-                    ) {
-                        eventHandler(ActiveTimerVM.Event.UpdateTheme(it))
-                    }
+                    eventHandler(ActiveTimerVM.Event.UpdateTheme(it))
                 }
             }
         }

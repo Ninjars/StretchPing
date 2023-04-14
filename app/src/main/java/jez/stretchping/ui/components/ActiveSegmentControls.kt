@@ -42,7 +42,7 @@ fun ActiveSegmentControls(
     val timerState = state.activeTimer
     Row(
         modifier = modifier
-            .padding(48.dp),
+            .padding(horizontal = 48.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {

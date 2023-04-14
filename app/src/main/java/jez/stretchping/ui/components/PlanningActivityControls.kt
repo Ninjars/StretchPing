@@ -63,15 +63,15 @@ fun PlanningActivityControls(
                 focusManager.moveFocus(FocusDirection.Next)
             },
             label = {
-                Text(stringResource(id = R.string.stretch_duration))
+                Text(stringResource(id = R.string.active_duration))
             },
         ) {
-            eventHandler(ActiveTimerVM.Event.UpdateStretchDuration(it))
+            eventHandler(ActiveTimerVM.Event.UpdateActiveDuration(it))
         }
 
         // Edit Transition Duration
         SelectOnFocusTextField(
-            text = state.breakDuration,
+            text = state.transitionDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
             ),
@@ -86,7 +86,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.transition_duration))
             },
         ) {
-            eventHandler(ActiveTimerVM.Event.UpdateBreakDuration(it))
+            eventHandler(ActiveTimerVM.Event.UpdateTransitionDuration(it))
         }
 
         // Edit Rep Count

@@ -131,8 +131,8 @@ class ActiveTimerVM @Inject constructor(
         object Pause : Event()
         object Reset : Event()
         object OnSectionCompleted : Event()
-        data class UpdateStretchDuration(val duration: String) : Event()
-        data class UpdateBreakDuration(val duration: String) : Event()
+        data class UpdateActiveDuration(val duration: String) : Event()
+        data class UpdateTransitionDuration(val duration: String) : Event()
         data class UpdateRepCount(val count: String) : Event()
         data class UpdateTheme(val themeModeIndex: Int) : Event()
     }

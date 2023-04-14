@@ -11,10 +11,10 @@ internal object EventToSettingsUpdate : (Event) -> SettingsCommand? {
             is Event.UpdateRepCount -> event.count.toFlooredInt()?.let {
                 SettingsCommand.SetRepCount(it)
             }
-            is Event.UpdateStretchDuration -> event.duration.toFlooredInt()?.let {
+            is Event.UpdateActiveDuration -> event.duration.toFlooredInt()?.let {
                 SettingsCommand.SetActivityDuration(it)
             }
-            is Event.UpdateBreakDuration -> event.duration.toFlooredInt()?.let {
+            is Event.UpdateTransitionDuration -> event.duration.toFlooredInt()?.let {
                 SettingsCommand.SetTransitionDuration(it)
             }
             is Event.OnSectionCompleted,

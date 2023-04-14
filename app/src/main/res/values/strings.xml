@@ -7,10 +7,10 @@
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>
 
-    <string name="mode_stretch">Stretch</string>
+    <string name="mode_active">Stretch</string>
     <string name="mode_transition">Break</string>
 
-    <string name="stretch_duration">Stretch Seconds</string>
+    <string name="active_duration">Stretch Seconds</string>
     <string name="transition_duration">Break Seconds</string>
     <string name="rep_count">Times to Repeat</string>
 

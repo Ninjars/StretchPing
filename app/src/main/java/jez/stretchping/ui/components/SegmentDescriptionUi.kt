@@ -67,7 +67,7 @@ fun SegmentDescriptionUi(
 @StringRes
 private fun ActiveTimerState.Mode.toStringRes(): Int =
     when (this) {
-        ActiveTimerState.Mode.Stretch -> R.string.mode_stretch
+        ActiveTimerState.Mode.Stretch -> R.string.mode_active
         ActiveTimerState.Mode.Transition -> R.string.mode_transition
     }
 

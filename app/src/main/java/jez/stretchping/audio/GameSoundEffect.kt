@@ -6,14 +6,12 @@ import android.media.AudioAttributes.USAGE_GAME
 import android.media.SoundPool
 import jez.stretchping.R
 import jez.stretchping.audio.GameSoundEffect.ActiveSection
-import jez.stretchping.audio.GameSoundEffect.Back
 import jez.stretchping.audio.GameSoundEffect.CountdownBeep
 import jez.stretchping.audio.GameSoundEffect.Stop
 import jez.stretchping.audio.GameSoundEffect.TransitionSection
 import jez.stretchping.audio.GameSoundEffect.values
 
 enum class GameSoundEffect {
-    Back,
     Stop,
     ActiveSection,
     TransitionSection,
@@ -33,9 +31,9 @@ class GameSoundEffectPlayer {
         soundIds = values()
             .map {
                 when (it) {
-                    Back, Stop -> R.raw.puzzle_success_xylophone_2_two_note_decline_low_wet_stereo
-                    ActiveSection -> R.raw.puzzle_success_xylophone_1_three_note_wet_stereo
-                    TransitionSection -> R.raw.puzzle_success_xylophone_1_two_note_fast_wet_stereo
+                    Stop -> R.raw.puzzle_success_xylophone_1_two_note_fast_wet_stereo
+                    ActiveSection -> R.raw.puzzle_success_xylophone_2_two_note_decline_bright_wet_stereo
+                    TransitionSection -> R.raw.puzzle_success_xylophone_2_two_note_climb_bright_wet_stereo
                     CountdownBeep -> R.raw.puzzle_success_xylophone_2_one_note_wet_stereo
                 }
             }.map {

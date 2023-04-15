@@ -97,7 +97,7 @@ class EventScheduler @Inject constructor(
         pingCount: Int,
         pingIntervalMillis: Long,
     ) {
-        (1..(min(pingCount, (durationMillis / pingIntervalMillis).toInt()))).forEach {
+        (1 until (min(pingCount, (durationMillis / pingIntervalMillis).toInt()))).forEach {
             jobs.add(
                 coroutineScope.launch {
                     delay((durationMillis - it * pingIntervalMillis).milliseconds)

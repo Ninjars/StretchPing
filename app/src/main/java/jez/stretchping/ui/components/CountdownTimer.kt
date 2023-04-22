@@ -19,33 +19,32 @@ import jez.stretchping.utils.KeepScreenOn
 @Composable
 fun CountdownTimer(
     startAtFraction: Float,
-    durationMillis: Long,
+    endTimeMillis: Long,
     pausedAtFraction: Float?,
     modifier: Modifier = Modifier,
 ) {
     if (pausedAtFraction != null) {
         ArcProgressBar(progress = pausedAtFraction, modifier = modifier)
     } else {
-        CountdownTimer(startAtFraction, durationMillis, modifier)
+        CountdownTimer(startAtFraction, endTimeMillis, modifier)
     }
 }
 
 @Composable
 private fun CountdownTimer(
     startAtFraction: Float,
-    durationMillis: Long,
+    endTimeMillis: Long,
     modifier: Modifier = Modifier,
 ) {
     KeepScreenOn()
-    val start = remember(startAtFraction, durationMillis) {
+    val start = remember(startAtFraction, endTimeMillis) {
         Animatable(startAtFraction)
     }
     LaunchedEffect(start) {
         start.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                // the subtraction here is a hack to deal with a small difference in scheduler from animation
-                durationMillis = durationMillis.toInt() - 100,
+                durationMillis = (endTimeMillis - System.currentTimeMillis()).toInt(),
                 easing = LinearEasing,
             ),
         )

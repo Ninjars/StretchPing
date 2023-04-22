@@ -43,7 +43,7 @@ data class Duration(
 
 data class ActiveTimerState(
     val startAtFraction: Float,
-    val durationMillis: Long,
+    val endTimeMillis: Long,
     val pausedAtFraction: Float?,
     val mode: Mode,
 ) {
@@ -115,7 +115,7 @@ internal object StateToViewState :
     private fun ActiveTimerVM.ActiveState.ActiveSegment.toState(): ActiveTimerState =
         ActiveTimerState(
             startAtFraction = startedAtFraction,
-            durationMillis = remainingDurationMillis,
+            endTimeMillis = endAtTime,
             pausedAtFraction = pausedAtFraction,
             mode = mode.map()
         )

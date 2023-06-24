@@ -198,8 +198,8 @@ private fun AdvancedSettings(
             shape = CircleShape,
             contentPadding = PaddingValues(8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
             ),
             modifier = Modifier.size(56.dp),
         ) {

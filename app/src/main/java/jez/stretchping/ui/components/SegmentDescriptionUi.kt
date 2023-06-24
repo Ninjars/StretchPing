@@ -9,9 +9,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,6 +29,7 @@ import jez.stretchping.features.activetimer.SegmentDescription
 fun SegmentDescriptionUi(
     state: SegmentDescription,
 ) {
+    val textBackground = MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -50,6 +54,12 @@ fun SegmentDescriptionUi(
                             append("s")
                         }
                     },
+                    modifier = Modifier.drawBehind {
+                        drawCircle(
+                            color = textBackground,
+                            radius = this.size.maxDimension / 2f + 8
+                        )
+                    }
                 )
             }
         }

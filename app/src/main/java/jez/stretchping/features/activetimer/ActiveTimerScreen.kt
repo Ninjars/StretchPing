@@ -16,12 +16,15 @@ import androidx.compose.animation.with
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,6 +48,7 @@ import jez.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerState.Mode
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.ui.components.ActiveSegmentControls
+import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer
 import jez.stretchping.ui.components.PlanningActivityControls
 import jez.stretchping.ui.components.SegmentDescriptionUi
@@ -209,7 +213,7 @@ private fun MainContent(
         }
     ) { isRunning ->
         if (isRunning) {
-            Box(
+            BoxWithConstraints(
                 contentAlignment = Alignment.Center,
             ) {
                 state.activeTimer?.run {
@@ -217,8 +221,21 @@ private fun MainContent(
                         startAtFraction = startAtFraction,
                         endTimeMillis = endTimeMillis,
                         pausedAtFraction = pausedAtFraction,
-                        modifier = Modifier.fillMaxWidth(0.9f),
-                    )
+                    ) { progress ->
+                        if (maxWidth > maxHeight) {
+                            LinearProgressIndicator(
+                                progress = progress,
+                                modifier = Modifier.fillMaxWidth(0.9f).height(16.dp),
+                                color = MaterialTheme.colorScheme.tertiary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            )
+                        } else {
+                            ArcProgressBar(
+                                progress = progress,
+                                modifier = Modifier.fillMaxWidth(0.9f)
+                            )
+                        }
+                    }
                 }
 
                 state.segmentDescription?.let {

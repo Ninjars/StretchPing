@@ -3,17 +3,9 @@ package jez.stretchping.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.KeepScreenOn
 
 @Composable
@@ -21,12 +13,12 @@ fun CountdownTimer(
     startAtFraction: Float,
     endTimeMillis: Long,
     pausedAtFraction: Float?,
-    modifier: Modifier = Modifier,
+    content: @Composable (Float) -> Unit,
 ) {
     if (pausedAtFraction != null) {
-        ArcProgressBar(progress = pausedAtFraction, modifier = modifier)
+        content(pausedAtFraction)
     } else {
-        CountdownTimer(startAtFraction, endTimeMillis, modifier)
+        CountdownTimer(startAtFraction, endTimeMillis, content)
     }
 }
 
@@ -34,7 +26,7 @@ fun CountdownTimer(
 private fun CountdownTimer(
     startAtFraction: Float,
     endTimeMillis: Long,
-    modifier: Modifier = Modifier,
+    content: @Composable (Float) -> Unit,
 ) {
     KeepScreenOn()
     val start = remember(startAtFraction, endTimeMillis) {
@@ -49,22 +41,5 @@ private fun CountdownTimer(
             ),
         )
     }
-    ArcProgressBar(progress = start.value, modifier = modifier)
-}
-
-@Preview
-@Composable
-private fun ArcProgressBarPreview() {
-    StretchPingTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                ArcProgressBar(0.33f)
-                ArcProgressBar(0.66f)
-                ArcProgressBar(1f)
-            }
-        }
-    }
+    content(start.value)
 }

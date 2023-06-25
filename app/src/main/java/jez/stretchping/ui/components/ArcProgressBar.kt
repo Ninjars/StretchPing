@@ -28,7 +28,7 @@ fun ArcProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
 ) {
-    val arcForeground = MaterialTheme.colorScheme.tertiary
+    val arcForeground = MaterialTheme.colorScheme.secondary
     val arcBackground = MaterialTheme.colorScheme.surfaceVariant
 
     Canvas(

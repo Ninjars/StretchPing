@@ -226,7 +226,7 @@ private fun MainContent(
                             LinearProgressIndicator(
                                 progress = progress,
                                 modifier = Modifier.fillMaxWidth(0.9f).height(16.dp),
-                                color = MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.secondary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         } else {

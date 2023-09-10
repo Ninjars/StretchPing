@@ -28,6 +28,7 @@ class EventScheduler @Inject constructor(
         executedCommand: ActiveTimerVM.Command,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
+        soundManager.playSilence()
         when (executedCommand) {
             is ActiveTimerVM.Command.ResetToStart ->
                 clearAllJobs()

@@ -1,11 +1,10 @@
 package jez.stretchping.ui.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 /**
  * Adapted from https://betterprogramming.pub/tristate-toggle-in-jetpack-compose-5b080e537c64
  */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun TriStateToggle(
     states: List<String>,
@@ -46,11 +44,12 @@ fun TriStateToggle(
         ) {
             states.forEachIndexed { index, text ->
                 AnimatedContent(
+                    label = "tri-state toggle",
                     targetState = index == selectedIndex,
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(250, delayMillis = 45)) with
+                        fadeIn(animationSpec = tween(250, delayMillis = 45)) togetherWith
                                 fadeOut(animationSpec = tween(90))
-                    }
+                    },
                 ) { isSelected ->
                     val textColor = if (isSelected) {
                         MaterialTheme.colorScheme.onSecondary

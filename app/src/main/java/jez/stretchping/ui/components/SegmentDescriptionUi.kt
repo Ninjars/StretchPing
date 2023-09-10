@@ -2,11 +2,10 @@ package jez.stretchping.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
@@ -81,16 +80,16 @@ private fun ActiveTimerState.Mode.toStringRes(): Int =
         ActiveTimerState.Mode.Transition -> R.string.mode_transition
     }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun AnimatedText(
     text: String,
     content: @Composable (String) -> Unit
 ) {
     AnimatedContent(
+        label = "animated text",
         targetState = text,
         transitionSpec = {
-            fadeIn(animationSpec = tween(250, delayMillis = 45)) with
+            fadeIn(animationSpec = tween(250, delayMillis = 45)) togetherWith
                     fadeOut(animationSpec = tween(90))
         }
     ) {

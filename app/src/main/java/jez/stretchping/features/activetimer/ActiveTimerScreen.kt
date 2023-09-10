@@ -12,7 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -205,12 +205,13 @@ private fun MainContent(
     if (state.isLoading) return
 
     AnimatedContent(
+        label = "main content",
         contentAlignment = Alignment.Center,
         targetState = state.activeTimer != null,
         transitionSpec = {
-            fadeIn(animationSpec = tween(250, delayMillis = 45)) with
+            fadeIn(animationSpec = tween(250, delayMillis = 45)) togetherWith
                     fadeOut(animationSpec = tween(90))
-        }
+        },
     ) { isRunning ->
         if (isRunning) {
             BoxWithConstraints(

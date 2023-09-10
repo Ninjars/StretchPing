@@ -268,9 +268,11 @@ private fun SelectOnFocusTextField(
         keyboardActions = keyboardActions,
         singleLine = true,
         colors = with(MaterialTheme.colorScheme) {
-            TextFieldDefaults.textFieldColors(
-                containerColor = secondaryContainer,
-                textColor = onSecondaryContainer,
+            TextFieldDefaults.colors(
+                focusedContainerColor = secondaryContainer,
+                unfocusedContainerColor = secondaryContainer,
+                focusedTextColor = onSecondaryContainer,
+                unfocusedTextColor = onSecondaryContainer,
             )
         },
     )

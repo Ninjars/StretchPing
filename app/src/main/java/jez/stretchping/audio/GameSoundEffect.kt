@@ -12,6 +12,7 @@ enum class GameSoundEffect(val resourceId: Int) {
     ActiveSection(R.raw.puzzle_success_xylophone_2_two_note_decline_bright_wet_stereo),
     TransitionSection(R.raw.puzzle_success_xylophone_2_two_note_climb_bright_wet_stereo),
     CountdownBeep(R.raw.puzzle_success_xylophone_2_one_note_wet_stereo),
+    Completed(R.raw.special_interface_8),
 }
 
 class GameSoundEffectPlayer {

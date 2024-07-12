@@ -24,7 +24,7 @@ internal object EventToCommand : (State.Active, Event) -> Command? {
                     else -> start(state)
                 }
             is Event.OnSectionCompleted -> if (state.isAtEnd()) {
-                Command.ResetToStart
+                Command.SequenceCompleted
             } else {
                 start(state)
             }

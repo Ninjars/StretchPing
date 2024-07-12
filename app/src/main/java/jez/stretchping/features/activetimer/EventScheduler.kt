@@ -32,6 +32,10 @@ class EventScheduler @Inject constructor(
         when (executedCommand) {
             is ActiveTimerVM.Command.ResetToStart ->
                 clearAllJobs()
+            is ActiveTimerVM.Command.SequenceCompleted -> {
+                clearAllJobs()
+                soundManager.playSound(GameSoundEffect.Completed)
+            }
             is ActiveTimerVM.Command.PauseSegment -> {
                 clearAllJobs()
                 soundManager.playSound(GameSoundEffect.Stop)

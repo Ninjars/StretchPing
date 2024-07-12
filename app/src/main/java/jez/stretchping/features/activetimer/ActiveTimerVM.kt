@@ -172,6 +172,7 @@ class ActiveTimerVM @Inject constructor(
         ) : Command()
 
         object ResetToStart : Command()
+        object SequenceCompleted : Command()
     }
 
     sealed class State {

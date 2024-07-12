@@ -11,6 +11,7 @@ internal object ActiveTimerStateUpdater : (ActiveState, Command?) -> ActiveState
             is Command.PauseSegment -> pauseActiveSegment(state, command)
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
+            is Command.SequenceCompleted,
             is Command.ResetToStart -> resetToStart(state)
         }
 

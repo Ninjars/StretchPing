@@ -1,5 +1,6 @@
 package jez.stretchping.features.activetimer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -204,6 +205,10 @@ private fun MainContent(
     val state = stateProvider()
     if (state.isLoading) return
 
+    BackHandler(enabled = state.activeTimer != null) {
+        eventHandler(Event.Reset)
+    }
+
     AnimatedContent(
         label = "main content",
         contentAlignment = Alignment.Center,
@@ -226,7 +231,9 @@ private fun MainContent(
                         if (maxWidth > maxHeight) {
                             LinearProgressIndicator(
                                 progress = progress,
-                                modifier = Modifier.fillMaxWidth(0.9f).height(16.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .height(16.dp),
                                 color = MaterialTheme.colorScheme.secondary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             )

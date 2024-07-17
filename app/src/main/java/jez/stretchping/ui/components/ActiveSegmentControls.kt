@@ -40,6 +40,7 @@ fun ActiveSegmentControls(
 ) {
     val state = stateProvider()
     val timerState = state.activeTimer
+
     Row(
         modifier = modifier
             .padding(horizontal = 48.dp, vertical = 8.dp),

@@ -8,8 +8,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,8 +33,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setThemeMode(mode: ThemeMode) {
-        context.dataStore.edit {
-            it[ThemePref] = mode.toInt()
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[ThemePref] = mode.toInt()
+            }
         }
     }
 
@@ -42,8 +46,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setActivityDuration(durationSeconds: Int) {
-        context.dataStore.edit {
-            it[ActivityDurationPref] = durationSeconds
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[ActivityDurationPref] = durationSeconds
+            }
         }
     }
 
@@ -53,8 +59,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setTransitionDuration(durationSeconds: Int) {
-        context.dataStore.edit {
-            it[TransitionDurationPref] = durationSeconds
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[TransitionDurationPref] = durationSeconds
+            }
         }
     }
 
@@ -64,8 +72,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setRepCount(count: Int) {
-        context.dataStore.edit {
-            it[RepCountPref] = count
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[RepCountPref] = count
+            }
         }
     }
 
@@ -75,8 +85,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setTransitionPingsCount(count: Int) {
-        context.dataStore.edit {
-            it[TransitionPingsPref] = count
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[TransitionPingsPref] = count
+            }
         }
     }
 
@@ -86,8 +98,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setActivePingsCount(count: Int) {
-        context.dataStore.edit {
-            it[ActivePingsPref] = count
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[ActivePingsPref] = count
+            }
         }
     }
 
@@ -97,8 +111,10 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
 
     suspend fun setPauseWithLifecycle(shouldPause: Boolean) {
-        context.dataStore.edit {
-            it[LifecyclePausePref] = shouldPause
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[LifecyclePausePref] = shouldPause
+            }
         }
     }
 

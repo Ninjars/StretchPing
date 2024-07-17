@@ -27,6 +27,7 @@ data class EditTimerState(
     val activePings: Int,
     val transitionPings: Int,
     val canStart: Boolean,
+    val autoPause: Boolean,
 ) {
     data class ThemeState(
         val optionStringResources: List<Int>,
@@ -91,6 +92,7 @@ internal object StateToViewState :
                 transitionPings = transitionPings,
                 themeState = createThemeState(themeMode),
                 canStart = activeSegmentLength > 0 && transitionLength > 0 && repCount > Int.MIN_VALUE,
+                autoPause = pauseWithLifecycle,
             )
         } else {
             null

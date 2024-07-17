@@ -34,6 +34,7 @@ internal object EventToCommand : (State.Active, Event) -> Command? {
             is Event.UpdateRepCount,
             is Event.UpdateActivePings,
             is Event.UpdateTransitionPings,
+            is Event.AutoPause,
             is Event.UpdateTheme -> null
         }
     }

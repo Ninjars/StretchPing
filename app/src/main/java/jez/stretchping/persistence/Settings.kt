@@ -3,6 +3,7 @@ package jez.stretchping.persistence
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -90,6 +91,17 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
+    val pauseWithLifecycle: Flow<Boolean> = context.dataStore.data
+        .map {
+            it[LifecyclePausePref] ?: false
+        }
+
+    suspend fun setPauseWithLifecycle(shouldPause: Boolean) {
+        context.dataStore.edit {
+            it[LifecyclePausePref] = shouldPause
+        }
+    }
+
     private fun ThemeMode.toInt() = when (this) {
         ThemeMode.Unset -> 0
         ThemeMode.System -> 1
@@ -111,5 +123,6 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         val RepCountPref = intPreferencesKey("RepCountDuration")
         val TransitionPingsPref = intPreferencesKey("TransitionPings")
         val ActivePingsPref = intPreferencesKey("ActivePings")
+        val LifecyclePausePref = booleanPreferencesKey("LifecyclePause")
     }
 }

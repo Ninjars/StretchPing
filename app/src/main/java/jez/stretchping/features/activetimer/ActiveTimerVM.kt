@@ -50,8 +50,9 @@ class ActiveTimerVM @Inject constructor(
     private val combinedState = combine(
         activeStateFlow,
         settingsState,
-        settings.themeMode
-    ) { activeState, settingsState, themeMode ->
+        settings.themeMode,
+        settings.pauseWithLifecycle,
+    ) { activeState, settingsState, themeMode, pauseWithLifecycle ->
         State.Active(
             activeState = activeState,
             repCount = settingsState.repCount,
@@ -59,6 +60,7 @@ class ActiveTimerVM @Inject constructor(
             transitionLength = settingsState.transitionDuration,
             transitionPings = settingsState.transitionPingsCount,
             activePings = settingsState.activePingsCount,
+            pauseWithLifecycle = pauseWithLifecycle,
             themeMode = themeMode,
         )
     }.stateIn(
@@ -107,21 +109,33 @@ class ActiveTimerVM @Inject constructor(
         when (command) {
             is SettingsCommand.SetThemeMode ->
                 settings.setThemeMode(command.mode)
+
             is SettingsCommand.SetActivityDuration ->
                 settings.setActivityDuration(command.duration)
+
             is SettingsCommand.SetTransitionDuration ->
                 settings.setTransitionDuration(command.duration)
+
             is SettingsCommand.SetRepCount ->
                 settings.setRepCount(command.count)
+
             is SettingsCommand.SetActivePings ->
                 settings.setActivePingsCount(command.count)
+
             is SettingsCommand.SetTransitionPings ->
                 settings.setTransitionPingsCount(command.count)
+
+            is SettingsCommand.SetAutoPause ->
+                settings.setPauseWithLifecycle(command.enabled)
         }
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        accept(Event.Pause)
+        with(combinedState.value) {
+            if (this is State.Active && this.pauseWithLifecycle) {
+                accept(Event.Pause)
+            }
+        }
         super.onPause(owner)
     }
 
@@ -141,6 +155,7 @@ class ActiveTimerVM @Inject constructor(
         data class UpdateTransitionPings(val count: Int) : Event()
         data class UpdateRepCount(val count: String) : Event()
         data class UpdateTheme(val themeModeIndex: Int) : Event()
+        data class AutoPause(val enabled: Boolean) : Event()
     }
 
     sealed class SettingsCommand {
@@ -150,6 +165,7 @@ class ActiveTimerVM @Inject constructor(
         data class SetRepCount(val count: Int) : SettingsCommand()
         data class SetActivePings(val count: Int) : SettingsCommand()
         data class SetTransitionPings(val count: Int) : SettingsCommand()
+        data class SetAutoPause(val enabled: Boolean) : SettingsCommand()
     }
 
     sealed class Command {
@@ -184,6 +200,7 @@ class ActiveTimerVM @Inject constructor(
             val transitionLength: Int,
             val activePings: Int,
             val transitionPings: Int,
+            val pauseWithLifecycle: Boolean,
             val themeMode: ThemeMode,
         ) : State()
     }

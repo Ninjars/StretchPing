@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -52,14 +54,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jez.stretchping.R
-import jez.stretchping.features.activetimer.ActiveTimerVM
+import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.EditTimerState
 
 
 @Composable
 fun PlanningActivityControls(
     state: EditTimerState,
-    eventHandler: (ActiveTimerVM.Event) -> Unit,
+    eventHandler: (Event) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
@@ -88,7 +90,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.active_duration))
             },
         ) {
-            eventHandler(ActiveTimerVM.Event.UpdateActiveDuration(it))
+            eventHandler(Event.UpdateActiveDuration(it))
         }
 
         // Edit Transition Duration
@@ -109,7 +111,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.transition_duration))
             },
         ) {
-            eventHandler(ActiveTimerVM.Event.UpdateTransitionDuration(it))
+            eventHandler(Event.UpdateTransitionDuration(it))
         }
 
         // Edit Rep Count
@@ -127,7 +129,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.rep_count))
             },
         ) {
-            eventHandler(ActiveTimerVM.Event.UpdateRepCount(it))
+            eventHandler(Event.UpdateRepCount(it))
         }
 
         AdvancedSettings(
@@ -141,7 +143,7 @@ fun PlanningActivityControls(
 @Composable
 private fun AdvancedSettings(
     state: EditTimerState,
-    eventHandler: (ActiveTimerVM.Event) -> Unit,
+    eventHandler: (Event) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showSettings by remember { mutableStateOf(false) }
@@ -161,7 +163,7 @@ private fun AdvancedSettings(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.active_ping_title_count),
                     value = state.activePings,
-                    onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateActivePings(it)) },
+                    onValueChange = { eventHandler(Event.UpdateActivePings(it)) },
                     maxValue = 10.coerceAtMost(state.activeDuration.toIntOrNull() ?: Int.MAX_VALUE),
                 )
 
@@ -170,11 +172,27 @@ private fun AdvancedSettings(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.transition_ping_title_count),
                     value = state.transitionPings,
-                    onValueChange = { eventHandler(ActiveTimerVM.Event.UpdateTransitionPings(it)) },
+                    onValueChange = { eventHandler(Event.UpdateTransitionPings(it)) },
                     maxValue = 10.coerceAtMost(
                         state.transitionDuration.toIntOrNull() ?: Int.MAX_VALUE
                     ),
                 )
+
+                // Auto Pause
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.auto_pause),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Checkbox(
+                        checked = state.autoPause,
+                        onCheckedChange = { eventHandler(Event.AutoPause(it)) }
+                    )
+                }
 
                 // Theme Selection
                 Text(
@@ -188,7 +206,7 @@ private fun AdvancedSettings(
                     states = state.themeState.optionStringResources.map { stringResource(id = it) },
                     selectedIndex = state.themeState.selectedIndex,
                 ) {
-                    eventHandler(ActiveTimerVM.Event.UpdateTheme(it))
+                    eventHandler(Event.UpdateTheme(it))
                 }
             }
         }

@@ -12,15 +12,8 @@ internal object ActiveTimerStateUpdater : (ActiveState, Command?) -> ActiveState
             is Command.ResumeSegment -> resumePausedSegment(state, command)
             is Command.StartSegment -> startNextSegment(state, command)
             is Command.SequenceCompleted,
-            is Command.ResetToStart -> resetToStart(state)
+            is Command.GoBack -> state
         }
-
-    private fun resetToStart(state: ActiveState): ActiveState =
-        state.copy(
-            activeSegment = null,
-            queuedSegments = emptyList(),
-            repeatsCompleted = -1,
-        )
 
     private fun startNextSegment(state: ActiveState, command: Command.StartSegment): ActiveState =
         state.copy(

@@ -6,6 +6,7 @@
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>
+    <string name="timer_reset">Resume</string>
 
     <string name="mode_active">Stretch</string>
     <string name="mode_transition">Break</string>

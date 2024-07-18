@@ -30,7 +30,7 @@ class EventScheduler @Inject constructor(
     ) {
         soundManager.playSilence()
         when (executedCommand) {
-            is ActiveTimerVM.Command.ResetToStart ->
+            is ActiveTimerVM.Command.GoBack ->
                 clearAllJobs()
             is ActiveTimerVM.Command.SequenceCompleted -> {
                 clearAllJobs()

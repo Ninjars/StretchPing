@@ -3,136 +3,90 @@ package jez.stretchping.features.activetimer
 import androidx.core.util.Consumer
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jez.stretchping.persistence.Settings
-import jez.stretchping.persistence.ThemeMode
+import jez.stretchping.NavigationDispatcher
+import jez.stretchping.Route
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-
-private data class CombinedSettings(
+@Serializable
+data class ExerciseConfig(
     val repCount: Int,
     val activityDuration: Int,
     val transitionDuration: Int,
     val activePingsCount: Int,
     val transitionPingsCount: Int,
+    val pauseWithLifecycle: Boolean,
 )
 
 @HiltViewModel
 class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
-    private val settings: Settings,
+    private val navigationDispatcher: NavigationDispatcher,
+    savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
-    private val activeStateFlow = MutableStateFlow(ActiveState())
-    private val settingsState = combine(
-        settings.repCount,
-        settings.activityDuration,
-        settings.transitionDuration,
-        settings.activePingsCount,
-        settings.transitionPingsCount,
-    ) { repCount, activityDuration, transitionDuration, activePingsCount, transitionPingsCount ->
-        CombinedSettings(
-            repCount = repCount,
-            activityDuration = activityDuration,
-            transitionDuration = transitionDuration,
-            activePingsCount = activePingsCount,
-            transitionPingsCount = transitionPingsCount,
+    private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
+        .let { Json.decodeFromString<ExerciseConfig>(it) }
+    private val mutableState = MutableStateFlow(
+        State(
+            activeState = ActiveState(),
+            repCount = exerciseConfig.repCount,
+            activeSegmentLength = exerciseConfig.activityDuration,
+            transitionLength = exerciseConfig.transitionDuration,
+            transitionPings = exerciseConfig.transitionPingsCount,
+            activePings = exerciseConfig.activePingsCount,
+            pauseWithLifecycle = exerciseConfig.pauseWithLifecycle,
         )
-    }
-    private val combinedState = combine(
-        activeStateFlow,
-        settingsState,
-        settings.themeMode,
-        settings.pauseWithLifecycle,
-    ) { activeState, settingsState, themeMode, pauseWithLifecycle ->
-        State.Active(
-            activeState = activeState,
-            repCount = settingsState.repCount,
-            activeSegmentLength = settingsState.activityDuration,
-            transitionLength = settingsState.transitionDuration,
-            transitionPings = settingsState.transitionPingsCount,
-            activePings = settingsState.activePingsCount,
-            pauseWithLifecycle = pauseWithLifecycle,
-            themeMode = themeMode,
-        )
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        State.Loading
     )
 
     val viewState: StateFlow<ActiveTimerViewState> =
-        combinedState.toViewState(
+        mutableState.toViewState(
             scope = viewModelScope,
-            initial = State.Loading
-        ) { state -> StateToViewState(state) }
+        ) { state -> ActiveTimerStateToViewState(state) }
 
-    override fun accept(event: Event) {
-        val currentState = combinedState.value
-        viewModelScope.launch {
-
-            if (currentState is State.Active) {
-                val command = EventToCommand(currentState, event)
-                val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
-
-                activeStateFlow.compareAndSet(activeStateFlow.value, newActiveState)
-
-                command?.let {
-                    eventScheduler.planFutureActions(
-                        coroutineScope = this,
-                        eventsConfiguration = EventsConfiguration(
-                            currentState.activePings,
-                            currentState.transitionPings
-                        ),
-                        executedCommand = it,
-                        eventConsumer = this@ActiveTimerVM
-                    )
-                }
-            }
-
-
-            EventToSettingsUpdate(event)?.let {
-                updateSettings(it)
-            }
-        }
+    init {
+        accept(Event.Start)
     }
 
-    private suspend fun updateSettings(command: SettingsCommand) {
-        when (command) {
-            is SettingsCommand.SetThemeMode ->
-                settings.setThemeMode(command.mode)
+    override fun accept(event: Event) {
+        val currentState = mutableState.value
+        viewModelScope.launch {
+            val command = EventToCommand(currentState, event)
+            val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
 
-            is SettingsCommand.SetActivityDuration ->
-                settings.setActivityDuration(command.duration)
+            mutableState.compareAndSet(mutableState.value, currentState.copy(activeState = newActiveState))
 
-            is SettingsCommand.SetTransitionDuration ->
-                settings.setTransitionDuration(command.duration)
+            command?.let {
+                eventScheduler.planFutureActions(
+                    coroutineScope = this,
+                    eventsConfiguration = EventsConfiguration(
+                        currentState.activePings,
+                        currentState.transitionPings
+                    ),
+                    executedCommand = it,
+                    eventConsumer = this@ActiveTimerVM
+                )
 
-            is SettingsCommand.SetRepCount ->
-                settings.setRepCount(command.count)
-
-            is SettingsCommand.SetActivePings ->
-                settings.setActivePingsCount(command.count)
-
-            is SettingsCommand.SetTransitionPings ->
-                settings.setTransitionPingsCount(command.count)
-
-            is SettingsCommand.SetAutoPause ->
-                settings.setPauseWithLifecycle(command.enabled)
+                when (it) {
+                    is Command.GoBack,
+                    is Command.SequenceCompleted -> navigationDispatcher.navigateTo(Route.Back)
+                    else -> Unit
+                }
+            }
         }
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        with(combinedState.value) {
-            if (this is State.Active && this.pauseWithLifecycle) {
+        with(mutableState.value) {
+            if (this.pauseWithLifecycle) {
                 accept(Event.Pause)
             }
         }
@@ -145,27 +99,10 @@ class ActiveTimerVM @Inject constructor(
     }
 
     sealed class Event {
-        object Start : Event()
-        object Pause : Event()
-        object Reset : Event()
-        object OnSectionCompleted : Event()
-        data class UpdateActiveDuration(val duration: String) : Event()
-        data class UpdateTransitionDuration(val duration: String) : Event()
-        data class UpdateActivePings(val count: Int) : Event()
-        data class UpdateTransitionPings(val count: Int) : Event()
-        data class UpdateRepCount(val count: String) : Event()
-        data class UpdateTheme(val themeModeIndex: Int) : Event()
-        data class AutoPause(val enabled: Boolean) : Event()
-    }
-
-    sealed class SettingsCommand {
-        data class SetThemeMode(val mode: ThemeMode) : SettingsCommand()
-        data class SetActivityDuration(val duration: Int) : SettingsCommand()
-        data class SetTransitionDuration(val duration: Int) : SettingsCommand()
-        data class SetRepCount(val count: Int) : SettingsCommand()
-        data class SetActivePings(val count: Int) : SettingsCommand()
-        data class SetTransitionPings(val count: Int) : SettingsCommand()
-        data class SetAutoPause(val enabled: Boolean) : SettingsCommand()
+        data object Start : Event()
+        data object Pause : Event()
+        data object BackPressed : Event()
+        data object OnSectionCompleted : Event()
     }
 
     sealed class Command {
@@ -187,23 +124,19 @@ class ActiveTimerVM @Inject constructor(
             val runningSegment: ActiveState.ActiveSegment,
         ) : Command()
 
-        object ResetToStart : Command()
-        object SequenceCompleted : Command()
+        data object GoBack : Command()
+        data object SequenceCompleted : Command()
     }
 
-    sealed class State {
-        object Loading : State()
-        data class Active(
-            val activeState: ActiveState = ActiveState(),
-            val repCount: Int,
-            val activeSegmentLength: Int,
-            val transitionLength: Int,
-            val activePings: Int,
-            val transitionPings: Int,
-            val pauseWithLifecycle: Boolean,
-            val themeMode: ThemeMode,
-        ) : State()
-    }
+    data class State(
+        val activeState: ActiveState = ActiveState(),
+        val repCount: Int,
+        val activeSegmentLength: Int,
+        val transitionLength: Int,
+        val activePings: Int,
+        val transitionPings: Int,
+        val pauseWithLifecycle: Boolean,
+    )
 
     data class ActiveState(
         val queuedSegments: List<SegmentSpec> = emptyList(),

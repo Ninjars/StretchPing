@@ -1,10 +1,11 @@
-package jez.stretchping.ui.components
+package jez.stretchping.features.edittimer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +28,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +36,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -54,20 +57,87 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jez.stretchping.R
-import jez.stretchping.features.activetimer.ActiveTimerVM.Event
-import jez.stretchping.features.activetimer.EditTimerState
+import jez.stretchping.ui.components.IntSliderControl
+import jez.stretchping.ui.components.TimerControls
+import jez.stretchping.ui.components.TimerControlsEvent
+import jez.stretchping.ui.components.TimerControlsViewState
+import jez.stretchping.ui.components.TriStateToggle
+import jez.stretchping.utils.rememberEventConsumer
+
+sealed class EditTimerEvent {
+    data object Start : EditTimerEvent()
+    data class UpdateActiveDuration(val duration: String) : EditTimerEvent()
+    data class UpdateTransitionDuration(val duration: String) : EditTimerEvent()
+    data class UpdateActivePings(val count: Int) : EditTimerEvent()
+    data class UpdateTransitionPings(val count: Int) : EditTimerEvent()
+    data class UpdateRepCount(val count: String) : EditTimerEvent()
+    data class UpdateTheme(val themeModeIndex: Int) : EditTimerEvent()
+    data class AutoPause(val enabled: Boolean) : EditTimerEvent()
+}
 
 
 @Composable
-fun PlanningActivityControls(
-    state: EditTimerState,
-    eventHandler: (Event) -> Unit,
+fun EditTimerScreen(
+    viewModel: EditTimerVM
+) {
+    EditTimerScreen(
+        viewModel.viewState.collectAsState(),
+        rememberEventConsumer(viewModel)
+    )
+}
+
+@Composable
+private fun EditTimerScreen(
+    viewState: State<EditTimerViewState>,
+    eventHandler: (EditTimerEvent) -> Unit,
+) {
+    val localFocusManager = LocalFocusManager.current
+    val state = viewState.value
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    localFocusManager.clearFocus()
+                })
+            },
+    ) {
+        Settings(state, eventHandler, Modifier.weight(1f))
+
+        TimerControls(
+            eventHandler = {
+                when (it) {
+                    TimerControlsEvent.PlayClicked -> eventHandler(EditTimerEvent.Start)
+                    TimerControlsEvent.PauseClicked,
+                    TimerControlsEvent.BackClicked -> Unit
+                }
+            },
+        ) {
+            with(state) {
+                TimerControlsViewState(
+                    mainButtonEnabled = canStart,
+                    showMainButton = true,
+                    showBackWhenPaused = false,
+                    isPaused = true,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Settings(
+    state: EditTimerViewState,
+    eventHandler: (EditTimerEvent) -> Unit,
+    modifier: Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth(0.8f)
+        modifier = modifier
+            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
         val focusManager = LocalFocusManager.current
@@ -90,7 +160,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.active_duration))
             },
         ) {
-            eventHandler(Event.UpdateActiveDuration(it))
+            eventHandler(EditTimerEvent.UpdateActiveDuration(it))
         }
 
         // Edit Transition Duration
@@ -111,7 +181,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.transition_duration))
             },
         ) {
-            eventHandler(Event.UpdateTransitionDuration(it))
+            eventHandler(EditTimerEvent.UpdateTransitionDuration(it))
         }
 
         // Edit Rep Count
@@ -129,7 +199,7 @@ fun PlanningActivityControls(
                 Text(stringResource(id = R.string.rep_count))
             },
         ) {
-            eventHandler(Event.UpdateRepCount(it))
+            eventHandler(EditTimerEvent.UpdateRepCount(it))
         }
 
         AdvancedSettings(
@@ -142,8 +212,8 @@ fun PlanningActivityControls(
 
 @Composable
 private fun AdvancedSettings(
-    state: EditTimerState,
-    eventHandler: (Event) -> Unit,
+    state: EditTimerViewState,
+    eventHandler: (EditTimerEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showSettings by remember { mutableStateOf(false) }
@@ -163,7 +233,7 @@ private fun AdvancedSettings(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.active_ping_title_count),
                     value = state.activePings,
-                    onValueChange = { eventHandler(Event.UpdateActivePings(it)) },
+                    onValueChange = { eventHandler(EditTimerEvent.UpdateActivePings(it)) },
                     maxValue = 10.coerceAtMost(state.activeDuration.toIntOrNull() ?: Int.MAX_VALUE),
                 )
 
@@ -172,7 +242,7 @@ private fun AdvancedSettings(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.transition_ping_title_count),
                     value = state.transitionPings,
-                    onValueChange = { eventHandler(Event.UpdateTransitionPings(it)) },
+                    onValueChange = { eventHandler(EditTimerEvent.UpdateTransitionPings(it)) },
                     maxValue = 10.coerceAtMost(
                         state.transitionDuration.toIntOrNull() ?: Int.MAX_VALUE
                     ),
@@ -190,7 +260,7 @@ private fun AdvancedSettings(
                     )
                     Checkbox(
                         checked = state.autoPause,
-                        onCheckedChange = { eventHandler(Event.AutoPause(it)) }
+                        onCheckedChange = { eventHandler(EditTimerEvent.AutoPause(it)) }
                     )
                 }
 
@@ -206,7 +276,7 @@ private fun AdvancedSettings(
                     states = state.themeState.optionStringResources.map { stringResource(id = it) },
                     selectedIndex = state.themeState.selectedIndex,
                 ) {
-                    eventHandler(Event.UpdateTheme(it))
+                    eventHandler(EditTimerEvent.UpdateTheme(it))
                 }
             }
         }
@@ -230,7 +300,6 @@ private fun AdvancedSettings(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectOnFocusTextField(
     text: String,

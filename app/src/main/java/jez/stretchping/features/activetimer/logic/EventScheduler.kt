@@ -37,7 +37,6 @@ class EventScheduler @Inject constructor(
 
             is Command.SequenceCompleted -> {
                 clearAllJobs()
-                soundManager.playSound(GameSoundEffect.Completed)
             }
 
             is Command.PauseSegment -> {
@@ -51,6 +50,7 @@ class EventScheduler @Inject constructor(
                     eventsConfiguration,
                     executedCommand.pausedSegment.remainingDurationMillis,
                     executedCommand.pausedSegment.mode,
+                    executedCommand.isLastSegment,
                     eventConsumer,
                 )
 
@@ -60,6 +60,7 @@ class EventScheduler @Inject constructor(
                     eventsConfiguration,
                     executedCommand.segmentSpec.durationSeconds * 1000L,
                     executedCommand.segmentSpec.mode,
+                    executedCommand.isLastSegment,
                     eventConsumer,
                 )
         }
@@ -75,18 +76,24 @@ class EventScheduler @Inject constructor(
         eventsConfiguration: EventsConfiguration,
         durationMillis: Long,
         segmentMode: Mode,
+        isLastSegment: Boolean,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         jobs.add(
             coroutineScope.launch {
                 delay(durationMillis.milliseconds)
                 eventConsumer.accept(ActiveTimerVM.Event.OnSectionCompleted)
-                soundManager.playSound(
-                    when (segmentMode) {
-                        Mode.Stretch -> GameSoundEffect.ActiveSection
-                        Mode.Transition -> GameSoundEffect.TransitionSection
-                    }
-                )
+
+                if (isLastSegment) {
+                    soundManager.playSound(GameSoundEffect.Completed)
+                } else {
+                    soundManager.playSound(
+                        when (segmentMode) {
+                            Mode.Stretch -> GameSoundEffect.ActiveSection
+                            Mode.Transition -> GameSoundEffect.TransitionSection
+                        }
+                    )
+                }
             }
         )
         enqueueCountdownPings(

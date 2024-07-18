@@ -89,12 +89,14 @@ class ActiveTimerEngine(
             val segmentSpec: ActiveState.SegmentSpec,
             val queuedSegments: List<ActiveState.SegmentSpec>,
             val isNewRep: Boolean,
+            val isLastSegment: Boolean,
         ) : Command()
 
         data class ResumeSegment(
             val startMillis: Long,
             val startFraction: Float,
             val pausedSegment: ActiveState.ActiveSegment,
+            val isLastSegment: Boolean,
         ) : Command()
 
         data class PauseSegment(

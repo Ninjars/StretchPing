@@ -1,8 +1,8 @@
 package jez.stretchping.features.activetimer.logic
 
+import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
-import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
 
 internal object EventToCommand : (State, Event) -> Command? {
@@ -18,16 +18,19 @@ internal object EventToCommand : (State, Event) -> Command? {
                         runningSegment = activeSegment,
                     )
                 }
+
             is Event.Start ->
                 when {
-                    activeSegment != null -> resume(activeSegment)
+                    activeSegment != null -> resume(state, activeSegment)
                     else -> start(state)
                 }
+
             is Event.OnSectionCompleted -> if (state.isAtEnd()) {
                 Command.SequenceCompleted
             } else {
                 start(state)
             }
+
             is Event.BackPressed -> Command.GoBack
         }
     }
@@ -41,27 +44,41 @@ internal object EventToCommand : (State, Event) -> Command? {
                 }
         val nextSegment = currentSegments.first()
         val queuedSegments = currentSegments.drop(1)
+        val isLast = isAtEnd(state.repCount, state.activeState.repeatsCompleted, queuedSegments)
         return Command.StartSegment(
             System.currentTimeMillis(),
             nextSegment,
             queuedSegments,
             isNewRep,
+            isLast,
         )
     }
 
-    private fun resume(activeSegment: ActiveState.ActiveSegment): Command? =
+    private fun resume(state: State, activeSegment: ActiveState.ActiveSegment): Command? =
         if (activeSegment.pausedAtFraction == null) {
             null
         } else {
+            val isLast = isAtEnd(
+                state.repCount,
+                state.activeState.repeatsCompleted,
+                state.activeState.queuedSegments
+            )
             Command.ResumeSegment(
                 startMillis = System.currentTimeMillis(),
                 startFraction = activeSegment.pausedAtFraction,
                 pausedSegment = activeSegment,
+                isLastSegment = isLast,
             )
         }
 
     private fun State.isAtEnd(): Boolean =
-        repCount > 0 && activeState.repeatsCompleted == repCount - 1 && activeState.queuedSegments.isEmpty()
+        isAtEnd(repCount, activeState.repeatsCompleted, activeState.queuedSegments)
+
+    private fun isAtEnd(
+        repCount: Int,
+        completedReps: Int,
+        remainingSegments: List<ActiveState.SegmentSpec>,
+    ) = repCount > 0 && completedReps == repCount - 1 && remainingSegments.isEmpty()
 
     private fun State.createSegments(): List<ActiveState.SegmentSpec> =
         listOf(

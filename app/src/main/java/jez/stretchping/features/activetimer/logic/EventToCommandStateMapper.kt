@@ -1,12 +1,13 @@
 package jez.stretchping.features.activetimer.logic
 
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
+import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
 
-internal object EventToCommand : (State, Event) -> Command? {
-    override fun invoke(state: State, event: Event): Command? {
+internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
+    override fun invoke(exerciseConfig: ExerciseConfig, state: State, event: Event): Command? {
         val activeSegment = state.activeState.activeSegment
         return when (event) {
             is Event.Pause ->
@@ -21,30 +22,37 @@ internal object EventToCommand : (State, Event) -> Command? {
 
             is Event.Start ->
                 when {
-                    activeSegment != null -> resume(state, activeSegment)
-                    else -> start(state)
+                    activeSegment != null -> resume(exerciseConfig, state, activeSegment)
+                    else -> start(exerciseConfig, state)
                 }
 
-            is Event.OnSectionCompleted -> if (state.isAtEnd()) {
+            is Event.OnSectionCompleted -> if (
+                isAtEnd(
+                    exerciseConfig.repCount,
+                    state.activeState.repeatsCompleted,
+                    state.activeState.queuedSegments
+                )
+            ) {
                 Command.SequenceCompleted
             } else {
-                start(state)
+                start(exerciseConfig, state)
             }
 
             is Event.BackPressed -> Command.GoBack
         }
     }
 
-    private fun start(state: State): Command {
+    private fun start(exerciseConfig: ExerciseConfig, state: State): Command {
         var isNewRep = false
         val currentSegments =
             state.activeState.queuedSegments.takeIf { it.isNotEmpty() }
-                ?: state.createSegments().also {
+                ?: exerciseConfig.createSegments().also {
                     isNewRep = true
                 }
         val nextSegment = currentSegments.first()
         val queuedSegments = currentSegments.drop(1)
-        val isLast = isAtEnd(state.repCount, state.activeState.repeatsCompleted, queuedSegments)
+        val isLast =
+            isAtEnd(exerciseConfig.repCount, state.activeState.repeatsCompleted, queuedSegments)
         return Command.StartSegment(
             System.currentTimeMillis(),
             nextSegment,
@@ -54,12 +62,16 @@ internal object EventToCommand : (State, Event) -> Command? {
         )
     }
 
-    private fun resume(state: State, activeSegment: ActiveState.ActiveSegment): Command? =
+    private fun resume(
+        exerciseConfig: ExerciseConfig,
+        state: State,
+        activeSegment: ActiveState.ActiveSegment
+    ): Command? =
         if (activeSegment.pausedAtFraction == null) {
             null
         } else {
             val isLast = isAtEnd(
-                state.repCount,
+                exerciseConfig.repCount,
                 state.activeState.repeatsCompleted,
                 state.activeState.queuedSegments
             )
@@ -71,23 +83,20 @@ internal object EventToCommand : (State, Event) -> Command? {
             )
         }
 
-    private fun State.isAtEnd(): Boolean =
-        isAtEnd(repCount, activeState.repeatsCompleted, activeState.queuedSegments)
-
     private fun isAtEnd(
         repCount: Int,
         completedReps: Int,
         remainingSegments: List<ActiveState.SegmentSpec>,
     ) = repCount > 0 && completedReps == repCount - 1 && remainingSegments.isEmpty()
 
-    private fun State.createSegments(): List<ActiveState.SegmentSpec> =
+    private fun ExerciseConfig.createSegments(): List<ActiveState.SegmentSpec> =
         listOf(
             ActiveState.SegmentSpec(
-                durationSeconds = transitionLength,
+                durationSeconds = transitionDuration,
                 mode = ActiveState.SegmentSpec.Mode.Transition,
             ),
             ActiveState.SegmentSpec(
-                durationSeconds = activeSegmentLength,
+                durationSeconds = activityDuration,
                 mode = ActiveState.SegmentSpec.Mode.Stretch,
             ),
         )

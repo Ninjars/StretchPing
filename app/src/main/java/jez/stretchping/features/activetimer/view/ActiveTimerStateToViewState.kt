@@ -1,17 +1,19 @@
 package jez.stretchping.features.activetimer.view
 
+import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.ActiveSegment
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
 
 internal object ActiveTimerStateToViewState :
-        (State) -> ActiveTimerViewState {
+        (ExerciseConfig, State) -> ActiveTimerViewState {
     override fun invoke(
+        config: ExerciseConfig,
         state: State,
     ): ActiveTimerViewState =
         ActiveTimerViewState(
             activeTimer = state.activeState.activeSegment?.toState(),
-            segmentDescription = state.toSegmentDescription(),
+            segmentDescription = state.toSegmentDescription(config),
         )
 
     private fun ActiveSegment.toState(): ActiveTimerState =
@@ -28,17 +30,17 @@ internal object ActiveTimerStateToViewState :
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun State.toSegmentDescription(): SegmentDescription {
+    private fun State.toSegmentDescription(config: ExerciseConfig): SegmentDescription {
         val segmentLength =
             activeState.activeSegment?.spec?.durationSeconds
-                ?: activeSegmentLength
+                ?: config.activityDuration
         val segmentMode =
             activeState.activeSegment?.mode?.map() ?: ActiveTimerState.Mode.Stretch
 
         return SegmentDescription(
             mode = segmentMode,
             duration = segmentLength.toDuration(),
-            repsRemaining = if (repCount < 1) "∞" else (repCount - activeState.repeatsCompleted).toRepCountString()
+            repsRemaining = if (config.repCount < 1) "∞" else (config.repCount - activeState.repeatsCompleted).toRepCountString()
         )
     }
 

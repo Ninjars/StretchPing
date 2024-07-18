@@ -21,31 +21,25 @@ class ActiveTimerEngine(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
     private val serviceProvider: ActiveTimerServiceProvider,
-    exerciseConfig: ExerciseConfig,
+    private val exerciseConfig: ExerciseConfig,
 ) : Consumer<ActiveTimerVM.Event> {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val mutableState = MutableStateFlow(
         State(
             activeState = ActiveState(),
-            repCount = exerciseConfig.repCount,
-            activeSegmentLength = exerciseConfig.activityDuration,
-            transitionLength = exerciseConfig.transitionDuration,
-            transitionPings = exerciseConfig.transitionPingsCount,
-            activePings = exerciseConfig.activePingsCount,
-            playInBackground = exerciseConfig.playInBackground,
         )
     )
 
     val viewState: StateFlow<ActiveTimerViewState> =
         mutableState.toViewState(
             scope = coroutineScope,
-        ) { state -> ActiveTimerStateToViewState(state) }
+        ) { state -> ActiveTimerStateToViewState(exerciseConfig, state) }
 
     override fun accept(event: ActiveTimerVM.Event) {
         coroutineScope.launch {
             val currentState = mutableState.value
-            val command = EventToCommand(currentState, event)
+            val command = EventToCommand(exerciseConfig, currentState, event)
             val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
 
             mutableState.compareAndSet(
@@ -57,8 +51,8 @@ class ActiveTimerEngine(
                 eventScheduler.planFutureActions(
                     coroutineScope = this,
                     eventsConfiguration = EventsConfiguration(
-                        currentState.activePings,
-                        currentState.transitionPings
+                        exerciseConfig.activePingsCount,
+                        exerciseConfig.transitionPingsCount
                     ),
                     executedCommand = it,
                     eventConsumer = this@ActiveTimerEngine
@@ -110,12 +104,6 @@ class ActiveTimerEngine(
 
     data class State(
         val activeState: ActiveState = ActiveState(),
-        val repCount: Int,
-        val activeSegmentLength: Int,
-        val transitionLength: Int,
-        val activePings: Int,
-        val transitionPings: Int,
-        val playInBackground: Boolean,
     )
 
     data class ActiveState(

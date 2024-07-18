@@ -3,6 +3,9 @@
     <string name="title_part_1">Stretch</string>
     <string name="title_part_2">Ping</string>
 
+    <string name="service_notification_name">StretchPing</string>
+    <string name="service_notification_title">StretchPing</string>
+
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>

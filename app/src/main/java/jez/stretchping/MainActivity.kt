@@ -40,6 +40,8 @@ import jez.stretchping.features.activetimer.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.persistence.Settings
 import jez.stretchping.persistence.ThemeMode
+import jez.stretchping.service.ActiveTimerServiceController
+import jez.stretchping.service.ActiveTimerServiceProvider
 import jez.stretchping.ui.theme.StretchPingTheme
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -52,8 +54,14 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var navigationDispatcher: NavigationDispatcher
+
+    @Inject
+    lateinit var serviceProvider: ActiveTimerServiceProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        serviceProvider.setController(ActiveTimerServiceController(this))
+
         setContent {
             val navController = rememberNavController()
             navigationDispatcher.setNavListener { route ->

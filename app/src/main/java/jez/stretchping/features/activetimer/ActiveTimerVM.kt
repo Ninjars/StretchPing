@@ -9,6 +9,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
+import jez.stretchping.features.activetimer.logic.ActiveTimerStateUpdater
+import jez.stretchping.features.activetimer.logic.EventScheduler
+import jez.stretchping.features.activetimer.logic.EventToCommand
+import jez.stretchping.features.activetimer.logic.EventsConfiguration
+import jez.stretchping.features.activetimer.view.ActiveTimerStateToViewState
+import jez.stretchping.features.activetimer.view.ActiveTimerViewState
+import jez.stretchping.service.ActiveTimerServiceProvider
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +38,7 @@ data class ExerciseConfig(
 class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
+    private val serviceProvider: ActiveTimerServiceProvider,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!

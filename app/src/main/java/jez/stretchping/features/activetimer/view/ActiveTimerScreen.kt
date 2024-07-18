@@ -1,4 +1,4 @@
-package jez.stretchping.features.activetimer
+package jez.stretchping.features.activetimer.view
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -23,7 +23,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import jez.stretchping.features.activetimer.ActiveTimerState.Mode
+import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode
+import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer

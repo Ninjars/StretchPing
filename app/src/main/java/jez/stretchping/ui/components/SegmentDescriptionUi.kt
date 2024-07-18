@@ -20,8 +20,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import jez.stretchping.R
-import jez.stretchping.features.activetimer.ActiveTimerState
-import jez.stretchping.features.activetimer.SegmentDescription
+import jez.stretchping.features.activetimer.view.ActiveTimerState
+import jez.stretchping.features.activetimer.view.SegmentDescription
 
 
 @Composable

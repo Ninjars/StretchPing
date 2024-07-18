@@ -1,4 +1,4 @@
-package jez.stretchping.features.activetimer
+package jez.stretchping.features.activetimer.logic
 
 import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState
 import jez.stretchping.features.activetimer.ActiveTimerVM.Command

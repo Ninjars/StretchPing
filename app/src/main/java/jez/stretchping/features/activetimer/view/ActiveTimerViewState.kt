@@ -1,4 +1,4 @@
-package jez.stretchping.features.activetimer
+package jez.stretchping.features.activetimer.view
 
 data class ActiveTimerViewState(
     val activeTimer: ActiveTimerState?,

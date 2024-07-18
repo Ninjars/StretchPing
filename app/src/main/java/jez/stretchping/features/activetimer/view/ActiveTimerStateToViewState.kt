@@ -1,5 +1,6 @@
-package jez.stretchping.features.activetimer
+package jez.stretchping.features.activetimer.view
 
+import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec
 import jez.stretchping.features.activetimer.ActiveTimerVM.State
 

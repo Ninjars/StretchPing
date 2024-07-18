@@ -49,6 +49,11 @@ class ActiveTimerVM @Inject constructor(
         super.onPause(owner)
     }
 
+    override fun onCleared() {
+        engine.dispose()
+        super.onCleared()
+    }
+
     sealed class Event {
         data object Start : Event()
         data object Pause : Event()

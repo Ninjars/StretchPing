@@ -1,8 +1,8 @@
 package jez.stretchping.features.activetimer.view
 
-import jez.stretchping.features.activetimer.ActiveTimerVM
-import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec
-import jez.stretchping.features.activetimer.ActiveTimerVM.State
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.ActiveSegment
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
 
 internal object ActiveTimerStateToViewState :
         (State) -> ActiveTimerViewState {
@@ -14,7 +14,7 @@ internal object ActiveTimerStateToViewState :
             segmentDescription = state.toSegmentDescription(),
         )
 
-    private fun ActiveTimerVM.ActiveState.ActiveSegment.toState(): ActiveTimerState =
+    private fun ActiveSegment.toState(): ActiveTimerState =
         ActiveTimerState(
             startAtFraction = startedAtFraction,
             endTimeMillis = endAtTime,

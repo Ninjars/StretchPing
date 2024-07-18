@@ -1,7 +1,7 @@
 package jez.stretchping.features.activetimer.logic
 
-import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState
-import jez.stretchping.features.activetimer.ActiveTimerVM.Command
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 
 internal object ActiveTimerStateUpdater : (ActiveState, Command?) -> ActiveState {
 

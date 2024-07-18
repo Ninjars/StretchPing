@@ -4,7 +4,8 @@ import androidx.core.util.Consumer
 import jez.stretchping.audio.GameSoundEffect
 import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.ActiveTimerVM
-import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState.SegmentSpec.Mode
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec.Mode
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -26,22 +27,25 @@ class EventScheduler @Inject constructor(
     suspend fun planFutureActions(
         coroutineScope: CoroutineScope,
         eventsConfiguration: EventsConfiguration,
-        executedCommand: ActiveTimerVM.Command,
+        executedCommand: Command,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         soundManager.playSilence()
         when (executedCommand) {
-            is ActiveTimerVM.Command.GoBack ->
+            is Command.GoBack ->
                 clearAllJobs()
-            is ActiveTimerVM.Command.SequenceCompleted -> {
+
+            is Command.SequenceCompleted -> {
                 clearAllJobs()
                 soundManager.playSound(GameSoundEffect.Completed)
             }
-            is ActiveTimerVM.Command.PauseSegment -> {
+
+            is Command.PauseSegment -> {
                 clearAllJobs()
                 soundManager.playSound(GameSoundEffect.Stop)
             }
-            is ActiveTimerVM.Command.ResumeSegment ->
+
+            is Command.ResumeSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
                     eventsConfiguration,
@@ -49,7 +53,8 @@ class EventScheduler @Inject constructor(
                     executedCommand.pausedSegment.mode,
                     eventConsumer,
                 )
-            is ActiveTimerVM.Command.StartSegment ->
+
+            is Command.StartSegment ->
                 scheduleNextSegmentEvents(
                     coroutineScope,
                     eventsConfiguration,

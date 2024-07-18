@@ -1,9 +1,9 @@
 package jez.stretchping.features.activetimer.logic
 
-import jez.stretchping.features.activetimer.ActiveTimerVM.ActiveState
-import jez.stretchping.features.activetimer.ActiveTimerVM.Command
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
-import jez.stretchping.features.activetimer.ActiveTimerVM.State
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
 
 internal object EventToCommand : (State, Event) -> Command? {
     override fun invoke(state: State, event: Event): Command? {

@@ -105,15 +105,15 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
-    val pauseWithLifecycle: Flow<Boolean> = context.dataStore.data
+    val playInBackground: Flow<Boolean> = context.dataStore.data
         .map {
-            it[LifecyclePausePref] ?: false
+            it[PlayInBackgroundPref] ?: false
         }
 
-    suspend fun setPauseWithLifecycle(shouldPause: Boolean) {
+    suspend fun setPlayInBackground(shouldPause: Boolean) {
         withContext(Dispatchers.IO) {
             context.dataStore.edit {
-                it[LifecyclePausePref] = shouldPause
+                it[PlayInBackgroundPref] = shouldPause
             }
         }
     }
@@ -139,6 +139,6 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         val RepCountPref = intPreferencesKey("RepCountDuration")
         val TransitionPingsPref = intPreferencesKey("TransitionPings")
         val ActivePingsPref = intPreferencesKey("ActivePings")
-        val LifecyclePausePref = booleanPreferencesKey("LifecyclePause")
+        val PlayInBackgroundPref = booleanPreferencesKey("PlayInBackground")
     }
 }

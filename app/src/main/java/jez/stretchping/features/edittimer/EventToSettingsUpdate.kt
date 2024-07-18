@@ -20,7 +20,7 @@ internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
                 SettingsCommand.SetTransitionDuration(it)
             }
 
-            is EditTimerEvent.AutoPause -> SettingsCommand.SetAutoPause(event.enabled)
+            is EditTimerEvent.UpdatePlayInBackground -> SettingsCommand.SetPlayInBackground(event.enabled)
             is EditTimerEvent.UpdateActivePings -> SettingsCommand.SetActivePings(event.count)
             is EditTimerEvent.UpdateTransitionPings -> SettingsCommand.SetTransitionPings(event.count)
         }

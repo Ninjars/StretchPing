@@ -7,7 +7,7 @@ data class EditTimerViewState(
     val activePings: Int,
     val transitionPings: Int,
     val canStart: Boolean,
-    val autoPause: Boolean,
+    val playInBackground: Boolean,
 ) {
     data class ThemeState(
         val optionStringResources: List<Int>,

@@ -40,15 +40,15 @@ class EditTimerVM @Inject constructor(
     private val state = combine(
         settingsState,
         settings.themeMode,
-        settings.pauseWithLifecycle,
-    ) { settingsState, themeMode, pauseWithLifecycle ->
+        settings.playInBackground,
+    ) { settingsState, themeMode, playInBackground ->
         State(
             repCount = settingsState.repCount,
             activeSegmentLength = settingsState.activityDuration,
             transitionLength = settingsState.transitionDuration,
             transitionPings = settingsState.transitionPingsCount,
             activePings = settingsState.activePingsCount,
-            pauseWithLifecycle = pauseWithLifecycle,
+            playInBackground = playInBackground,
             themeMode = themeMode,
         )
     }.stateIn(
@@ -74,7 +74,7 @@ class EditTimerVM @Inject constructor(
                             transitionDuration = transitionLength,
                             activePingsCount = activePings,
                             transitionPingsCount = transitionPings,
-                            pauseWithLifecycle = pauseWithLifecycle,
+                            playInBackground = playInBackground,
                         )
                     )
                 }
@@ -109,8 +109,8 @@ class EditTimerVM @Inject constructor(
             is SettingsCommand.SetTransitionPings ->
                 settings.setTransitionPingsCount(command.count)
 
-            is SettingsCommand.SetAutoPause ->
-                settings.setPauseWithLifecycle(command.enabled)
+            is SettingsCommand.SetPlayInBackground ->
+                settings.setPlayInBackground(command.enabled)
         }
     }
 
@@ -120,7 +120,7 @@ class EditTimerVM @Inject constructor(
         val transitionLength: Int,
         val activePings: Int,
         val transitionPings: Int,
-        val pauseWithLifecycle: Boolean,
+        val playInBackground: Boolean,
         val themeMode: ThemeMode,
     ) {
         companion object {
@@ -130,7 +130,7 @@ class EditTimerVM @Inject constructor(
                 transitionLength = 0,
                 activePings = 0,
                 transitionPings = 0,
-                pauseWithLifecycle = false,
+                playInBackground = false,
                 themeMode = ThemeMode.Unset,
             )
         }
@@ -151,6 +151,6 @@ class EditTimerVM @Inject constructor(
         data class SetRepCount(val count: Int) : SettingsCommand()
         data class SetActivePings(val count: Int) : SettingsCommand()
         data class SetTransitionPings(val count: Int) : SettingsCommand()
-        data class SetAutoPause(val enabled: Boolean) : SettingsCommand()
+        data class SetPlayInBackground(val enabled: Boolean) : SettingsCommand()
     }
 }

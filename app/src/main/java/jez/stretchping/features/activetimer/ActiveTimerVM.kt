@@ -24,7 +24,7 @@ data class ExerciseConfig(
     val transitionDuration: Int,
     val activePingsCount: Int,
     val transitionPingsCount: Int,
-    val pauseWithLifecycle: Boolean,
+    val playInBackground: Boolean,
 )
 
 @HiltViewModel
@@ -43,7 +43,7 @@ class ActiveTimerVM @Inject constructor(
             transitionLength = exerciseConfig.transitionDuration,
             transitionPings = exerciseConfig.transitionPingsCount,
             activePings = exerciseConfig.activePingsCount,
-            pauseWithLifecycle = exerciseConfig.pauseWithLifecycle,
+            playInBackground = exerciseConfig.playInBackground,
         )
     )
 
@@ -86,7 +86,7 @@ class ActiveTimerVM @Inject constructor(
 
     override fun onPause(owner: LifecycleOwner) {
         with(mutableState.value) {
-            if (this.pauseWithLifecycle) {
+            if (!playInBackground) {
                 accept(Event.Pause)
             }
         }
@@ -135,7 +135,7 @@ class ActiveTimerVM @Inject constructor(
         val transitionLength: Int,
         val activePings: Int,
         val transitionPings: Int,
-        val pauseWithLifecycle: Boolean,
+        val playInBackground: Boolean,
     )
 
     data class ActiveState(

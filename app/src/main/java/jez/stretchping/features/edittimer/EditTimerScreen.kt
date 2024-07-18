@@ -72,7 +72,7 @@ sealed class EditTimerEvent {
     data class UpdateTransitionPings(val count: Int) : EditTimerEvent()
     data class UpdateRepCount(val count: String) : EditTimerEvent()
     data class UpdateTheme(val themeModeIndex: Int) : EditTimerEvent()
-    data class AutoPause(val enabled: Boolean) : EditTimerEvent()
+    data class UpdatePlayInBackground(val enabled: Boolean) : EditTimerEvent()
 }
 
 
@@ -255,12 +255,12 @@ private fun AdvancedSettings(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(R.string.auto_pause),
+                        text = stringResource(R.string.background_play),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Checkbox(
-                        checked = state.autoPause,
-                        onCheckedChange = { eventHandler(EditTimerEvent.AutoPause(it)) }
+                        checked = state.playInBackground,
+                        onCheckedChange = { eventHandler(EditTimerEvent.UpdatePlayInBackground(it)) }
                     )
                 }
 

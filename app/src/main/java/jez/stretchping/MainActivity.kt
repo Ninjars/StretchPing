@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,7 +45,9 @@ import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.service.ActiveTimerServiceController
 import jez.stretchping.service.ActiveTimerServiceDispatcher
 import jez.stretchping.ui.theme.StretchPingTheme
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 36.dp)
+                                .defaultMinSize(minHeight = 42.dp)
                         )
                         NavHost(
                             navController = navController,
@@ -114,49 +119,79 @@ class MainActivity : ComponentActivity() {
     private fun Title(
         modifier: Modifier = Modifier,
     ) {
-        var visible1 by remember { mutableStateOf(false) }
-        var visible2 by remember { mutableStateOf(false) }
+        val titlePart2 = stringResource(R.string.title_part_2)
+
+        var visible by remember { mutableStateOf(false) }
+        var titlePingText by remember { mutableStateOf("") }
         LaunchedEffect(Unit) {
-            visible1 = true
-            delay(500)
-            visible2 = true
+            visible = true
+            delay(1000)
+            titlePingText = titlePart2
         }
 
-        Row(
-            modifier = modifier,
-            horizontalArrangement = Arrangement.Center,
+        Box(
+            modifier = modifier
+                .clickable {
+                    visible = false
+                    titlePingText = ""
+                    GlobalScope.launch {
+                        delay(1000)
+                        visible = true
+                        delay(1000)
+                        titlePingText = titlePart2
+                    }
+                }
+                .animateContentSize()
         ) {
             AnimatedVisibility(
-                visible = visible1,
+                visible = visible,
                 enter = slideInHorizontally(
                     animationSpec = spring(
-                        stiffness = Spring.StiffnessLow,
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                    ),
-                    initialOffsetX = { -it * 4 }
-                ),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.title_part_1),
-                    style = MaterialTheme.typography.headlineLarge,
-                )
-            }
-            AnimatedVisibility(
-                visible = visible2,
-                enter = expandHorizontally(
-                    animationSpec = spring(
                         stiffness = Spring.StiffnessMediumLow,
-                        dampingRatio = Spring.DampingRatioHighBouncy,
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
                     ),
-                    expandFrom = Alignment.Start,
-                    clip = false,
+                    initialOffsetX = { -it * 2 }
                 ),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = stringResource(id = R.string.title_part_2),
-                    style = MaterialTheme.typography.headlineLarge,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.title_part_1),
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                    Text(
+                        text = titlePingText,
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier
+                            .animateContentSize(
+                                spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioHighBouncy,
+                                )
+                            )
+                            .padding(end = 16.dp)
+                    )
+                }
             }
+//            AnimatedVisibility(
+//                visible = visible2,
+//                enter = expandHorizontally(
+//                    animationSpec = spring(
+//                        stiffness = Spring.StiffnessMediumLow,
+//                        dampingRatio = Spring.DampingRatioHighBouncy,
+//                    ),
+//                    expandFrom = Alignment.Start,
+//                    clip = false,
+//                ),
+//            ) {
+//                Text(
+//                    text = stringResource(id = R.string.title_part_2),
+//                    style = MaterialTheme.typography.headlineLarge,
+//                )
+//            }
         }
     }
 

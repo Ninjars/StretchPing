@@ -12,7 +12,7 @@ import jez.stretchping.Route
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
-import jez.stretchping.service.ActiveTimerServiceProvider
+import jez.stretchping.service.ActiveTimerServiceDispatcher
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -22,24 +22,34 @@ import javax.inject.Inject
 class ActiveTimerVM @Inject constructor(
     eventScheduler: EventScheduler,
     navigationDispatcher: NavigationDispatcher,
-    serviceProvider: ActiveTimerServiceProvider,
+    private val serviceDispatcher: ActiveTimerServiceDispatcher,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
         .let { Json.decodeFromString<ExerciseConfig>(it) }
 
     private val engine =
-        ActiveTimerEngine(eventScheduler, navigationDispatcher, serviceProvider, exerciseConfig)
+        ActiveTimerEngine(eventScheduler, navigationDispatcher, exerciseConfig)
 
     val viewState: StateFlow<ActiveTimerViewState> = engine.viewState
 
     init {
+        serviceDispatcher.startService()
+        serviceDispatcher.bind { boundService ->
+
+        }
         accept(Event.Start)
     }
 
     override fun accept(event: Event) {
         engine.accept(event)
-        viewModelScope
+
+        when (event) {
+            Event.BackPressed -> serviceDispatcher.unbind()
+            Event.Pause,
+            Event.Start,
+            Event.OnSectionCompleted -> Unit
+        }
     }
 
     override fun onPause(owner: LifecycleOwner) {

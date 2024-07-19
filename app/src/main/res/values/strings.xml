@@ -5,6 +5,7 @@
 
     <string name="service_notification_name">StretchPing</string>
     <string name="service_notification_title">StretchPing</string>
+    <string name="service_notification_text">Exercise Running</string>
 
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>

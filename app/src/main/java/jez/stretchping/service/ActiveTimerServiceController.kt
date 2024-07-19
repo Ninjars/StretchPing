@@ -6,28 +6,35 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 
 class ActiveTimerServiceController(private val activity: Activity) {
-    private val serviceMutableState: MutableStateFlow<ActiveTimerService?> = MutableStateFlow(null)
-    val serviceState: StateFlow<ActiveTimerService?> = serviceMutableState
+    private var onConnectedCallback: ((ActiveTimerService) -> Unit)? = null
+    private var activeTimerService: ActiveTimerService? = null
 
     /** Defines callbacks for service binding, passed to bindService().  */
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            Timber.e("onServiceConnected")
             val binder = service as ActiveTimerService.LocalBinder
-            serviceMutableState.value = binder.getService()
+            val boundService = binder.getService()
+            activeTimerService = boundService
+            onConnectedCallback?.invoke(boundService)
+            onConnectedCallback = null
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
-            serviceMutableState.value = null
+            Timber.e("onServiceConnected")
+            activeTimerService = null
         }
     }
 
-    fun bind() {
-        if (!isBound()) {
+    fun bind(callback: (ActiveTimerService) -> Unit) {
+        Timber.e("bind: already bound? ${isBound()}")
+        val existingService = activeTimerService
+        if (existingService == null) {
+            onConnectedCallback = callback
             with(activity) {
                 bindService(
                     Intent(this, ActiveTimerService::class.java),
@@ -35,14 +42,23 @@ class ActiveTimerServiceController(private val activity: Activity) {
                     Context.BIND_AUTO_CREATE
                 )
             }
+        } else {
+            callback(existingService)
         }
     }
 
     fun unbind() {
+        Timber.e("unbind: already bound? ${isBound()}")
         if (isBound()) {
             activity.unbindService(connection)
         }
+        activeTimerService = null
+        onConnectedCallback = null
     }
 
-    private fun isBound(): Boolean = serviceMutableState.value != null
+    private fun isBound(): Boolean = activeTimerService != null
+    fun startService() {
+        Timber.e("startService")
+        activity.startService(Intent(activity, ActiveTimerService::class.java))
+    }
 }

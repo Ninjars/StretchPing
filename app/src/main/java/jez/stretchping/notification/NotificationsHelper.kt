@@ -10,6 +10,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import jez.stretchping.MainActivity
 import jez.stretchping.R
+import timber.log.Timber
 
 internal object NotificationsHelper {
 
@@ -26,12 +27,14 @@ internal object NotificationsHelper {
             NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(channel)
+
+        Timber.e("createNotificationChannel: $NOTIFICATION_CHANNEL_ID")
     }
 
-    fun buildNotification(context: Context): Notification {
-        return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+    fun buildNotification(context: Context): Notification =
+        NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.service_notification_title))
-//            .setContentText(context.getString(R.string.foreground_service_sample_notification_description))
+            .setContentText(context.getString(R.string.service_notification_text))
             .setSmallIcon(R.drawable.ic_stretch_launcher_foreground)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setOngoing(true)
@@ -44,5 +47,7 @@ internal object NotificationsHelper {
                 )
             })
             .build()
-    }
+            .also {
+                Timber.e("built notification $it")
+            }
 }

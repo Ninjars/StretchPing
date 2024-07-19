@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package jez.stretchping.features.edittimer
 
+import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -56,6 +59,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import jez.stretchping.R
 import jez.stretchping.ui.components.IntSliderControl
 import jez.stretchping.ui.components.TimerControls
@@ -249,6 +255,9 @@ private fun AdvancedSettings(
                 )
 
                 // Auto Pause
+                val notificationPermissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS) {
+                    eventHandler(EditTimerEvent.UpdatePlayInBackground(true))
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -260,7 +269,13 @@ private fun AdvancedSettings(
                     )
                     Checkbox(
                         checked = state.playInBackground,
-                        onCheckedChange = { eventHandler(EditTimerEvent.UpdatePlayInBackground(it)) }
+                        onCheckedChange = { enabled ->
+                            if (enabled && !notificationPermissionState.status.isGranted) {
+                                notificationPermissionState.launchPermissionRequest()
+                            } else {
+                                eventHandler(EditTimerEvent.UpdatePlayInBackground(enabled))
+                            }
+                        }
                     )
                 }
 

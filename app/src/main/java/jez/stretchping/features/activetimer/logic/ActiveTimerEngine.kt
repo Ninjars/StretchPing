@@ -7,7 +7,7 @@ import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.view.ActiveTimerStateToViewState
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
-import jez.stretchping.service.ActiveTimerServiceProvider
+import jez.stretchping.service.ActiveTimerServiceDispatcher
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,11 +16,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class ActiveTimerEngine(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
-    private val serviceProvider: ActiveTimerServiceProvider,
     private val exerciseConfig: ExerciseConfig,
 ) : Consumer<ActiveTimerVM.Event> {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)

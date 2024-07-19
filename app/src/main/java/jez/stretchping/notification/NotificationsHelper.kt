@@ -35,7 +35,7 @@ internal object NotificationsHelper {
         NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.service_notification_title))
             .setContentText(context.getString(R.string.service_notification_text))
-            .setSmallIcon(R.drawable.ic_stretch_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_stretch_notification)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setOngoing(true)
             .setContentIntent(Intent(context, MainActivity::class.java).let { notificationIntent ->

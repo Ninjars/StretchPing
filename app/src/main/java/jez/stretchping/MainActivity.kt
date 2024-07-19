@@ -56,11 +56,11 @@ class MainActivity : ComponentActivity() {
     lateinit var navigationDispatcher: NavigationDispatcher
 
     @Inject
-    lateinit var serviceProvider: ActiveTimerServiceDispatcher
+    lateinit var serviceDispatcher: ActiveTimerServiceDispatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        serviceProvider.setController(ActiveTimerServiceController(this))
+        serviceDispatcher.setController(ActiveTimerServiceController(this))
 
         setContent {
             val navController = rememberNavController()

@@ -7,6 +7,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.notification.NotificationsHelper
 import timber.log.Timber
 
@@ -17,13 +18,15 @@ class ActiveTimerService : Service() {
     }
 
     private val binder = LocalBinder()
+    private var engine: ActiveTimerEngine ? = null
 
     override fun onBind(intent: Intent?): IBinder = binder.also{
         Timber.e("onBind")
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Timber.e("onStartCommand")
+    override fun onCreate() {
+        super.onCreate()
+        Timber.e("onCreate")
         // create the notification channel
         NotificationsHelper.createNotificationChannel(this)
 
@@ -38,17 +41,28 @@ class ActiveTimerService : Service() {
                 0
             }
         )
+    }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Timber.e("onStartCommand")
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         Timber.e("onDestroy")
-        // TODO: cleanup any running jobs
+        engine?.dispose()
+        engine = null
         super.onDestroy()
     }
 
     fun stopForegroundService() {
+        Timber.e("stopForegroundService")
         stopSelf()
     }
+
+    fun getOrCreateEngine(factory: (() -> Unit) -> ActiveTimerEngine): ActiveTimerEngine =
+        with (engine) {
+            Timber.e("getOrCreateEngine: already exists? ${engine != null}")
+            this ?: factory { stopForegroundService() }.also { engine = it }
+        }
 }

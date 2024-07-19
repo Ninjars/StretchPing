@@ -7,7 +7,6 @@ import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.view.ActiveTimerStateToViewState
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
-import jez.stretchping.service.ActiveTimerServiceDispatcher
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,9 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class ActiveTimerEngine(
+    private val onEndCallback: () -> Unit,
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
     private val exerciseConfig: ExerciseConfig,
@@ -63,6 +62,7 @@ class ActiveTimerEngine(
                     is Command.SequenceCompleted ->
                         withContext(Dispatchers.Main) {
                             navigationDispatcher.navigateTo(Route.Back)
+                            onEndCallback()
                         }
 
                     else -> Unit

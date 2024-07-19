@@ -24,6 +24,7 @@ class ActiveTimerServiceDispatcher @Inject constructor() {
     }
 
     fun startService() {
+        Timber.e("startService")
         controller.startService()
     }
 }

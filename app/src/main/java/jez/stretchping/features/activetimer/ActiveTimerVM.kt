@@ -13,7 +13,9 @@ import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
 import jez.stretchping.service.ActiveTimerServiceDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -28,21 +30,39 @@ class ActiveTimerVM @Inject constructor(
     private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
         .let { Json.decodeFromString<ExerciseConfig>(it) }
 
-    private val engine =
-        ActiveTimerEngine(eventScheduler, navigationDispatcher, exerciseConfig)
+    private var engine: ActiveTimerEngine? = null
 
-    val viewState: StateFlow<ActiveTimerViewState> = engine.viewState
+    private val mutableViewState: MutableStateFlow<ActiveTimerViewState> =
+        MutableStateFlow(ActiveTimerViewState(null, null))
+    val viewState: StateFlow<ActiveTimerViewState> = mutableViewState
 
     init {
         serviceDispatcher.startService()
-        serviceDispatcher.bind { boundService ->
 
+        serviceDispatcher.bind { boundService ->
+            val serviceEngine = boundService.getOrCreateEngine { onEndCallback ->
+                ActiveTimerEngine(
+                    onEndCallback,
+                    eventScheduler,
+                    navigationDispatcher,
+                    exerciseConfig
+                )
+            }
+
+            engine = serviceEngine
+
+            viewModelScope.launch {
+                serviceEngine.viewState.collect {
+                    mutableViewState.value = it
+                }
+            }
+
+            accept(Event.Start)
         }
-        accept(Event.Start)
     }
 
     override fun accept(event: Event) {
-        engine.accept(event)
+        engine?.accept(event)
 
         when (event) {
             Event.BackPressed -> serviceDispatcher.unbind()
@@ -57,11 +77,6 @@ class ActiveTimerVM @Inject constructor(
             accept(Event.Pause)
         }
         super.onPause(owner)
-    }
-
-    override fun onCleared() {
-        engine.dispose()
-        super.onCleared()
     }
 
     sealed class Event {

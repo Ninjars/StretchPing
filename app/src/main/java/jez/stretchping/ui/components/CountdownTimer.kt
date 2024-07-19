@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import jez.stretchping.utils.KeepScreenOn
+import kotlin.math.max
 
 @Composable
 fun CountdownTimer(
@@ -36,7 +37,7 @@ private fun CountdownTimer(
         start.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = (endTimeMillis - System.currentTimeMillis()).toInt(),
+                durationMillis = max(1, (endTimeMillis - System.currentTimeMillis())).toInt(),
                 easing = LinearEasing,
             ),
         )

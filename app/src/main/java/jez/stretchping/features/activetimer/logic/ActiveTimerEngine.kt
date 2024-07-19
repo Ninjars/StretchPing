@@ -26,6 +26,7 @@ class ActiveTimerEngine(
 
     private val mutableState = MutableStateFlow(
         State(
+            hasStarted = false,
             activeState = ActiveState(),
         )
     )
@@ -43,7 +44,10 @@ class ActiveTimerEngine(
 
             mutableState.compareAndSet(
                 mutableState.value,
-                currentState.copy(activeState = newActiveState)
+                currentState.copy(
+                    hasStarted = currentState.hasStarted || event is ActiveTimerVM.Event.Start,
+                    activeState = newActiveState
+                )
             )
 
             command?.let {
@@ -76,6 +80,7 @@ class ActiveTimerEngine(
         coroutineScope.cancel()
     }
 
+    fun hasStarted() = mutableState.value.hasStarted
 
     sealed class Command {
         data class StartSegment(
@@ -103,6 +108,7 @@ class ActiveTimerEngine(
     }
 
     data class State(
+        val hasStarted: Boolean,
         val activeState: ActiveState = ActiveState(),
     )
 

@@ -13,6 +13,7 @@ import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
 import jez.stretchping.service.ActiveTimerServiceDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,8 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActiveTimerVM @Inject constructor(
-    eventScheduler: EventScheduler,
-    navigationDispatcher: NavigationDispatcher,
+    private val eventScheduler: EventScheduler,
+    private val navigationDispatcher: NavigationDispatcher,
     private val serviceDispatcher: ActiveTimerServiceDispatcher,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
@@ -31,6 +32,7 @@ class ActiveTimerVM @Inject constructor(
         .let { Json.decodeFromString<ExerciseConfig>(it) }
 
     private var engine: ActiveTimerEngine? = null
+    private var engineViewModelJob: Job? = null
 
     private val mutableViewState: MutableStateFlow<ActiveTimerViewState> =
         MutableStateFlow(ActiveTimerViewState(null, null))
@@ -38,27 +40,6 @@ class ActiveTimerVM @Inject constructor(
 
     init {
         serviceDispatcher.startService()
-
-        serviceDispatcher.bind { boundService ->
-            val serviceEngine = boundService.getOrCreateEngine { onEndCallback ->
-                ActiveTimerEngine(
-                    onEndCallback,
-                    eventScheduler,
-                    navigationDispatcher,
-                    exerciseConfig
-                )
-            }
-
-            engine = serviceEngine
-
-            viewModelScope.launch {
-                serviceEngine.viewState.collect {
-                    mutableViewState.value = it
-                }
-            }
-
-            accept(Event.Start)
-        }
     }
 
     override fun accept(event: Event) {
@@ -75,8 +56,41 @@ class ActiveTimerVM @Inject constructor(
     override fun onPause(owner: LifecycleOwner) {
         if (!exerciseConfig.playInBackground) {
             accept(Event.Pause)
+            serviceDispatcher.unbind()
+            engineViewModelJob?.cancel()
         }
         super.onPause(owner)
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        bindService()
+    }
+
+    private fun bindService() {
+        serviceDispatcher.bind { boundService ->
+            val serviceEngine = boundService.getOrCreateEngine { onEndCallback ->
+                ActiveTimerEngine(
+                    onEndCallback,
+                    eventScheduler,
+                    navigationDispatcher,
+                    exerciseConfig
+                )
+            }
+
+            engine = serviceEngine
+
+            engineViewModelJob?.cancel()
+            engineViewModelJob = viewModelScope.launch {
+                serviceEngine.viewState.collect {
+                    mutableViewState.value = it
+                }
+            }
+
+            if (!serviceEngine.hasStarted()) {
+                accept(Event.Start)
+            }
+        }
     }
 
     sealed class Event {

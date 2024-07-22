@@ -63,6 +63,10 @@ class ActiveTimerService : Service() {
     fun getOrCreateEngine(factory: (() -> Unit) -> ActiveTimerEngine): ActiveTimerEngine =
         with (engine) {
             Timber.e("getOrCreateEngine: already exists? ${engine != null}")
-            this ?: factory { stopForegroundService() }.also { engine = it }
+            this ?: factory {
+                stopForegroundService()
+                engine?.dispose()
+                engine = null
+            }.also { engine = it }
         }
 }

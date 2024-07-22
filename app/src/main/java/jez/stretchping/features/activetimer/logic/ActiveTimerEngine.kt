@@ -11,6 +11,7 @@ import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -62,12 +63,19 @@ class ActiveTimerEngine(
                 )
 
                 when (it) {
-                    is Command.GoBack,
-                    is Command.SequenceCompleted ->
+                    is Command.GoBack ->
                         withContext(Dispatchers.Main) {
                             navigationDispatcher.navigateTo(Route.Back)
                             onEndCallback()
                         }
+
+                    is Command.SequenceCompleted -> {
+                        delay(1000)
+                        withContext(Dispatchers.Main) {
+                            navigationDispatcher.navigateTo(Route.Back)
+                            onEndCallback()
+                        }
+                    }
 
                     else -> Unit
                 }

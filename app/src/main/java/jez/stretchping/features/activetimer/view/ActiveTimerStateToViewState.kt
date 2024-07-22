@@ -1,14 +1,14 @@
 package jez.stretchping.features.activetimer.view
 
-import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.ActiveSegment
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
+import jez.stretchping.persistence.TimerConfig
 
 internal object ActiveTimerStateToViewState :
-        (ExerciseConfig, State) -> ActiveTimerViewState {
+        (TimerConfig, State) -> ActiveTimerViewState {
     override fun invoke(
-        config: ExerciseConfig,
+        config: TimerConfig,
         state: State,
     ): ActiveTimerViewState =
         ActiveTimerViewState(
@@ -30,7 +30,7 @@ internal object ActiveTimerStateToViewState :
             SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun State.toSegmentDescription(config: ExerciseConfig): SegmentDescription {
+    private fun State.toSegmentDescription(config: TimerConfig): SegmentDescription {
         val segmentLength =
             activeState.activeSegment?.spec?.durationSeconds
                 ?: config.activityDuration

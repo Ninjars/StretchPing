@@ -1,13 +1,11 @@
 package jez.stretchping.features.activetimer
 
+import jez.stretchping.persistence.EngineSettings
+import jez.stretchping.persistence.TimerConfig
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExerciseConfig(
-    val repCount: Int,
-    val activityDuration: Int,
-    val transitionDuration: Int,
-    val activePingsCount: Int,
-    val transitionPingsCount: Int,
-    val playInBackground: Boolean,
+    val engineSettings: EngineSettings,
+    val timerConfig: TimerConfig,
 )

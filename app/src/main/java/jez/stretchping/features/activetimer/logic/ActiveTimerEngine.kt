@@ -4,9 +4,10 @@ import androidx.core.util.Consumer
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
 import jez.stretchping.features.activetimer.ActiveTimerVM
-import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.view.ActiveTimerStateToViewState
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
+import jez.stretchping.persistence.EngineSettings
+import jez.stretchping.persistence.TimerConfig
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,8 @@ class ActiveTimerEngine(
     private val onEndCallback: () -> Unit,
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
-    private val exerciseConfig: ExerciseConfig,
+    private val engineSettings: EngineSettings,
+    private val timerConfig: TimerConfig,
 ) : Consumer<ActiveTimerVM.Event> {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
@@ -35,12 +37,12 @@ class ActiveTimerEngine(
     val viewState: StateFlow<ActiveTimerViewState> =
         mutableState.toViewState(
             scope = coroutineScope,
-        ) { state -> ActiveTimerStateToViewState(exerciseConfig, state) }
+        ) { state -> ActiveTimerStateToViewState(timerConfig, state) }
 
     override fun accept(event: ActiveTimerVM.Event) {
         coroutineScope.launch {
             val currentState = mutableState.value
-            val command = EventToCommand(exerciseConfig, currentState, event)
+            val command = EventToCommand(timerConfig, currentState, event)
             val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
 
             mutableState.compareAndSet(
@@ -55,8 +57,8 @@ class ActiveTimerEngine(
                 eventScheduler.planFutureActions(
                     coroutineScope = this,
                     eventsConfiguration = EventsConfiguration(
-                        exerciseConfig.activePingsCount,
-                        exerciseConfig.transitionPingsCount
+                        engineSettings.activePingsCount,
+                        engineSettings.transitionPingsCount,
                     ),
                     executedCommand = it,
                     eventConsumer = this@ActiveTimerEngine

@@ -1,13 +1,17 @@
 package jez.stretchping.features.activetimer.logic
 
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
-import jez.stretchping.features.activetimer.ExerciseConfig
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
+import jez.stretchping.persistence.TimerConfig
 
-internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
-    override fun invoke(exerciseConfig: ExerciseConfig, state: State, event: Event): Command? {
+internal object EventToCommand : (TimerConfig, State, Event) -> Command? {
+    override fun invoke(
+        config: TimerConfig,
+        state: State,
+        event: Event,
+    ): Command? {
         val activeSegment = state.activeState.activeSegment
         return when (event) {
             is Event.Pause ->
@@ -22,37 +26,37 @@ internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
 
             is Event.Start ->
                 when {
-                    activeSegment != null -> resume(exerciseConfig, state, activeSegment)
-                    else -> start(exerciseConfig, state)
+                    activeSegment != null -> resume(config, state, activeSegment)
+                    else -> start(config, state)
                 }
 
             is Event.OnSectionCompleted -> if (
                 isAtEnd(
-                    exerciseConfig.repCount,
+                    config.repCount,
                     state.activeState.repeatsCompleted,
                     state.activeState.queuedSegments
                 )
             ) {
                 Command.SequenceCompleted
             } else {
-                start(exerciseConfig, state)
+                start(config, state)
             }
 
             is Event.BackPressed -> Command.GoBack
         }
     }
 
-    private fun start(exerciseConfig: ExerciseConfig, state: State): Command {
+    private fun start(config: TimerConfig, state: State): Command {
         var isNewRep = false
         val currentSegments =
             state.activeState.queuedSegments.takeIf { it.isNotEmpty() }
-                ?: exerciseConfig.createSegments().also {
+                ?: config.createSegments().also {
                     isNewRep = true
                 }
         val nextSegment = currentSegments.first()
         val queuedSegments = currentSegments.drop(1)
         val isLast =
-            isAtEnd(exerciseConfig.repCount, state.activeState.repeatsCompleted, queuedSegments)
+            isAtEnd(config.repCount, state.activeState.repeatsCompleted, queuedSegments)
         return Command.StartSegment(
             System.currentTimeMillis(),
             nextSegment,
@@ -63,7 +67,7 @@ internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
     }
 
     private fun resume(
-        exerciseConfig: ExerciseConfig,
+        config: TimerConfig,
         state: State,
         activeSegment: ActiveState.ActiveSegment
     ): Command? =
@@ -71,7 +75,7 @@ internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
             null
         } else {
             val isLast = isAtEnd(
-                exerciseConfig.repCount,
+                config.repCount,
                 state.activeState.repeatsCompleted,
                 state.activeState.queuedSegments
             )
@@ -89,7 +93,7 @@ internal object EventToCommand : (ExerciseConfig, State, Event) -> Command? {
         remainingSegments: List<ActiveState.SegmentSpec>,
     ) = repCount > 0 && completedReps == repCount - 1 && remainingSegments.isEmpty()
 
-    private fun ExerciseConfig.createSegments(): List<ActiveState.SegmentSpec> =
+    private fun TimerConfig.createSegments(): List<ActiveState.SegmentSpec> =
         listOf(
             ActiveState.SegmentSpec(
                 durationSeconds = transitionDuration,

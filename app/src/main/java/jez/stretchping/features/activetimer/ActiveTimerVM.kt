@@ -54,7 +54,7 @@ class ActiveTimerVM @Inject constructor(
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!exerciseConfig.playInBackground) {
+        if (!exerciseConfig.engineSettings.playInBackground) {
             accept(Event.Pause)
             serviceDispatcher.unbind()
             engineViewModelJob?.cancel()
@@ -74,7 +74,8 @@ class ActiveTimerVM @Inject constructor(
                     onEndCallback,
                     eventScheduler,
                     navigationDispatcher,
-                    exerciseConfig
+                    exerciseConfig.engineSettings,
+                    exerciseConfig.timerConfig,
                 )
             }
 

@@ -14,9 +14,9 @@ internal object EditTimerStateToViewState :
                     Int.MIN_VALUE -> ""
                     else -> activeSegmentLength.toString()
                 },
-                transitionDuration = when (transitionLength) {
+                transitionDuration = when (transitionDuration) {
                     Int.MIN_VALUE -> ""
-                    else -> transitionLength.toString()
+                    else -> transitionDuration.toString()
                 },
                 repCount = when {
                     repCount == Int.MIN_VALUE -> ""
@@ -26,7 +26,7 @@ internal object EditTimerStateToViewState :
                 activePings = activePings,
                 transitionPings = transitionPings,
                 themeState = createThemeState(themeMode),
-                canStart = activeSegmentLength > 0 && transitionLength > 0 && repCount > Int.MIN_VALUE,
+                canStart = activeSegmentLength > 0 && transitionDuration > 0 && repCount > Int.MIN_VALUE,
                 playInBackground = playInBackground,
             )
         }

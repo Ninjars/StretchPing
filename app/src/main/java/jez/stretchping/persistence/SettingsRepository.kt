@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -27,20 +28,7 @@ enum class ThemeMode {
 class SettingsRepository @Inject constructor(@ApplicationContext private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-    val themeMode: Flow<ThemeMode> = context.dataStore.data
-        .map {
-            it[ThemePref]?.toThemeMode() ?: ThemeMode.System
-        }
-
-    suspend fun setThemeMode(mode: ThemeMode) {
-        withContext(Dispatchers.IO) {
-            context.dataStore.edit {
-                it[ThemePref] = mode.toInt()
-            }
-        }
-    }
-
-    val activityDuration: Flow<Int> = context.dataStore.data
+    private val activityDuration: Flow<Int> = context.dataStore.data
         .map {
             it[ActivityDurationPref] ?: 30
         }
@@ -53,7 +41,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    val transitionDuration: Flow<Int> = context.dataStore.data
+    private val transitionDuration: Flow<Int> = context.dataStore.data
         .map {
             it[TransitionDurationPref] ?: 5
         }
@@ -66,7 +54,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    val repCount: Flow<Int> = context.dataStore.data
+    private val repCount: Flow<Int> = context.dataStore.data
         .map {
             it[RepCountPref] ?: -1
         }
@@ -79,7 +67,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    val transitionPingsCount: Flow<Int> = context.dataStore.data
+    private val transitionPingsCount: Flow<Int> = context.dataStore.data
         .map {
             it[TransitionPingsPref] ?: 3
         }
@@ -92,7 +80,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    val activePingsCount: Flow<Int> = context.dataStore.data
+    private val activePingsCount: Flow<Int> = context.dataStore.data
         .map {
             it[ActivePingsPref] ?: 5
         }
@@ -105,7 +93,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    val playInBackground: Flow<Boolean> = context.dataStore.data
+    private val playInBackground: Flow<Boolean> = context.dataStore.data
         .map {
             it[PlayInBackgroundPref] ?: false
         }
@@ -114,6 +102,41 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         withContext(Dispatchers.IO) {
             context.dataStore.edit {
                 it[PlayInBackgroundPref] = shouldPause
+            }
+        }
+    }
+
+    val engineSettings: Flow<EngineSettings> =
+        combine(
+            activePingsCount,
+            transitionPingsCount,
+            playInBackground,
+        ) { activePings, transitionPings, playInBackground ->
+            EngineSettings(activePings, transitionPings, playInBackground)
+        }
+
+    val simpleTimerConfig: Flow<TimerConfig> =
+        combine(
+            repCount,
+            activityDuration,
+            transitionDuration,
+        ) { repCount, activityDuration, transitionDuration ->
+            TimerConfig(
+                repCount,
+                activityDuration,
+                transitionDuration,
+            )
+        }
+
+    val themeMode: Flow<ThemeMode> = context.dataStore.data
+        .map {
+            it[ThemePref]?.toThemeMode() ?: ThemeMode.System
+        }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        withContext(Dispatchers.IO) {
+            context.dataStore.edit {
+                it[ThemePref] = mode.toInt()
             }
         }
     }

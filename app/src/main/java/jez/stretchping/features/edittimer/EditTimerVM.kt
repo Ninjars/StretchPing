@@ -7,8 +7,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
 import jez.stretchping.features.activetimer.ExerciseConfig
+import jez.stretchping.persistence.EngineSettings
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
+import jez.stretchping.persistence.TimerConfig
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,33 +24,18 @@ class EditTimerVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
     private val settingsRepository: SettingsRepository,
 ) : Consumer<EditTimerEvent>, ViewModel() {
-    private val settingsState = combine(
-        settingsRepository.repCount,
-        settingsRepository.activityDuration,
-        settingsRepository.transitionDuration,
-        settingsRepository.activePingsCount,
-        settingsRepository.transitionPingsCount,
-    ) { repCount, activityDuration, transitionDuration, activePingsCount, transitionPingsCount ->
-        CombinedSettings(
-            repCount = repCount,
-            activityDuration = activityDuration,
-            transitionDuration = transitionDuration,
-            activePingsCount = activePingsCount,
-            transitionPingsCount = transitionPingsCount,
-        )
-    }
     private val state = combine(
-        settingsState,
+        settingsRepository.engineSettings,
+        settingsRepository.simpleTimerConfig,
         settingsRepository.themeMode,
-        settingsRepository.playInBackground,
-    ) { settingsState, themeMode, playInBackground ->
+    ) { engineSettings, timerConfig, themeMode ->
         State(
-            repCount = settingsState.repCount,
-            activeSegmentLength = settingsState.activityDuration,
-            transitionLength = settingsState.transitionDuration,
-            transitionPings = settingsState.transitionPingsCount,
-            activePings = settingsState.activePingsCount,
-            playInBackground = playInBackground,
+            repCount = timerConfig.repCount,
+            activeSegmentLength = timerConfig.activityDuration,
+            transitionDuration = timerConfig.transitionDuration,
+            transitionPings = engineSettings.transitionPingsCount,
+            activePings = engineSettings.activePingsCount,
+            playInBackground = engineSettings.playInBackground,
             themeMode = themeMode,
         )
     }.stateIn(
@@ -66,16 +53,20 @@ class EditTimerVM @Inject constructor(
     override fun accept(event: EditTimerEvent) {
         when (event) {
             EditTimerEvent.Start -> navigationDispatcher.navigateTo(
-                with (state.value) {
+                with(state.value) {
                     Route.ActiveTimer(
                         config = ExerciseConfig(
-                            repCount = repCount,
-                            activityDuration = activeSegmentLength,
-                            transitionDuration = transitionLength,
-                            activePingsCount = activePings,
-                            transitionPingsCount = transitionPings,
-                            playInBackground = playInBackground,
-                        )
+                            engineSettings = EngineSettings(
+                                activePingsCount = activePings,
+                                transitionPingsCount = transitionPings,
+                                playInBackground = playInBackground,
+                            ),
+                            timerConfig = TimerConfig(
+                                repCount = repCount,
+                                activityDuration = activeSegmentLength,
+                                transitionDuration = transitionDuration,
+                            ),
+                        ),
                     )
                 }
             )
@@ -117,7 +108,7 @@ class EditTimerVM @Inject constructor(
     data class State(
         val repCount: Int,
         val activeSegmentLength: Int,
-        val transitionLength: Int,
+        val transitionDuration: Int,
         val activePings: Int,
         val transitionPings: Int,
         val playInBackground: Boolean,
@@ -127,7 +118,7 @@ class EditTimerVM @Inject constructor(
             val Default = State(
                 repCount = 0,
                 activeSegmentLength = 0,
-                transitionLength = 0,
+                transitionDuration = 0,
                 activePings = 0,
                 transitionPings = 0,
                 playInBackground = false,

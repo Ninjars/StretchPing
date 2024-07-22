@@ -40,7 +40,7 @@ import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import jez.stretchping.features.activetimer.view.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
-import jez.stretchping.persistence.Settings
+import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.service.ActiveTimerServiceController
 import jez.stretchping.service.ActiveTimerServiceDispatcher
@@ -54,7 +54,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var settings: Settings
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var navigationDispatcher: NavigationDispatcher
@@ -75,7 +75,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val themeModeState = settings.themeMode.collectAsState(initial = ThemeMode.Unset)
+            val themeModeState =
+                settingsRepository.themeMode.collectAsState(initial = ThemeMode.Unset)
             ThemedContent(
                 themeMode = themeModeState.value,
             ) {

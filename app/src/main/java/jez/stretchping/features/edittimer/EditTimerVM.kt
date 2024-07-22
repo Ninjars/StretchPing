@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
 import jez.stretchping.features.activetimer.ExerciseConfig
-import jez.stretchping.persistence.Settings
+import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,14 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 class EditTimerVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
-    private val settings: Settings,
+    private val settingsRepository: SettingsRepository,
 ) : Consumer<EditTimerEvent>, ViewModel() {
     private val settingsState = combine(
-        settings.repCount,
-        settings.activityDuration,
-        settings.transitionDuration,
-        settings.activePingsCount,
-        settings.transitionPingsCount,
+        settingsRepository.repCount,
+        settingsRepository.activityDuration,
+        settingsRepository.transitionDuration,
+        settingsRepository.activePingsCount,
+        settingsRepository.transitionPingsCount,
     ) { repCount, activityDuration, transitionDuration, activePingsCount, transitionPingsCount ->
         CombinedSettings(
             repCount = repCount,
@@ -39,8 +39,8 @@ class EditTimerVM @Inject constructor(
     }
     private val state = combine(
         settingsState,
-        settings.themeMode,
-        settings.playInBackground,
+        settingsRepository.themeMode,
+        settingsRepository.playInBackground,
     ) { settingsState, themeMode, playInBackground ->
         State(
             repCount = settingsState.repCount,
@@ -92,25 +92,25 @@ class EditTimerVM @Inject constructor(
     private suspend fun updateSettings(command: SettingsCommand) {
         when (command) {
             is SettingsCommand.SetThemeMode ->
-                settings.setThemeMode(command.mode)
+                settingsRepository.setThemeMode(command.mode)
 
             is SettingsCommand.SetActivityDuration ->
-                settings.setActivityDuration(command.duration)
+                settingsRepository.setActivityDuration(command.duration)
 
             is SettingsCommand.SetTransitionDuration ->
-                settings.setTransitionDuration(command.duration)
+                settingsRepository.setTransitionDuration(command.duration)
 
             is SettingsCommand.SetRepCount ->
-                settings.setRepCount(command.count)
+                settingsRepository.setRepCount(command.count)
 
             is SettingsCommand.SetActivePings ->
-                settings.setActivePingsCount(command.count)
+                settingsRepository.setActivePingsCount(command.count)
 
             is SettingsCommand.SetTransitionPings ->
-                settings.setTransitionPingsCount(command.count)
+                settingsRepository.setTransitionPingsCount(command.count)
 
             is SettingsCommand.SetPlayInBackground ->
-                settings.setPlayInBackground(command.enabled)
+                settingsRepository.setPlayInBackground(command.enabled)
         }
     }
 

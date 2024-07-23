@@ -38,6 +38,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
+import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.view.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.persistence.SettingsRepository
@@ -61,6 +62,14 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var serviceDispatcher: ActiveTimerServiceDispatcher
+
+    @Inject
+    lateinit var soundManager: SoundManager
+
+    override fun onDestroy() {
+        soundManager.dispose()
+        super.onDestroy()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

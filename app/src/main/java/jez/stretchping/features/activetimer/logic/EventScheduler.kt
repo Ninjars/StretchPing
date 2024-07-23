@@ -127,6 +127,6 @@ class EventScheduler @Inject constructor(
     }
 
     fun dispose() {
-        soundManager.dispose()
+        jobs.forEach { it.cancel() }
     }
 }

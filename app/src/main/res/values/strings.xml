@@ -12,6 +12,7 @@
     <string name="timer_resume">Resume</string>
     <string name="timer_reset">Resume</string>
 
+    <string name="mode_announce">Get Ready</string>
     <string name="mode_active">Stretch</string>
     <string name="mode_transition">Break</string>
 
@@ -21,6 +22,7 @@
     <string name="transition_ping_title_count">Break Count-Out Pings</string>
     <string name="rep_count">Times to Repeat</string>
     <string name="settings">Settings</string>
+    <string name="rep_count_heading">Reps Completed: %s</string>
 
     <string name="theme_title">Theme</string>
     <string name="theme_system">System</string>

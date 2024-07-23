@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
-import jez.stretchping.features.activetimer.ExerciseConfig
+import jez.stretchping.features.activetimer.ActiveTimerConfig
 import jez.stretchping.persistence.EngineSettings
+import jez.stretchping.persistence.ExerciseConfig
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
-import jez.stretchping.persistence.TimerConfig
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class EditTimerVM @Inject constructor(
@@ -55,16 +56,25 @@ class EditTimerVM @Inject constructor(
             EditTimerEvent.Start -> navigationDispatcher.navigateTo(
                 with(state.value) {
                     Route.ActiveTimer(
-                        config = ExerciseConfig(
+                        config = ActiveTimerConfig(
                             engineSettings = EngineSettings(
                                 activePingsCount = activePings,
                                 transitionPingsCount = transitionPings,
                                 playInBackground = playInBackground,
                             ),
-                            timerConfig = TimerConfig(
-                                repCount = repCount,
-                                activityDuration = activeSegmentLength,
-                                transitionDuration = transitionDuration,
+                            exerciseConfig = ExerciseConfig(
+                                exerciseId = "Quick Exercise",
+                                exerciseName = "",
+                                sections = listOf(
+                                    ExerciseConfig.Section(
+                                        name = "",
+                                        repCount = max(1, repCount),
+                                        introDuration = 0,
+                                        activityDuration = activeSegmentLength,
+                                        transitionDuration = transitionDuration,
+                                    )
+                                ),
+                                repeat = repCount < 1,
                             ),
                         ),
                     )
@@ -126,14 +136,6 @@ class EditTimerVM @Inject constructor(
             )
         }
     }
-
-    private data class CombinedSettings(
-        val repCount: Int,
-        val activityDuration: Int,
-        val transitionDuration: Int,
-        val activePingsCount: Int,
-        val transitionPingsCount: Int,
-    )
 
     sealed class SettingsCommand {
         data class SetThemeMode(val mode: ThemeMode) : SettingsCommand()

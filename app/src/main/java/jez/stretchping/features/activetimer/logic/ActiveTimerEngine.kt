@@ -4,10 +4,13 @@ import androidx.core.util.Consumer
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
 import jez.stretchping.features.activetimer.ActiveTimerVM
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.ActiveSegment
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.SegmentSpec
 import jez.stretchping.features.activetimer.view.ActiveTimerStateToViewState
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
 import jez.stretchping.persistence.EngineSettings
-import jez.stretchping.persistence.TimerConfig
+import jez.stretchping.persistence.ExerciseConfig
+import jez.stretchping.utils.getIf
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,34 +25,68 @@ class ActiveTimerEngine(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
     private val engineSettings: EngineSettings,
-    private val timerConfig: TimerConfig,
+    exerciseConfig: ExerciseConfig,
 ) : Consumer<ActiveTimerVM.Event> {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private val eventToCommand = EventToCommand(exerciseConfig.repeat)
 
     private val mutableState = MutableStateFlow(
-        State(
-            hasStarted = false,
-            activeState = ActiveState(),
-        )
+        with(exerciseConfig.parse()) {
+            State(
+                hasStarted = false,
+                segments = this,
+                index = 0,
+                activeSegment = null,
+                completedReps = 0,
+            )
+        }
     )
 
     val viewState: StateFlow<ActiveTimerViewState> =
         mutableState.toViewState(
             scope = coroutineScope,
-        ) { state -> ActiveTimerStateToViewState(timerConfig, state) }
+        ) { state -> ActiveTimerStateToViewState(state) }
+
+    private fun ExerciseConfig.parse() =
+        sections.flatMapIndexed { index, section ->
+            listOfNotNull(
+                getIf(section.introDuration > 0) {
+                    SegmentSpec.Announcement(
+                        name = section.name,
+                        durationSeconds = section.introDuration,
+                    )
+                },
+            ) + (0 until section.repCount).flatMap {
+                listOfNotNull(
+                    getIf(section.transitionDuration > 0) {
+                        SegmentSpec.Transition(
+                            name = section.name,
+                            durationSeconds = section.transitionDuration,
+                            index = it,
+                            repCount = section.repCount,
+                        )
+                    },
+                    getIf(section.activityDuration > 0) {
+                        SegmentSpec.Stretch(
+                            name = section.name,
+                            durationSeconds = section.activityDuration,
+                            index = it,
+                            isLast = !repeat && index == sections.size - 1 && it == section.repCount - 1,
+                            repCount = section.repCount,
+                        )
+                    },
+                )
+            }
+        }
 
     override fun accept(event: ActiveTimerVM.Event) {
         coroutineScope.launch {
             val currentState = mutableState.value
-            val command = EventToCommand(timerConfig, currentState, event)
-            val newActiveState = ActiveTimerStateUpdater(currentState.activeState, command)
+            val command = eventToCommand(currentState, event)
 
             mutableState.compareAndSet(
                 mutableState.value,
-                currentState.copy(
-                    hasStarted = currentState.hasStarted || event is ActiveTimerVM.Event.Start,
-                    activeState = newActiveState
-                )
+                ActiveTimerStateUpdater(currentState, command),
             )
 
             command?.let {
@@ -88,22 +125,24 @@ class ActiveTimerEngine(
     sealed class Command {
         data class StartSegment(
             val startMillis: Long,
-            val segmentSpec: ActiveState.SegmentSpec,
-            val queuedSegments: List<ActiveState.SegmentSpec>,
-            val isNewRep: Boolean,
-            val isLastSegment: Boolean,
+            val index: Int,
+            val segmentSpec: SegmentSpec,
+        ) : Command()
+
+        data class RepeatExercise(
+            val startMillis: Long,
+            val segmentSpec: SegmentSpec,
         ) : Command()
 
         data class ResumeSegment(
             val startMillis: Long,
             val startFraction: Float,
-            val pausedSegment: ActiveState.ActiveSegment,
-            val isLastSegment: Boolean,
+            val pausedSegment: ActiveSegment,
         ) : Command()
 
         data class PauseSegment(
             val pauseMillis: Long,
-            val runningSegment: ActiveState.ActiveSegment,
+            val runningSegment: ActiveSegment,
         ) : Command()
 
         data object GoBack : Command()
@@ -112,13 +151,10 @@ class ActiveTimerEngine(
 
     data class State(
         val hasStarted: Boolean,
-        val activeState: ActiveState = ActiveState(),
-    )
-
-    data class ActiveState(
-        val queuedSegments: List<SegmentSpec> = emptyList(),
-        val activeSegment: ActiveSegment? = null,
-        val repeatsCompleted: Int = -1,
+        val segments: List<SegmentSpec>,
+        val index: Int,
+        val activeSegment: ActiveSegment?,
+        val completedReps: Int,
     ) {
         data class ActiveSegment(
             val startedAtTime: Long,
@@ -128,17 +164,41 @@ class ActiveTimerEngine(
             val pausedAtTime: Long?,
             val spec: SegmentSpec,
         ) {
-            val mode = spec.mode
             val remainingDurationMillis = endAtTime - (pausedAtTime ?: startedAtTime)
         }
 
-        data class SegmentSpec(
-            val durationSeconds: Int,
-            val mode: Mode,
-        ) {
-            enum class Mode {
-                Stretch,
-                Transition,
+        sealed interface SegmentSpec {
+            val name: String?
+            val durationSeconds: Int
+            val isLast: Boolean
+            val position: String
+
+            data class Announcement(
+                override val name: String?,
+                override val durationSeconds: Int,
+            ) : SegmentSpec {
+                override val isLast = false
+                override val position: String = ""
+            }
+
+            data class Transition(
+                override val name: String?,
+                override val durationSeconds: Int,
+                val index: Int,
+                val repCount: Int,
+            ) : SegmentSpec {
+                override val isLast = false
+                override val position: String = if (repCount > 1) "${index + 1} / $repCount" else ""
+            }
+
+            data class Stretch(
+                override val name: String?,
+                override val durationSeconds: Int,
+                override val isLast: Boolean,
+                val index: Int,
+                val repCount: Int,
+            ) : SegmentSpec {
+                override val position: String = if (repCount > 1) "${index + 1} / $repCount" else ""
             }
         }
     }

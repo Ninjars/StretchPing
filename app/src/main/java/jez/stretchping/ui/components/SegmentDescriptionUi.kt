@@ -21,6 +21,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import jez.stretchping.R
 import jez.stretchping.features.activetimer.view.ActiveTimerState
+import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode.Announce
+import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode.Stretch
+import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode.Transition
 import jez.stretchping.features.activetimer.view.SegmentDescription
 
 
@@ -33,7 +36,7 @@ fun SegmentDescriptionUi(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedText(
-            text = stringResource(state.mode.toStringRes()),
+            text = state.name.ifBlank { stringResource(state.mode.toStringRes()) },
         ) {
             Text(
                 text = it,
@@ -63,7 +66,7 @@ fun SegmentDescriptionUi(
             }
         }
         AnimatedText(
-            text = state.repsRemaining,
+            text = state.position,
         ) {
             Text(
                 text = it,
@@ -76,8 +79,9 @@ fun SegmentDescriptionUi(
 @StringRes
 private fun ActiveTimerState.Mode.toStringRes(): Int =
     when (this) {
-        ActiveTimerState.Mode.Stretch -> R.string.mode_active
-        ActiveTimerState.Mode.Transition -> R.string.mode_transition
+        Stretch -> R.string.mode_active
+        Transition -> R.string.mode_transition
+        Announce -> R.string.mode_announce
     }
 
 @Composable

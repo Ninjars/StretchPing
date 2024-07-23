@@ -28,14 +28,14 @@ class ActiveTimerVM @Inject constructor(
     private val serviceDispatcher: ActiveTimerServiceDispatcher,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
-    private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
-        .let { Json.decodeFromString<ExerciseConfig>(it) }
+    private val activeTimerConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
+        .let { Json.decodeFromString<ActiveTimerConfig>(it) }
 
     private var engine: ActiveTimerEngine? = null
     private var engineViewModelJob: Job? = null
 
     private val mutableViewState: MutableStateFlow<ActiveTimerViewState> =
-        MutableStateFlow(ActiveTimerViewState(null, null))
+        MutableStateFlow(ActiveTimerViewState(null, null, null))
     val viewState: StateFlow<ActiveTimerViewState> = mutableViewState
 
     init {
@@ -47,7 +47,7 @@ class ActiveTimerVM @Inject constructor(
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!exerciseConfig.engineSettings.playInBackground) {
+        if (!activeTimerConfig.engineSettings.playInBackground) {
             accept(Event.Pause)
             serviceDispatcher.unbind()
             engineViewModelJob?.cancel()
@@ -72,8 +72,8 @@ class ActiveTimerVM @Inject constructor(
                     onEndCallback,
                     eventScheduler,
                     navigationDispatcher,
-                    exerciseConfig.engineSettings,
-                    exerciseConfig.timerConfig,
+                    activeTimerConfig.engineSettings,
+                    activeTimerConfig.exerciseConfig,
                 )
             }
 
@@ -96,6 +96,6 @@ class ActiveTimerVM @Inject constructor(
         data object Start : Event()
         data object Pause : Event()
         data object BackPressed : Event()
-        data object OnSectionCompleted : Event()
+        data object OnSegmentCompleted : Event()
     }
 }

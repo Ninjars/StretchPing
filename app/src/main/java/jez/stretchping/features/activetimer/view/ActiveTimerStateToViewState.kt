@@ -1,19 +1,17 @@
 package jez.stretchping.features.activetimer.view
 
-import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.ActiveSegment
-import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State
-import jez.stretchping.persistence.TimerConfig
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.ActiveSegment
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.SegmentSpec
 
-internal object ActiveTimerStateToViewState :
-        (TimerConfig, State) -> ActiveTimerViewState {
+internal object ActiveTimerStateToViewState : (State) -> ActiveTimerViewState {
     override fun invoke(
-        config: TimerConfig,
         state: State,
     ): ActiveTimerViewState =
         ActiveTimerViewState(
-            activeTimer = state.activeState.activeSegment?.toState(),
-            segmentDescription = state.toSegmentDescription(config),
+            activeTimer = state.activeSegment?.toState(),
+            segmentDescription = state.toSegmentDescription(),
+            repCompleteHeading = state.completedReps.toHeadingString(),
         )
 
     private fun ActiveSegment.toState(): ActiveTimerState =
@@ -21,30 +19,34 @@ internal object ActiveTimerStateToViewState :
             startAtFraction = startedAtFraction,
             endTimeMillis = endAtTime,
             pausedAtFraction = pausedAtFraction,
-            mode = mode.map()
+            mode = spec.toMode()
         )
 
-    private fun SegmentSpec.Mode.map() =
+    private fun SegmentSpec.toMode() =
         when (this) {
-            SegmentSpec.Mode.Stretch -> ActiveTimerState.Mode.Stretch
-            SegmentSpec.Mode.Transition -> ActiveTimerState.Mode.Transition
+            is SegmentSpec.Announcement -> ActiveTimerState.Mode.Announce
+            is SegmentSpec.Stretch -> ActiveTimerState.Mode.Stretch
+            is SegmentSpec.Transition -> ActiveTimerState.Mode.Transition
         }
 
-    private fun State.toSegmentDescription(config: TimerConfig): SegmentDescription {
-        val segmentLength =
-            activeState.activeSegment?.spec?.durationSeconds
-                ?: config.activityDuration
-        val segmentMode =
-            activeState.activeSegment?.mode?.map() ?: ActiveTimerState.Mode.Stretch
-
-        return SegmentDescription(
-            mode = segmentMode,
-            duration = segmentLength.toDuration(),
-            repsRemaining = if (config.repCount < 1) "∞" else (config.repCount - activeState.repeatsCompleted).toRepCountString()
-        )
+    private fun State.toSegmentDescription(): SegmentDescription {
+        val segment = activeSegment
+        return if (segment == null) {
+            SegmentDescription(
+                name = "",
+                mode = ActiveTimerState.Mode.Announce,
+                duration = 0.toDuration(),
+                position = "",
+            )
+        } else {
+            SegmentDescription(
+                name = segment.spec.name ?: "",
+                mode = segment.spec.toMode(),
+                duration = segment.spec.durationSeconds.toDuration(),
+                position = segment.spec.position
+            )
+        }
     }
-
-    private fun Int.toRepCountString() = if (this < 0) "∞" else this.toString()
 
     private fun Int.toDuration(): Duration {
         val value = Integer.max(this, 0)
@@ -52,4 +54,11 @@ internal object ActiveTimerStateToViewState :
         val seconds = value % 60
         return Duration(minutes, seconds)
     }
+
+    private fun Int.toHeadingString(): String? =
+        if (this > 0) {
+            this.toString()
+        } else {
+            null
+        }
 }

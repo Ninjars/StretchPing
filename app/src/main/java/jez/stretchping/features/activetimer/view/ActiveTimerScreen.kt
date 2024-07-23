@@ -4,15 +4,17 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -21,11 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode
+import jez.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
+import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode
 import jez.stretchping.ui.components.ArcProgressBar
 import jez.stretchping.ui.components.CountdownTimer
 import jez.stretchping.ui.components.SegmentDescriptionUi
@@ -63,12 +67,16 @@ private fun ActiveTimerScreen(
                 })
             },
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.weight(1f)
-        ) {
-            MainContent(eventHandler) { state.value }
-        }
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = state.value.repCompleteHeading?.let {
+                stringResource(id = R.string.rep_count_heading, it)
+            } ?: "",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        MainContent(eventHandler) { state.value }
+        Spacer(modifier = Modifier.weight(1f))
         TimerControls(
             eventHandler = {
                 when (it) {
@@ -153,10 +161,12 @@ private fun ActiveTimerScreenPreview() {
                             mode = Mode.Stretch,
                         ),
                         segmentDescription = SegmentDescription(
+                            name = "Segment Name",
                             mode = Mode.Stretch,
                             duration = Duration(1, 15),
-                            repsRemaining = "∞",
+                            position = "1 / 5",
                         ),
+                        repCompleteHeading = "2",
                     )
                 }
             ) {}

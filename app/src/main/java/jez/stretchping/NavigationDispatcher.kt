@@ -2,7 +2,7 @@ package jez.stretchping
 
 import androidx.navigation.NavOptionsBuilder
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import jez.stretchping.features.activetimer.ExerciseConfig
+import jez.stretchping.features.activetimer.ActiveTimerConfig
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -14,7 +14,7 @@ sealed class Route {
     data object Back : Route()
     data object EditTimer : Route()
     data class ActiveTimer(
-        val config: ExerciseConfig,
+        val config: ActiveTimerConfig,
     ) : Route() {
         override val routeId by lazy { "${ActiveTimer::class.simpleName}/${Json.encodeToString(config)}" }
 

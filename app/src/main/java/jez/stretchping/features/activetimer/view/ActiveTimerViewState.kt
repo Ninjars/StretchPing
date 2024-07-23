@@ -3,12 +3,14 @@ package jez.stretchping.features.activetimer.view
 data class ActiveTimerViewState(
     val activeTimer: ActiveTimerState?,
     val segmentDescription: SegmentDescription?,
+    val repCompleteHeading: String?,
 )
 
 data class SegmentDescription(
+    val name: String,
     val mode: ActiveTimerState.Mode,
     val duration: Duration,
-    val repsRemaining: String,
+    val position: String,
 )
 
 
@@ -28,6 +30,6 @@ data class ActiveTimerState(
     val isPaused = pausedAtFraction != null
 
     enum class Mode {
-        Stretch, Transition,
+        Announce, Stretch, Transition,
     }
 }

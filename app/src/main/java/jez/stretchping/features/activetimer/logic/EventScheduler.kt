@@ -4,8 +4,8 @@ import androidx.core.util.Consumer
 import jez.stretchping.audio.GameSoundEffect
 import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.ActiveTimerVM
-import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.ActiveState.SegmentSpec.Mode
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
+import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.SegmentSpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,8 +49,7 @@ class EventScheduler @Inject constructor(
                     coroutineScope,
                     eventsConfiguration,
                     executedCommand.pausedSegment.remainingDurationMillis,
-                    executedCommand.pausedSegment.mode,
-                    executedCommand.isLastSegment,
+                    executedCommand.pausedSegment.spec,
                     eventConsumer,
                 )
 
@@ -59,8 +58,16 @@ class EventScheduler @Inject constructor(
                     coroutineScope,
                     eventsConfiguration,
                     executedCommand.segmentSpec.durationSeconds * 1000L,
-                    executedCommand.segmentSpec.mode,
-                    executedCommand.isLastSegment,
+                    executedCommand.segmentSpec,
+                    eventConsumer,
+                )
+
+            is Command.RepeatExercise ->
+                scheduleNextSegmentEvents(
+                    coroutineScope,
+                    eventsConfiguration,
+                    executedCommand.segmentSpec.durationSeconds * 1000L,
+                    executedCommand.segmentSpec,
                     eventConsumer,
                 )
         }
@@ -75,22 +82,22 @@ class EventScheduler @Inject constructor(
         coroutineScope: CoroutineScope,
         eventsConfiguration: EventsConfiguration,
         durationMillis: Long,
-        segmentMode: Mode,
-        isLastSegment: Boolean,
+        segmentSpec: SegmentSpec,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         jobs.add(
             coroutineScope.launch {
                 delay(durationMillis.milliseconds)
-                eventConsumer.accept(ActiveTimerVM.Event.OnSectionCompleted)
+                eventConsumer.accept(ActiveTimerVM.Event.OnSegmentCompleted)
 
-                if (isLastSegment) {
+                if (segmentSpec.isLast) {
                     soundManager.playSound(GameSoundEffect.Completed)
                 } else {
                     soundManager.playSound(
-                        when (segmentMode) {
-                            Mode.Stretch -> GameSoundEffect.ActiveSection
-                            Mode.Transition -> GameSoundEffect.TransitionSection
+                        when (segmentSpec) {
+                            is SegmentSpec.Stretch -> GameSoundEffect.ActiveSection
+                            is SegmentSpec.Transition -> GameSoundEffect.TransitionSection
+                            is SegmentSpec.Announcement -> GameSoundEffect.ActiveSection//TODO("support announcement TTS")
                         }
                     )
                 }
@@ -99,14 +106,12 @@ class EventScheduler @Inject constructor(
         enqueueCountdownPings(
             coroutineScope = coroutineScope,
             durationMillis = durationMillis,
-            pingCount = when (segmentMode) {
-                Mode.Stretch -> eventsConfiguration.activePings
-                Mode.Transition -> eventsConfiguration.transitionPings
+            pingCount = when (segmentSpec) {
+                is SegmentSpec.Stretch -> eventsConfiguration.activePings
+                is SegmentSpec.Transition,
+                is SegmentSpec.Announcement -> eventsConfiguration.transitionPings
             },
-            pingIntervalMillis = when (segmentMode) {
-                Mode.Stretch -> 1
-                Mode.Transition -> 1
-            } * 1000L,
+            pingIntervalMillis = 1000L,
         )
     }
 

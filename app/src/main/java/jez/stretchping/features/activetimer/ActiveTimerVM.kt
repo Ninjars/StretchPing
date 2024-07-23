@@ -44,13 +44,6 @@ class ActiveTimerVM @Inject constructor(
 
     override fun accept(event: Event) {
         engine?.accept(event)
-
-        when (event) {
-            Event.BackPressed -> serviceDispatcher.unbind()
-            Event.Pause,
-            Event.Start,
-            Event.OnSectionCompleted -> Unit
-        }
     }
 
     override fun onPause(owner: LifecycleOwner) {
@@ -65,6 +58,11 @@ class ActiveTimerVM @Inject constructor(
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         bindService()
+    }
+
+    override fun onCleared() {
+        serviceDispatcher.unbind()
+        super.onCleared()
     }
 
     private fun bindService() {

@@ -5,7 +5,6 @@ import android.media.AudioAttributes
 import android.media.AudioAttributes.USAGE_GAME
 import android.media.SoundPool
 import jez.stretchping.R
-import jez.stretchping.audio.GameSoundEffect.values
 
 enum class GameSoundEffect(val resourceId: Int) {
     Stop(R.raw.puzzle_success_xylophone_1_two_note_fast_wet_stereo),
@@ -25,7 +24,7 @@ class GameSoundEffectPlayer {
             .setAudioAttributes(AudioAttributes.Builder().setUsage(USAGE_GAME).build())
             .build()
 
-        soundIds = values().map { effect ->
+        soundIds = GameSoundEffect.entries.map { effect ->
             soundPool.load(context, effect.resourceId, 1)
         }
     }

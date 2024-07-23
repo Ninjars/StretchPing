@@ -3,7 +3,9 @@ package jez.stretchping.audio
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class SoundManager @Inject constructor(
     @ApplicationContext context: Context,
 ) {
@@ -15,7 +17,7 @@ class SoundManager @Inject constructor(
      The "warmup latency" on first playing a sound can be huge and arbitrary,
      so we can reduce the UX impact of that by playing a silent sound occasionally.
 
-     This is kinda ridiculous to still be necessary in 2023 tbh, but it looks like "lot latency"
+     This is kinda ridiculous to still be necessary in 2023 tbh, but it looks like "low latency"
      C++ libs like Oboe get around this by constantly streaming silence when not playing sound,
      so it could be that there's a significant physical hardware aspect creating some of the issue here.
      */

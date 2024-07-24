@@ -6,8 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
-import jez.stretchping.features.activetimer.ActiveTimerConfig
-import jez.stretchping.persistence.EngineSettings
 import jez.stretchping.persistence.ExerciseConfig
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
@@ -56,27 +54,20 @@ class EditTimerVM @Inject constructor(
             EditTimerEvent.Start -> navigationDispatcher.navigateTo(
                 with(state.value) {
                     Route.ActiveTimer(
-                        config = ActiveTimerConfig(
-                            engineSettings = EngineSettings(
-                                activePingsCount = activePings,
-                                transitionPingsCount = transitionPings,
-                                playInBackground = playInBackground,
+                        config = ExerciseConfig(
+                            exerciseId = "Quick Exercise",
+                            exerciseName = "",
+                            sections = listOf(
+                                ExerciseConfig.SectionConfig(
+                                    name = "",
+                                    sectionId = "Quick Section",
+                                    repCount = max(1, repCount),
+                                    introDuration = 0,
+                                    activityDuration = activeSegmentLength,
+                                    transitionDuration = transitionDuration,
+                                )
                             ),
-                            exerciseConfig = ExerciseConfig(
-                                exerciseId = "Quick Exercise",
-                                exerciseName = "",
-                                sections = listOf(
-                                    ExerciseConfig.SectionConfig(
-                                        name = "",
-                                        sectionId = "Quick Section",
-                                        repCount = max(1, repCount),
-                                        introDuration = 0,
-                                        activityDuration = activeSegmentLength,
-                                        transitionDuration = transitionDuration,
-                                    )
-                                ),
-                                repeat = repCount < 1,
-                            ),
+                            repeat = repCount < 1,
                         ),
                     )
                 }

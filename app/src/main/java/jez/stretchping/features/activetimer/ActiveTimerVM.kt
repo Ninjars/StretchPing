@@ -12,10 +12,14 @@ import jez.stretchping.Route
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
+import jez.stretchping.persistence.EngineSettings
+import jez.stretchping.persistence.ExerciseConfig
+import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.service.ActiveTimerServiceDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -26,13 +30,16 @@ class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
     private val serviceDispatcher: ActiveTimerServiceDispatcher,
+    private val settingsRepository: SettingsRepository,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
-    private val activeTimerConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
-        .let { Json.decodeFromString<ActiveTimerConfig>(it) }
+    private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
+        .let { Json.decodeFromString<ExerciseConfig>(it) }
 
     private var engine: ActiveTimerEngine? = null
     private var engineViewModelJob: Job? = null
+
+    private var cachedEngineSettings: EngineSettings? = null
 
     private val mutableViewState: MutableStateFlow<ActiveTimerViewState> =
         MutableStateFlow(ActiveTimerViewState(null, null, null))
@@ -40,6 +47,15 @@ class ActiveTimerVM @Inject constructor(
 
     init {
         serviceDispatcher.startService()
+        loadEngineSettings()
+    }
+
+    private fun loadEngineSettings(callback: ((EngineSettings) -> Unit)? = null) {
+        viewModelScope.launch {
+            cachedEngineSettings = settingsRepository.engineSettings.first().also {
+                callback?.invoke(it)
+            }
+        }
     }
 
     override fun accept(event: Event) {
@@ -47,7 +63,7 @@ class ActiveTimerVM @Inject constructor(
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!activeTimerConfig.engineSettings.playInBackground) {
+        if (cachedEngineSettings?.playInBackground != true) {
             accept(Event.Pause)
             serviceDispatcher.unbind()
             engineViewModelJob?.cancel()
@@ -57,7 +73,12 @@ class ActiveTimerVM @Inject constructor(
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        bindService()
+        val currentEngineSettings = cachedEngineSettings
+        if (currentEngineSettings == null) {
+            loadEngineSettings { bindService(it) }
+        } else {
+            bindService(currentEngineSettings)
+        }
     }
 
     override fun onCleared() {
@@ -65,15 +86,15 @@ class ActiveTimerVM @Inject constructor(
         super.onCleared()
     }
 
-    private fun bindService() {
+    private fun bindService(engineSettings: EngineSettings) {
         serviceDispatcher.bind { boundService ->
             val serviceEngine = boundService.getOrCreateEngine { onEndCallback ->
                 ActiveTimerEngine(
                     onEndCallback,
                     eventScheduler,
                     navigationDispatcher,
-                    activeTimerConfig.engineSettings,
-                    activeTimerConfig.exerciseConfig,
+                    engineSettings,
+                    exerciseConfig,
                 )
             }
 

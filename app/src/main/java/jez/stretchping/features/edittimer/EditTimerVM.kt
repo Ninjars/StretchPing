@@ -66,8 +66,9 @@ class EditTimerVM @Inject constructor(
                                 exerciseId = "Quick Exercise",
                                 exerciseName = "",
                                 sections = listOf(
-                                    ExerciseConfig.Section(
+                                    ExerciseConfig.SectionConfig(
                                         name = "",
+                                        sectionId = "Quick Section",
                                         repCount = max(1, repCount),
                                         introDuration = 0,
                                         activityDuration = activeSegmentLength,

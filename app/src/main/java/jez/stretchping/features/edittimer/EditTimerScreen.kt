@@ -9,8 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,10 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,11 +47,8 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -64,6 +56,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import jez.stretchping.R
 import jez.stretchping.ui.components.IntSliderControl
+import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
@@ -216,6 +209,7 @@ private fun Settings(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun AdvancedSettings(
     state: EditTimerViewState,
@@ -255,9 +249,10 @@ private fun AdvancedSettings(
                 )
 
                 // Auto Pause
-                val notificationPermissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS) {
-                    eventHandler(EditTimerEvent.UpdatePlayInBackground(true))
-                }
+                val notificationPermissionState =
+                    rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS) {
+                        eventHandler(EditTimerEvent.UpdatePlayInBackground(true))
+                    }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -313,69 +308,4 @@ private fun AdvancedSettings(
             )
         }
     }
-}
-
-@Composable
-private fun SelectOnFocusTextField(
-    text: String,
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = LocalTextStyle.current,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions(),
-    label: @Composable (() -> Unit)? = null,
-    onValueChanged: (String) -> Unit,
-) {
-    val fieldState = remember { mutableStateOf(TextFieldValue(text)) }
-
-    val newTextRange = with(fieldState.value) {
-        if (text != this.text) {
-            val oldPosition = this.selection.end
-            val newPosition = oldPosition + text.length - this.text.length
-            TextRange(newPosition)
-        } else {
-            fieldState.value.selection
-        }
-    }
-    fieldState.value = fieldState.value.copy(
-        text = text,
-        selection = newTextRange
-    )
-
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    LaunchedEffect(isFocused) {
-        fieldState.value = fieldState.value.copy(
-            selection = if (isFocused) {
-                TextRange(
-                    start = 0,
-                    end = fieldState.value.text.length
-                )
-            } else {
-                TextRange.Zero
-            }
-        )
-    }
-
-    TextField(
-        modifier = modifier,
-        interactionSource = interactionSource,
-        value = fieldState.value,
-        label = label,
-        textStyle = textStyle,
-        onValueChange = {
-            fieldState.value = it
-            onValueChanged(it.text)
-        },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true,
-        colors = with(MaterialTheme.colorScheme) {
-            TextFieldDefaults.colors(
-                focusedContainerColor = secondaryContainer,
-                unfocusedContainerColor = secondaryContainer,
-                focusedTextColor = onSecondaryContainer,
-                unfocusedTextColor = onSecondaryContainer,
-            )
-        },
-    )
 }

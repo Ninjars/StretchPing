@@ -5,3 +5,14 @@ package jez.stretchping.utils
  */
 fun <T> getIf(condition: Boolean, getter: () -> T): T? =
     if (condition) getter() else null
+
+fun String.toFlooredInt(): Int? =
+    if (this.isEmpty()) {
+        Int.MIN_VALUE
+    } else {
+        try {
+            this.toFloat().toInt()
+        } catch (e: NumberFormatException) {
+            null
+        }
+    }

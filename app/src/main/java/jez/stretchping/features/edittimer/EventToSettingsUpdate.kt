@@ -2,6 +2,7 @@ package jez.stretchping.features.edittimer
 
 import jez.stretchping.features.edittimer.EditTimerVM.SettingsCommand
 import jez.stretchping.persistence.ThemeMode
+import jez.stretchping.utils.toFlooredInt
 
 internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
     override fun invoke(event: EditTimerEvent): SettingsCommand? =
@@ -23,16 +24,5 @@ internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
             is EditTimerEvent.UpdatePlayInBackground -> SettingsCommand.SetPlayInBackground(event.enabled)
             is EditTimerEvent.UpdateActivePings -> SettingsCommand.SetActivePings(event.count)
             is EditTimerEvent.UpdateTransitionPings -> SettingsCommand.SetTransitionPings(event.count)
-        }
-
-    private fun String.toFlooredInt(): Int? =
-        if (this.isEmpty()) {
-            Int.MIN_VALUE
-        } else {
-            try {
-                this.toFloat().toInt()
-            } catch (e: NumberFormatException) {
-                null
-            }
         }
 }

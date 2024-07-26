@@ -55,9 +55,11 @@ class PlansListVM @Inject constructor(
 
             is PlansListUIEvent.StartPlanClicked ->
                 viewModelScope.launch {
-                    Route.ActiveTimer(
-                        config = state.first().plans.firstOrNull { it.exerciseId == event.id }
-                            ?: throw IllegalStateException("plan with id ${event.id} not found")
+                    navigationDispatcher.navigateTo(
+                        Route.ActiveTimer(
+                            config = state.first().plans.firstOrNull { it.exerciseId == event.id }
+                                ?: throw IllegalStateException("plan with id ${event.id} not found")
+                        )
                     )
                 }
 

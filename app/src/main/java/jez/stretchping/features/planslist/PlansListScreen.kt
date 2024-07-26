@@ -1,7 +1,9 @@
 package jez.stretchping.features.planslist
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -148,13 +150,18 @@ private fun EmptyState(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlanSectionView(
     plan: PlansListViewState.Plan,
     eventHandler: (PlansListUIEvent) -> Unit,
 ) {
     Card(
-        modifier = Modifier.clickable { eventHandler(PlansListUIEvent.OpenPlanClicked(plan.id)) }
+        modifier = Modifier
+            .combinedClickable(
+                onClick = { eventHandler(PlansListUIEvent.OpenPlanClicked(plan.id)) },
+                onDoubleClick = null
+            )
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),

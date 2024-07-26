@@ -11,12 +11,14 @@ import jez.stretchping.persistence.ExerciseConfigs
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.utils.IdProvider
 import jez.stretchping.utils.toViewState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface PlansListUIEvent {
@@ -55,10 +57,13 @@ class PlansListVM @Inject constructor(
 
             is PlansListUIEvent.StartPlanClicked ->
                 viewModelScope.launch {
+                    val config = withContext(Dispatchers.IO) {
+                        state.first().plans.firstOrNull { it.exerciseId == event.id }
+                            ?: throw IllegalStateException("plan with id ${event.id} not found")
+                    }
                     navigationDispatcher.navigateTo(
                         Route.ActiveTimer(
-                            config = state.first().plans.firstOrNull { it.exerciseId == event.id }
-                                ?: throw IllegalStateException("plan with id ${event.id} not found")
+                            config = config
                         )
                     )
                 }

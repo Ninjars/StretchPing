@@ -11,10 +11,12 @@ import jez.stretchping.persistence.ExerciseConfig
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.utils.IdProvider
 import jez.stretchping.utils.toViewState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface PlannerUIEvent {
@@ -49,15 +51,17 @@ class PlannerVM @Inject constructor(
 
     init {
         viewModelScope.launch {
-            settingsRepository.exerciseConfigs
-                .map {
-                    it.exercises
-                        .firstOrNull { exercise -> exercise.exerciseId == planId }
-                        ?.toState()
-                        ?: State(id = planId)
-                }.collect {
-                    mutableState.value = it
-                }
+            withContext(Dispatchers.Default) {
+                settingsRepository.exerciseConfigs
+                    .map {
+                        it.exercises
+                            .firstOrNull { exercise -> exercise.exerciseId == planId }
+                            ?.toState()
+                            ?: State(id = planId)
+                    }.collect {
+                        mutableState.value = it
+                    }
+            }
         }
     }
 

@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package jez.stretchping.features.planner
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -190,7 +193,10 @@ private fun EmptyContent(
                     .fillMaxWidth(0.8f)
                     .aspectRatio(1f)
                     .clip(CircleShape)
-                    .clickable { eventHandler(PlannerUIEvent.NewSectionClicked) }
+                    .combinedClickable(
+                        onClick = { eventHandler(PlannerUIEvent.NewSectionClicked) },
+                        onDoubleClick = null
+                    )
                     .background(color = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Spacer(modifier = Modifier.weight(1f))

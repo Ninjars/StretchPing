@@ -3,6 +3,7 @@ package jez.stretchping.features.activetimer.logic
 import androidx.core.util.Consumer
 import jez.stretchping.audio.GameSoundEffect
 import jez.stretchping.audio.SoundManager
+import jez.stretchping.audio.TTSManager
 import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.Command
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.SegmentSpec
@@ -21,6 +22,7 @@ data class EventsConfiguration(
 
 class EventScheduler @Inject constructor(
     private val soundManager: SoundManager,
+    private val ttsManager: TTSManager,
 ) {
     private val jobs: MutableList<Job> = mutableListOf()
 
@@ -87,19 +89,22 @@ class EventScheduler @Inject constructor(
     ) {
         jobs.add(
             coroutineScope.launch {
+                if (segmentSpec is SegmentSpec.Announcement) {
+                    segmentSpec.name?.let {
+                        ttsManager.announce(it)
+                    }
+                }
                 delay(durationMillis.milliseconds)
                 eventConsumer.accept(ActiveTimerVM.Event.OnSegmentCompleted)
 
                 if (segmentSpec.isLast) {
                     soundManager.playSound(GameSoundEffect.Completed)
                 } else {
-                    soundManager.playSound(
-                        when (segmentSpec) {
-                            is SegmentSpec.Stretch -> GameSoundEffect.ActiveSection
-                            is SegmentSpec.Transition -> GameSoundEffect.TransitionSection
-                            is SegmentSpec.Announcement -> GameSoundEffect.ActiveSection//TODO("support announcement TTS")
-                        }
-                    )
+                    when (segmentSpec) {
+                        is SegmentSpec.Stretch -> soundManager.playSound(GameSoundEffect.ActiveSection)
+                        is SegmentSpec.Transition -> soundManager.playSound(GameSoundEffect.TransitionSection)
+                        is SegmentSpec.Announcement -> soundManager.playSound(GameSoundEffect.TransitionSection)
+                    }
                 }
             }
         )

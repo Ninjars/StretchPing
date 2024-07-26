@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
+import jez.stretchping.audio.TTSManager
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
 import jez.stretchping.features.activetimer.view.ActiveTimerViewState
@@ -31,6 +32,7 @@ class ActiveTimerVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
     private val serviceDispatcher: ActiveTimerServiceDispatcher,
     private val settingsRepository: SettingsRepository,
+    private val ttsManager: TTSManager,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
@@ -47,6 +49,7 @@ class ActiveTimerVM @Inject constructor(
 
     init {
         serviceDispatcher.startService()
+        ttsManager.initialise()
         loadEngineSettings()
     }
 
@@ -83,6 +86,7 @@ class ActiveTimerVM @Inject constructor(
 
     override fun onCleared() {
         serviceDispatcher.unbind()
+        ttsManager.destroy()
         super.onCleared()
     }
 

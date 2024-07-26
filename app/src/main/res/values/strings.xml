@@ -3,6 +3,9 @@
     <string name="title_part_1">Stretch</string>
     <string name="title_part_2">Ping</string>
 
+    <string name="page_simple">Exercise</string>
+    <string name="page_plan">Plans</string>
+
     <string name="service_notification_name">StretchPing</string>
     <string name="service_notification_title">StretchPing</string>
     <string name="service_notification_text">Exercise Running</string>

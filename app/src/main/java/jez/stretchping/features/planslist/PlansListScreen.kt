@@ -98,9 +98,9 @@ private fun PopulatedState(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        item(key = "header", contentType = "header") {
-            PlanListHeaderView()
-        }
+//        item(key = "header", contentType = "header") {
+//            PlanListHeaderView()
+//        }
         items(
             items = plans,
             key = { it.id },
@@ -120,7 +120,7 @@ private fun EmptyState(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        PlanListHeaderView()
+//        PlanListHeaderView()
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()

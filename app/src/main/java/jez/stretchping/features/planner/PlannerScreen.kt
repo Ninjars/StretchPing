@@ -53,6 +53,7 @@ import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 import jez.stretchping.utils.toFlooredInt
+import kotlin.math.max
 
 @Composable
 fun PlannerScreen(
@@ -216,6 +217,9 @@ private fun PlanHeaderView(
     TextField(
         value = planName,
         onValueChange = { eventHandler(PlannerUIEvent.UpdatePlanName(it)) },
+        textStyle = LocalTextStyle.current.copy(
+            fontSize = 30.sp
+        ),
         label = { Text(text = stringResource(R.string.label_plan_name)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -237,10 +241,10 @@ private fun PlanSectionView(
             SelectOnFocusTextField(
                 text = section.name,
                 textStyle = LocalTextStyle.current.copy(
-                    fontSize = 30.sp
+                    fontSize = 22.sp
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions {
@@ -251,9 +255,7 @@ private fun PlanSectionView(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                it.toFlooredInt()?.let { int ->
-                    eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
-                }
+                eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
             }
 
             Row(
@@ -278,7 +280,7 @@ private fun PlanSectionView(
                     },
                 ) {
                     it.toFlooredInt()?.let { int ->
-                        eventHandler(PlannerUIEvent.UpdateSectionRepCount(section.id, int))
+                        eventHandler(PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, int)))
                     }
                 }
 
@@ -304,7 +306,7 @@ private fun PlanSectionView(
                         eventHandler(
                             PlannerUIEvent.UpdateSectionEntryTransitionDuration(
                                 section.id,
-                                int
+                                max(0, int)
                             )
                         )
                     }
@@ -333,7 +335,12 @@ private fun PlanSectionView(
                     },
                 ) {
                     it.toFlooredInt()?.let { int ->
-                        eventHandler(PlannerUIEvent.UpdateSectionRepDuration(section.id, int))
+                        eventHandler(
+                            PlannerUIEvent.UpdateSectionRepDuration(
+                                section.id,
+                                max(0, int)
+                            )
+                        )
                     }
                 }
 
@@ -356,7 +363,7 @@ private fun PlanSectionView(
                         eventHandler(
                             PlannerUIEvent.UpdateSectionRepTransitionDuration(
                                 section.id,
-                                int
+                                max(0, int)
                             )
                         )
                     }

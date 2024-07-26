@@ -1,6 +1,7 @@
 package jez.stretchping.features.planner
 
 import androidx.core.util.Consumer
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import jez.stretchping.utils.IdProvider
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,18 +34,31 @@ class PlannerVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
     private val settingsRepository: SettingsRepository,
     idProvider: IdProvider,
+    savedStateHandle: SavedStateHandle,
 ) : Consumer<PlannerUIEvent>, ViewModel() {
-
-    // TODO: launch with a plan id and initialise from there
-    private val initialState: State = State(id = idProvider.getId())
+    private val planId = savedStateHandle.get<String>(Route.Planner.routePlanId)!!
+    private val initialState: State = State()
     private val mutableState = MutableStateFlow(initialState)
     private val plannerEventToState = PlannerEventToState(idProvider)
 
     val viewState: StateFlow<PlannerViewState> =
         mutableState.toViewState(
             scope = viewModelScope,
-            initial = initialState
+            initial = State()
         ) { state -> PlannerStateToViewState(state) }
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.exerciseConfigs
+                .map {
+                    it.exercises
+                        .first { exercise -> exercise.exerciseId == planId }
+                        .toState()
+                }.collect {
+                    mutableState.value = it
+                }
+        }
+    }
 
     override fun accept(event: PlannerUIEvent) {
         viewModelScope.launch {
@@ -87,8 +102,28 @@ class PlannerVM @Inject constructor(
             )
         }
 
+    private fun ExerciseConfig.toState() =
+        State(
+            id = exerciseId,
+            planName = exerciseName,
+            repeat = repeat,
+            sections = sections.toState(),
+        )
+
+    private fun List<ExerciseConfig.SectionConfig>.toState() =
+        map {
+            Section(
+                id = it.sectionId,
+                name = it.name,
+                repCount = it.repCount,
+                entryTransitionDuration = it.introDuration,
+                repDuration = it.activityDuration,
+                repTransitionDuration = it.transitionDuration,
+            )
+        }
+
     data class State(
-        val id: String,
+        val id: String = "",
         val planName: String = "",
         val repeat: Boolean = false,
         val sections: List<Section> = emptyList(),
@@ -115,56 +150,5 @@ class PlannerVM @Inject constructor(
                 repTransitionDuration = 3,
             )
         }
-    }
-
-    class PlannerEventToState(private val idProvider: IdProvider) :
-            (State, PlannerUIEvent) -> State {
-        override fun invoke(state: State, event: PlannerUIEvent): State =
-            when (event) {
-                is PlannerUIEvent.NewSectionClicked ->
-                    state.copy(sections = state.sections + Section.create(idProvider.getId()))
-
-                is PlannerUIEvent.UpdatePlanName ->
-                    state.copy(planName = event.value)
-
-                is PlannerUIEvent.UpdateIsRepeated ->
-                    state.copy(repeat = event.value)
-
-                is PlannerUIEvent.UpdateSectionEntryTransitionDuration ->
-                    state.copy(sections = state.sections.update(event.id) {
-                        it.copy(entryTransitionDuration = event.value)
-                    })
-
-                is PlannerUIEvent.UpdateSectionName ->
-                    state.copy(sections = state.sections.update(event.id) {
-                        it.copy(name = event.value)
-                    })
-
-                is PlannerUIEvent.UpdateSectionRepCount ->
-                    state.copy(sections = state.sections.update(event.id) {
-                        it.copy(repCount = event.value)
-                    })
-
-                is PlannerUIEvent.UpdateSectionRepDuration ->
-                    state.copy(sections = state.sections.update(event.id) {
-                        it.copy(repDuration = event.value)
-                    })
-
-                is PlannerUIEvent.UpdateSectionRepTransitionDuration ->
-                    state.copy(sections = state.sections.update(event.id) {
-                        it.copy(repTransitionDuration = event.value)
-                    })
-
-                PlannerUIEvent.Start -> state
-            }
-
-        private fun List<Section>.update(id: String, func: (Section) -> Section) =
-            map {
-                if (it.id == id) {
-                    func(it)
-                } else {
-                    it
-                }
-            }
     }
 }

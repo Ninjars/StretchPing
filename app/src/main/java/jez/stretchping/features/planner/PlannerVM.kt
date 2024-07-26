@@ -69,7 +69,9 @@ class PlannerVM @Inject constructor(
 
         viewModelScope.launch {
             mutableState.collect {
-                settingsRepository.saveExercise(it.toExerciseConfig())
+                if (it.canStart) {
+                    settingsRepository.saveExercise(it.toExerciseConfig())
+                }
             }
         }
 
@@ -129,7 +131,12 @@ class PlannerVM @Inject constructor(
         val sections: List<Section> = emptyList(),
     ) {
         val canStart = sections.isNotEmpty()
-                && sections.firstOrNull { it.repCount == 0 || it.repDuration == 0 } == null
+                && sections.none {
+            it.repCount < 1
+                    || it.repDuration < 1
+                    || it.entryTransitionDuration < 0
+                    || it.repTransitionDuration < 0
+        }
     }
 
     data class Section(

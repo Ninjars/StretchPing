@@ -176,6 +176,7 @@ private fun PlanSectionView(
                 )
             }
             Button(
+                enabled = plan.canStart,
                 onClick = { eventHandler(PlansListUIEvent.StartPlanClicked(plan.id)) },
                 shape = CircleShape,
                 contentPadding = PaddingValues(8.dp),
@@ -206,11 +207,13 @@ class PreviewPlansProvider : PreviewParameterProvider<PlansListViewState> {
                     id = "1",
                     name = "Plan 1",
                     isLooping = true,
+                    canStart = true,
                 ),
                 PlansListViewState.Plan(
                     id = "2",
                     name = "Plan 2",
                     isLooping = false,
+                    canStart = false,
                 ),
             )
         ),

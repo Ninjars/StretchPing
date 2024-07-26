@@ -7,5 +7,6 @@ data class PlansListViewState(
         val id: String,
         val name: String,
         val isLooping: Boolean,
+        val canStart: Boolean,
     )
 }

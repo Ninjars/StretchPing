@@ -13,6 +13,7 @@ sealed class Route {
 
     data object Back : Route()
     data object EditTimer : Route()
+    data object PlansList : Route()
     data class ActiveTimer(
         val config: ExerciseConfig,
     ) : Route() {
@@ -25,6 +26,17 @@ sealed class Route {
         companion object {
             val baseRouteId by lazy { "${ActiveTimer::class.simpleName}/{$routeConfig}" }
             const val routeConfig = "config"
+        }
+    }
+
+    data class Planner(
+        val planId: String
+    ) : Route() {
+        override val routeId by lazy { "${Planner::class.java}/$planId" }
+
+        companion object {
+            val baseRouteId by lazy { "${Planner::class.java}/{$routePlanId}" }
+            const val routePlanId = "id"
         }
     }
 }

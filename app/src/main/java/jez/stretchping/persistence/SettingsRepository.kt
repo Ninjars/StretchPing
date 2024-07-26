@@ -170,6 +170,17 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
+    suspend fun deleteExercise(id: String) {
+        editDataStore { prefs ->
+            val current = cachedExercises.value
+            val updated = current.copy(
+                exercises = current.exercises.filterNot { it.exerciseId == id }
+            )
+            prefs[ExercisesPref] = Json.encodeToString(updated)
+            cachedExercises.value = updated
+        }
+    }
+
     private suspend fun editDataStore(func: (MutablePreferences) -> Unit) =
         withContext(Dispatchers.IO) {
             context.dataStore.edit {

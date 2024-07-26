@@ -31,6 +31,9 @@
 
     <string name="background_play">Continue in background</string>
 
+    <string name="plans">Plans</string>
+    <string name="add_plan">Create Plan</string>
+
     <string name="label_plan_name">Plan Name</string>
     <string name="label_plan_repeat">Loop?</string>
     <string name="label_section_name">Section Name (optional)</string>
@@ -38,4 +41,5 @@
     <string name="desc_add_plan_section">Add section</string>
     <string name="desc_repeat_toggle_enabled">will repeat</string>
     <string name="desc_repeat_toggle_disabled">single playthrough</string>
+
 </resources>

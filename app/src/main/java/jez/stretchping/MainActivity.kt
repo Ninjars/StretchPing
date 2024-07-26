@@ -41,6 +41,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.view.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
+import jez.stretchping.features.planner.PlannerScreen
+import jez.stretchping.features.planslist.PlansListScreen
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.service.ActiveTimerServiceController
@@ -108,6 +110,9 @@ class MainActivity : ComponentActivity() {
                             composable(Route.EditTimer.routeId) {
                                 EditTimerScreen(hiltViewModel())
                             }
+                            composable(Route.PlansList.routeId) {
+                                PlansListScreen(hiltViewModel())
+                            }
                             composable(
                                 Route.ActiveTimer.baseRouteId,
                                 arguments = listOf(
@@ -117,6 +122,16 @@ class MainActivity : ComponentActivity() {
                                 )
                             ) {
                                 ActiveTimerScreen(hiltViewModel())
+                            }
+                            composable(
+                                Route.Planner.baseRouteId,
+                                arguments = listOf(
+                                    navArgument(Route.Planner.routePlanId) {
+                                        type = NavType.StringType
+                                    }
+                                )
+                            ) {
+                                PlannerScreen(hiltViewModel())
                             }
                         }
                     }

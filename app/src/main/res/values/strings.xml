@@ -16,7 +16,7 @@
     <string name="timer_reset">Resume</string>
 
     <string name="mode_announce">Get Ready</string>
-    <string name="mode_active">Stretch</string>
+    <string name="mode_active">Go!</string>
     <string name="mode_transition">Break</string>
 
     <string name="active_duration">Stretch Seconds</string>

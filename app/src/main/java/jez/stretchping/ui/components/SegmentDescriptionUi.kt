@@ -12,8 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -35,13 +33,27 @@ fun SegmentDescriptionUi(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AnimatedText(
-            text = state.name.ifBlank { stringResource(state.mode.toStringRes()) },
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = it,
-                fontSize = 24.sp
-            )
+            AnimatedText(
+                text = stringResource(state.mode.toStringRes()),
+            ) {
+                Text(
+                    text = it,
+                    fontSize = 24.sp
+                )
+            }
+            if (state.name.isNotBlank()) {
+                AnimatedText(
+                    text = state.name,
+                ) {
+                    Text(
+                        text = it,
+                        fontSize = 24.sp
+                    )
+                }
+            }
         }
         Row {
             AnimatedText(
@@ -56,12 +68,6 @@ fun SegmentDescriptionUi(
                             append("s")
                         }
                     },
-                    modifier = Modifier.drawBehind {
-                        drawCircle(
-                            color = textBackground,
-                            radius = this.size.maxDimension / 2f + 8
-                        )
-                    }
                 )
             }
         }

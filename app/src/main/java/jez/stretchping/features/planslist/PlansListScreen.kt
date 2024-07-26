@@ -62,6 +62,7 @@ private fun PlansListScreen(
         Content(viewState, eventHandler)
         FloatingActionButton(
             onClick = { eventHandler(PlansListUIEvent.NewPlanClicked) },
+            shape = CircleShape,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
@@ -145,7 +146,6 @@ private fun EmptyState(
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Spacer(modifier = Modifier.weight(1f))
-
             }
         }
     }

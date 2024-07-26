@@ -1,14 +1,18 @@
 package jez.stretchping.features.planner
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -16,12 +20,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Loop
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,6 +35,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -69,6 +73,7 @@ private fun PlannerScreen(
         Content(viewState, eventHandler)
         FloatingActionButton(
             onClick = { eventHandler(PlannerUIEvent.NewSectionClicked) },
+            shape = CircleShape,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
@@ -95,6 +100,13 @@ private fun PlannerScreen(
                         stringResource(R.string.desc_repeat_toggle_disabled)
                     }
                 )
+                if (!this) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
             }
         }
         TimerControls(
@@ -125,6 +137,18 @@ private fun Content(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val state = viewState.value
+    if (state.sections.isEmpty()) {
+        EmptyContent(state.planName, eventHandler)
+    } else {
+        PopulatedContent(state, eventHandler)
+    }
+}
+
+@Composable
+private fun PopulatedContent(
+    state: PlannerViewState,
+    eventHandler: (PlannerUIEvent) -> Unit,
+) {
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -144,6 +168,47 @@ private fun Content(
 }
 
 @Composable
+private fun EmptyContent(
+    planName: String,
+    eventHandler: (PlannerUIEvent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        PlanHeaderView(planName, eventHandler)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .aspectRatio(1f)
+                    .clip(CircleShape)
+                    .clickable { eventHandler(PlannerUIEvent.NewSectionClicked) }
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp)
+                )
+                Text(
+                    text = stringResource(R.string.desc_add_plan_section),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
 private fun PlanHeaderView(
     planName: String,
     eventHandler: (PlannerUIEvent) -> Unit,
@@ -152,45 +217,10 @@ private fun PlanHeaderView(
         value = planName,
         onValueChange = { eventHandler(PlannerUIEvent.UpdatePlanName(it)) },
         label = { Text(text = stringResource(R.string.label_plan_name)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         modifier = Modifier.fillMaxWidth()
     )
-}
-
-@Composable
-private fun PlanRepeatView(
-    repeat: Boolean,
-    eventHandler: (PlannerUIEvent) -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.label_plan_repeat),
-            modifier = Modifier.padding(end = 8.dp)
-        )
-        IconToggleButton(
-            checked = repeat,
-            onCheckedChange = { eventHandler(PlannerUIEvent.UpdateIsRepeated(it)) },
-        ) {
-            Crossfade(targetState = repeat) { isRepeating ->
-                Icon(
-                    imageVector = if (isRepeating) {
-                        Icons.Default.Loop
-                    } else {
-                        Icons.Default.PlayArrow
-                    },
-                    contentDescription = if (isRepeating) {
-                        stringResource(R.string.desc_repeat_toggle_enabled)
-                    } else {
-                        stringResource(R.string.desc_repeat_toggle_disabled)
-                    },
-                )
-
-            }
-        }
-    }
 }
 
 @Composable
@@ -203,12 +233,28 @@ private fun PlanSectionView(
             modifier = Modifier.fillMaxWidth()
         ) {
             val focusManager = LocalFocusManager.current
-            TextField(
-                value = section.name,
-                onValueChange = { eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it)) },
-                label = { Text(text = stringResource(R.string.label_section_name)) },
+            // Name
+            SelectOnFocusTextField(
+                text = section.name,
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 30.sp
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Next,
+                ),
+                keyboardActions = KeyboardActions {
+                    focusManager.moveFocus(FocusDirection.Next)
+                },
+                label = {
+                    Text(stringResource(id = R.string.label_section_name))
+                },
                 modifier = Modifier.fillMaxWidth()
-            )
+            ) {
+                it.toFlooredInt()?.let { int ->
+                    eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -332,7 +378,7 @@ private fun ActiveTimerScreenPreview() {
                 viewState = previewState {
                     PlannerViewState(
                         planName = "",
-                        repeat = true,
+                        repeat = false,
                         canStart = false,
                         sections = listOf(
                             PlannerViewState.Section(

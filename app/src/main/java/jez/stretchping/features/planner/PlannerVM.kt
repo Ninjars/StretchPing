@@ -52,8 +52,9 @@ class PlannerVM @Inject constructor(
             settingsRepository.exerciseConfigs
                 .map {
                     it.exercises
-                        .first { exercise -> exercise.exerciseId == planId }
-                        .toState()
+                        .firstOrNull { exercise -> exercise.exerciseId == planId }
+                        ?.toState()
+                        ?: State(id = planId)
                 }.collect {
                     mutableState.value = it
                 }

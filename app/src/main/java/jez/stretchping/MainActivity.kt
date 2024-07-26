@@ -41,6 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.view.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
+import jez.stretchping.features.home.HomeScreen
 import jez.stretchping.features.planner.PlannerScreen
 import jez.stretchping.features.planslist.PlansListScreen
 import jez.stretchping.persistence.SettingsRepository
@@ -105,8 +106,11 @@ class MainActivity : ComponentActivity() {
                         )
                         NavHost(
                             navController = navController,
-                            startDestination = Route.EditTimer.routeId
+                            startDestination = Route.Home.routeId
                         ) {
+                            composable(Route.Home.routeId) {
+                                HomeScreen(hiltViewModel(), hiltViewModel())
+                            }
                             composable(Route.EditTimer.routeId) {
                                 EditTimerScreen(hiltViewModel())
                             }

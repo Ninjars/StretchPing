@@ -12,6 +12,7 @@ sealed class Route {
     open val navOptions: NavOptionsBuilder.() -> Unit = { }
 
     data object Back : Route()
+    data object Home : Route()
     data object EditTimer : Route()
     data object PlansList : Route()
     data class ActiveTimer(

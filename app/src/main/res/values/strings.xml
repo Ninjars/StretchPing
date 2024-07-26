@@ -33,6 +33,7 @@
 
     <string name="plans">Plans</string>
     <string name="add_plan">Create Plan</string>
+    <string name="desc_start_plan">Start Plan</string>
 
     <string name="label_plan_name">Plan Name</string>
     <string name="label_plan_repeat">Loop?</string>

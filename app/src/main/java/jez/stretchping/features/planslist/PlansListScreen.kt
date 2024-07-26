@@ -20,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -98,9 +99,6 @@ private fun PopulatedState(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-//        item(key = "header", contentType = "header") {
-//            PlanListHeaderView()
-//        }
         items(
             items = plans,
             key = { it.id },
@@ -120,7 +118,6 @@ private fun EmptyState(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-//        PlanListHeaderView()
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
@@ -152,16 +149,6 @@ private fun EmptyState(
 }
 
 @Composable
-private fun PlanListHeaderView() {
-    Text(
-        text = stringResource(R.string.plans),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
 private fun PlanSectionView(
     plan: PlansListViewState.Plan,
     eventHandler: (PlansListUIEvent) -> Unit,
@@ -188,12 +175,24 @@ private fun PlanSectionView(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = stringResource(R.string.desc_repeat_toggle_enabled),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(36.dp)
-            )
+            Button(
+                onClick = { eventHandler(PlansListUIEvent.StartPlanClicked(plan.id)) },
+                shape = CircleShape,
+                contentPadding = PaddingValues(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = stringResource(R.string.desc_start_plan),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+            }
         }
     }
 }

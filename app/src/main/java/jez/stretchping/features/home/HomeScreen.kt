@@ -1,27 +1,26 @@
 package jez.stretchping.features.home
 
-import androidx.compose.animation.animateColorAsState
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.vectorResource
 import jez.stretchping.R
 import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.features.edittimer.EditTimerVM
@@ -36,28 +35,9 @@ fun HomeScreen(
     plansListVM: PlansListVM,
 ) {
     val pagerState = rememberPagerState(pageCount = { 2 })
-    Column(
-        modifier = Modifier.padding(top = 16.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            PageHeader(
-                text = stringResource(id = R.string.page_simple),
-                pagerState = pagerState,
-                index = 0,
-            )
-            PageHeader(
-                text = stringResource(id = R.string.page_plan),
-                pagerState = pagerState,
-                index = 1,
-            )
-        }
+    Column {
         HorizontalPager(
+            modifier = Modifier.weight(1f),
             state = pagerState,
         ) { page ->
             when (page) {
@@ -66,31 +46,45 @@ fun HomeScreen(
                 else -> throw IllegalStateException("Page $page unsupported")
             }
         }
+        NavigationBar {
+            NavBarItem(
+                pagerState = pagerState,
+                index = 0,
+                label = R.string.page_simple,
+                icon = ImageVector.vectorResource(R.drawable.nav_physical_therapy),
+            )
+            NavBarItem(
+                pagerState = pagerState,
+                index = 1,
+                label = R.string.page_plan,
+                icon = Icons.AutoMirrored.Default.List,
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@ExperimentalFoundationApi
 @Composable
-private fun RowScope.PageHeader(
-    text: String,
+private fun RowScope.NavBarItem(
     pagerState: PagerState,
     index: Int,
+    @StringRes label: Int,
+    icon: ImageVector,
 ) {
     val scope = rememberCoroutineScope()
-    val color =
-        animateColorAsState(targetValue = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .weight(1f)
-            .background(
-                color = color.value
+    val onClick = remember(index) {
+        { scope.launch { pagerState.animateScrollToPage(index, animationSpec = tween()) } }
+    }
+    val text = stringResource(id = label)
+    NavigationBarItem(
+        selected = pagerState.currentPage == index,
+        onClick = { onClick() },
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = text
             )
-            .clickable(role = Role.Tab) {
-                scope.launch { pagerState.scrollToPage(index) }
-            }
-            .padding(8.dp)
+        },
+        label = { Text(text = text) },
     )
 }

@@ -2,10 +2,10 @@ package jez.stretchping.audio
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ViewModelScoped
 class SoundManager @Inject constructor(
     @ApplicationContext context: Context,
 ) {

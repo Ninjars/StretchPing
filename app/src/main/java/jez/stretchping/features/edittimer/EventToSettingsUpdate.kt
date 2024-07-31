@@ -1,14 +1,12 @@
 package jez.stretchping.features.edittimer
 
 import jez.stretchping.features.edittimer.EditTimerVM.SettingsCommand
-import jez.stretchping.persistence.ThemeMode
 import jez.stretchping.utils.toFlooredInt
 
 internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
     override fun invoke(event: EditTimerEvent): SettingsCommand? =
         when (event) {
             is EditTimerEvent.Start -> null
-            is EditTimerEvent.UpdateTheme -> SettingsCommand.SetThemeMode(ThemeMode.displayValues[event.themeModeIndex])
             is EditTimerEvent.UpdateRepCount -> event.count.toFlooredInt()?.let {
                 SettingsCommand.SetRepCount(it)
             }
@@ -20,9 +18,5 @@ internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
             is EditTimerEvent.UpdateTransitionDuration -> event.duration.toFlooredInt()?.let {
                 SettingsCommand.SetTransitionDuration(it)
             }
-
-            is EditTimerEvent.UpdatePlayInBackground -> SettingsCommand.SetPlayInBackground(event.enabled)
-            is EditTimerEvent.UpdateActivePings -> SettingsCommand.SetActivePings(event.count)
-            is EditTimerEvent.UpdateTransitionPings -> SettingsCommand.SetTransitionPings(event.count)
         }
 }

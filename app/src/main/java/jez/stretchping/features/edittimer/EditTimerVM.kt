@@ -84,9 +84,6 @@ class EditTimerVM @Inject constructor(
 
     private suspend fun updateSettings(command: SettingsCommand) {
         when (command) {
-            is SettingsCommand.SetThemeMode ->
-                settingsRepository.setThemeMode(command.mode)
-
             is SettingsCommand.SetActivityDuration ->
                 settingsRepository.setActivityDuration(command.duration)
 
@@ -95,15 +92,6 @@ class EditTimerVM @Inject constructor(
 
             is SettingsCommand.SetRepCount ->
                 settingsRepository.setRepCount(command.count)
-
-            is SettingsCommand.SetActivePings ->
-                settingsRepository.setActivePingsCount(command.count)
-
-            is SettingsCommand.SetTransitionPings ->
-                settingsRepository.setTransitionPingsCount(command.count)
-
-            is SettingsCommand.SetPlayInBackground ->
-                settingsRepository.setPlayInBackground(command.enabled)
         }
     }
 
@@ -130,12 +118,8 @@ class EditTimerVM @Inject constructor(
     }
 
     sealed class SettingsCommand {
-        data class SetThemeMode(val mode: ThemeMode) : SettingsCommand()
         data class SetActivityDuration(val duration: Int) : SettingsCommand()
         data class SetTransitionDuration(val duration: Int) : SettingsCommand()
         data class SetRepCount(val count: Int) : SettingsCommand()
-        data class SetActivePings(val count: Int) : SettingsCommand()
-        data class SetTransitionPings(val count: Int) : SettingsCommand()
-        data class SetPlayInBackground(val enabled: Boolean) : SettingsCommand()
     }
 }

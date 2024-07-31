@@ -132,7 +132,7 @@ private fun EmptyState(
                     .aspectRatio(1f)
                     .clip(CircleShape)
                     .clickable { eventHandler(PlansListUIEvent.NewPlanClicked) }
-                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(

@@ -24,8 +24,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -98,20 +98,17 @@ private fun PlannerScreen(
                     .padding(16.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Loop,
+                    imageVector = if (this) {
+                        Icons.Default.Loop
+                    } else {
+                        Icons.Default.Start
+                    },
                     contentDescription = if (this) {
                         stringResource(R.string.desc_repeat_toggle_enabled)
                     } else {
                         stringResource(R.string.desc_repeat_toggle_disabled)
                     }
                 )
-                if (!this) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
             }
         }
         TimerControls(

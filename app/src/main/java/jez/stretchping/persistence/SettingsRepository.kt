@@ -115,6 +115,16 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[PlayInBackgroundPref] = shouldPause
         }
 
+    val showNavLabels: Flow<Boolean> = context.dataStore.data
+        .map {
+            it[ShowNavLabelsPref] ?: true
+        }
+
+    suspend fun setShowNavLabels(shouldShow: Boolean) =
+        editDataStore {
+            it[ShowNavLabelsPref] = shouldShow
+        }
+
     val engineSettings: Flow<EngineSettings> =
         combine(
             activePingsCount,
@@ -211,6 +221,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val TransitionPingsPref = intPreferencesKey("TransitionPings")
         val ActivePingsPref = intPreferencesKey("ActivePings")
         val PlayInBackgroundPref = booleanPreferencesKey("PlayInBackground")
+        val ShowNavLabelsPref = booleanPreferencesKey("ShowNavLabels")
         val ExercisesPref = stringPreferencesKey("Plans")
     }
 }

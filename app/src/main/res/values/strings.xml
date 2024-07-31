@@ -5,6 +5,7 @@
 
     <string name="page_simple">Simple</string>
     <string name="page_plan">Sets</string>
+    <string name="page_settings">Config</string>
 
     <string name="service_notification_name">StretchPing</string>
     <string name="service_notification_title">StretchPing</string>

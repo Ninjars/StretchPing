@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = Route.Home.routeId
                         ) {
                             composable(Route.Home.routeId) {
-                                HomeScreen(hiltViewModel(), hiltViewModel())
+                                HomeScreen(hiltViewModel(), hiltViewModel(), hiltViewModel())
                             }
                             composable(Route.EditTimer.routeId) {
                                 EditTimerScreen(hiltViewModel())

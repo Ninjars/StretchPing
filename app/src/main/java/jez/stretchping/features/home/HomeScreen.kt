@@ -9,12 +9,14 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -31,9 +33,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
+    homeScreenVM: HomeScreenVM,
     editTimerVM: EditTimerVM,
     plansListVM: PlansListVM,
 ) {
+    val homeScreenState = homeScreenVM.state.collectAsState()
     val pagerState = rememberPagerState(pageCount = { 2 })
     Column {
         HorizontalPager(
@@ -46,20 +50,39 @@ fun HomeScreen(
                 else -> throw IllegalStateException("Page $page unsupported")
             }
         }
-        NavigationBar {
-            NavBarItem(
-                pagerState = pagerState,
-                index = 0,
-                label = R.string.page_simple,
-                icon = ImageVector.vectorResource(R.drawable.nav_physical_therapy),
-            )
-            NavBarItem(
-                pagerState = pagerState,
-                index = 1,
-                label = R.string.page_plan,
-                icon = Icons.AutoMirrored.Default.List,
-            )
-        }
+        Navigation(pagerState) { homeScreenState.value }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun Navigation(
+    pagerState: PagerState,
+    showLabels: () -> Boolean,
+) {
+    val showLabel = showLabels()
+    NavigationBar {
+        NavBarItem(
+            pagerState = pagerState,
+            index = 0,
+            label = R.string.page_simple,
+            icon = ImageVector.vectorResource(R.drawable.nav_physical_therapy),
+            showLabel = showLabel,
+        )
+        NavBarItem(
+            pagerState = pagerState,
+            index = 1,
+            label = R.string.page_plan,
+            icon = Icons.Default.FitnessCenter,
+            showLabel = showLabel,
+        )
+        NavBarItem(
+            pagerState = pagerState,
+            index = 2,
+            label = R.string.page_settings,
+            icon = Icons.Default.Settings,
+            showLabel = showLabel,
+        )
     }
 }
 
@@ -70,6 +93,7 @@ private fun RowScope.NavBarItem(
     index: Int,
     @StringRes label: Int,
     icon: ImageVector,
+    showLabel: Boolean,
 ) {
     val scope = rememberCoroutineScope()
     val onClick = remember(index) {
@@ -85,6 +109,9 @@ private fun RowScope.NavBarItem(
                 contentDescription = text
             )
         },
-        label = { Text(text = text) },
+        alwaysShowLabel = false,
+        label = if (showLabel) {
+            { Text(text = text) }
+        } else null,
     )
 }

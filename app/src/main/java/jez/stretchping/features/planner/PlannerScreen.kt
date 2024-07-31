@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,9 +47,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -144,14 +148,6 @@ private fun Content(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val state = viewState.value
-    PopulatedContent(state, eventHandler)
-}
-
-@Composable
-private fun PopulatedContent(
-    state: PlannerViewState,
-    eventHandler: (PlannerUIEvent) -> Unit,
-) {
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -212,6 +208,7 @@ private fun PlanHeaderView(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -225,8 +222,13 @@ private fun PlanHeaderView(
             ),
             label = { Text(text = stringResource(R.string.label_plan_name)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            modifier = Modifier.weight(1f)
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Done,
+            ),
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .weight(1f)
         )
         Button(
             onClick = { showDialog = true },
@@ -243,6 +245,11 @@ private fun PlanHeaderView(
                 contentDescription = stringResource(id = R.string.desc_delete_plan),
                 modifier = Modifier.fillMaxSize(),
             )
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (planName.isBlank()) {
+            focusRequester.requestFocus()
         }
     }
 
@@ -293,7 +300,7 @@ private fun PlanSectionView(
                     fontSize = 22.sp
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions {

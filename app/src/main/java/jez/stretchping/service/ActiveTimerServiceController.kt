@@ -61,4 +61,9 @@ class ActiveTimerServiceController(private val activity: Activity) {
         Timber.e("startService")
         activity.startService(Intent(activity, ActiveTimerService::class.java))
     }
+
+    fun stopService() {
+        val success = activity.stopService(Intent(activity, ActiveTimerService::class.java))
+        Timber.e("stopService: succeeded? $success")
+    }
 }

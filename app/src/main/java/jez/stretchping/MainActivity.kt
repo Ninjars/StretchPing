@@ -69,14 +69,18 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var soundManager: SoundManager
 
+    private val activeTimerController = ActiveTimerServiceController(this)
+
     override fun onDestroy() {
         soundManager.dispose()
+        serviceDispatcher.unbind()
+        activeTimerController.stopService()
         super.onDestroy()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        serviceDispatcher.setController(ActiveTimerServiceController(this))
+        serviceDispatcher.setController(activeTimerController)
 
         setContent {
             val navController = rememberNavController()

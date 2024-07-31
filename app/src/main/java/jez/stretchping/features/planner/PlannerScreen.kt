@@ -167,6 +167,7 @@ private fun PopulatedContent(
             PlanSectionView(it, eventHandler)
         }
         item(key = "footer", contentType = "footer") {
+            AddSectionItemView { eventHandler(PlannerUIEvent.NewSectionClicked) }
             Spacer(modifier = Modifier.height(112.dp))
         }
     }
@@ -198,7 +199,7 @@ private fun EmptyContent(
                         onClick = { eventHandler(PlannerUIEvent.NewSectionClicked) },
                         onDoubleClick = null
                     )
-                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
@@ -212,6 +213,38 @@ private fun EmptyContent(
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
+        }
+    }
+}
+
+@Composable
+private fun AddSectionItemView(
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onDoubleClick = null
+            )
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
+            Text(
+                text = stringResource(R.string.desc_add_plan_section),
+                style = MaterialTheme.typography.titleMedium,
+            )
         }
     }
 }

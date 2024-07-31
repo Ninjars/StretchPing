@@ -42,7 +42,8 @@ class PlannerEventToState(private val idProvider: IdProvider) :
                     it.copy(repTransitionDuration = event.value)
                 })
 
-            PlannerUIEvent.Start -> state
+            PlannerUIEvent.StartClicked,
+            PlannerUIEvent.DeletePlanClicked -> state
         }
 
     private fun List<Section>.update(id: String, func: (Section) -> Section) =

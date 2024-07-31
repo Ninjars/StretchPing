@@ -3,7 +3,6 @@
 package jez.stretchping.features.planner
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,8 +22,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Start
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,9 +39,12 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -114,7 +119,7 @@ private fun PlannerScreen(
         TimerControls(
             eventHandler = {
                 when (it) {
-                    TimerControlsEvent.PlayClicked -> eventHandler(PlannerUIEvent.Start)
+                    TimerControlsEvent.PlayClicked -> eventHandler(PlannerUIEvent.StartClicked)
                     TimerControlsEvent.PauseClicked,
                     TimerControlsEvent.BackClicked -> Unit
                 }
@@ -139,11 +144,7 @@ private fun Content(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val state = viewState.value
-    if (state.sections.isEmpty()) {
-        EmptyContent(state.planName, eventHandler)
-    } else {
-        PopulatedContent(state, eventHandler)
-    }
+    PopulatedContent(state, eventHandler)
 }
 
 @Composable
@@ -169,50 +170,6 @@ private fun PopulatedContent(
         item(key = "footer", contentType = "footer") {
             AddSectionItemView { eventHandler(PlannerUIEvent.NewSectionClicked) }
             Spacer(modifier = Modifier.height(112.dp))
-        }
-    }
-}
-
-@Composable
-private fun EmptyContent(
-    planName: String,
-    eventHandler: (PlannerUIEvent) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        PlanHeaderView(planName, eventHandler)
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .aspectRatio(1f)
-                    .clip(CircleShape)
-                    .combinedClickable(
-                        onClick = { eventHandler(PlannerUIEvent.NewSectionClicked) },
-                        onDoubleClick = null
-                    )
-                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(72.dp)
-                )
-                Text(
-                    text = stringResource(R.string.desc_add_plan_section),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-            }
         }
     }
 }
@@ -254,17 +211,69 @@ private fun PlanHeaderView(
     planName: String,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    TextField(
-        value = planName,
-        onValueChange = { eventHandler(PlannerUIEvent.UpdatePlanName(it)) },
-        textStyle = LocalTextStyle.current.copy(
-            fontSize = 30.sp
-        ),
-        label = { Text(text = stringResource(R.string.label_plan_name)) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+    var showDialog by remember { mutableStateOf(false) }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
-    )
+    ) {
+        TextField(
+            value = planName,
+            onValueChange = { eventHandler(PlannerUIEvent.UpdatePlanName(it)) },
+            textStyle = LocalTextStyle.current.copy(
+                fontSize = 30.sp
+            ),
+            label = { Text(text = stringResource(R.string.label_plan_name)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            modifier = Modifier.weight(1f)
+        )
+        Button(
+            onClick = { showDialog = true },
+            shape = CircleShape,
+            contentPadding = PaddingValues(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError,
+            ),
+            modifier = Modifier.size(48.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.DeleteForever,
+                contentDescription = stringResource(id = R.string.desc_delete_plan),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(stringResource(R.string.delete_plan_title))
+            },
+            text = {
+                Text(stringResource(R.string.delete_plan_text))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        eventHandler(PlannerUIEvent.DeletePlanClicked)
+                    }) {
+                    Text(text = stringResource(R.string.delete_plan_button_confirm))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }) {
+                    Text(text = stringResource(R.string.delete_plan_button_dismiss))
+                }
+            }
+        )
+    }
 }
 
 @Composable

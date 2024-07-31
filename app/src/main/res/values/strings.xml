@@ -51,5 +51,10 @@
     <string name="desc_add_plan_section">Add section</string>
     <string name="desc_repeat_toggle_enabled">will repeat</string>
     <string name="desc_repeat_toggle_disabled">single playthrough</string>
+    <string name="desc_delete_plan">Delete Plan</string>
 
+    <string name="delete_plan_title">Delete Plan?</string>
+    <string name="delete_plan_text">Are you sure? There\'s no undo.</string>
+    <string name="delete_plan_button_confirm">Delete Plan</string>
+    <string name="delete_plan_button_dismiss">Keep Plan</string>
 </resources>

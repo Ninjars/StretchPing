@@ -21,7 +21,8 @@ import javax.inject.Inject
 
 sealed interface PlannerUIEvent {
     data object NewSectionClicked : PlannerUIEvent
-    data object Start : PlannerUIEvent
+    data object StartClicked : PlannerUIEvent
+    data object DeletePlanClicked : PlannerUIEvent
     data class UpdatePlanName(val value: String) : PlannerUIEvent
     data class UpdateIsRepeated(val value: Boolean) : PlannerUIEvent
     data class UpdateSectionName(val id: String, val value: String) : PlannerUIEvent
@@ -80,12 +81,23 @@ class PlannerVM @Inject constructor(
             }
         }
 
-        if (event is PlannerUIEvent.Start) {
-            navigationDispatcher.navigateTo(
-                Route.ActiveTimer(
-                    config = mutableState.value.toExerciseConfig(),
+        when (event) {
+            PlannerUIEvent.DeletePlanClicked -> {
+                viewModelScope.launch {
+                    settingsRepository.deleteExercise(planId)
+                    navigationDispatcher.navigateTo(Route.Back)
+                }
+            }
+
+            PlannerUIEvent.StartClicked -> {
+                navigationDispatcher.navigateTo(
+                    Route.ActiveTimer(
+                        config = mutableState.value.toExerciseConfig(),
+                    )
                 )
-            )
+            }
+
+            else -> Unit
         }
     }
 

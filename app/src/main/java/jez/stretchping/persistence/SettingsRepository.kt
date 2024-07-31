@@ -31,6 +31,14 @@ enum class ThemeMode {
     }
 }
 
+enum class NavLabelDisplayMode {
+    Unset, Always, Selected, Never;
+
+    companion object {
+        val displayValues = listOf(Always, Selected, Never)
+    }
+}
+
 @Singleton
 class SettingsRepository @Inject constructor(@ApplicationContext private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -115,14 +123,14 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[PlayInBackgroundPref] = shouldPause
         }
 
-    val showNavLabels: Flow<Boolean> = context.dataStore.data
+    val showNavLabels: Flow<NavLabelDisplayMode> = context.dataStore.data
         .map {
-            it[ShowNavLabelsPref] ?: true
+            it[ShowNavLabelsPref]?.toNavLabelDisplayMode() ?: NavLabelDisplayMode.Always
         }
 
-    suspend fun setShowNavLabels(shouldShow: Boolean) =
+    suspend fun setShowNavLabels(mode: NavLabelDisplayMode) =
         editDataStore {
-            it[ShowNavLabelsPref] = shouldShow
+            it[ShowNavLabelsPref] = mode.toInt()
         }
 
     val engineSettings: Flow<EngineSettings> =
@@ -213,6 +221,20 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         else -> ThemeMode.Unset
     }
 
+    private fun NavLabelDisplayMode.toInt() = when (this) {
+        NavLabelDisplayMode.Unset -> 0
+        NavLabelDisplayMode.Always -> 1
+        NavLabelDisplayMode.Selected -> 2
+        NavLabelDisplayMode.Never -> 3
+    }
+
+    private fun Int.toNavLabelDisplayMode() = when (this) {
+        1 -> NavLabelDisplayMode.Always
+        2 -> NavLabelDisplayMode.Selected
+        3 -> NavLabelDisplayMode.Never
+        else -> NavLabelDisplayMode.Unset
+    }
+
     private companion object {
         val ThemePref = intPreferencesKey("ThemePref")
         val ActivityDurationPref = intPreferencesKey("ActivityDuration")
@@ -221,7 +243,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val TransitionPingsPref = intPreferencesKey("TransitionPings")
         val ActivePingsPref = intPreferencesKey("ActivePings")
         val PlayInBackgroundPref = booleanPreferencesKey("PlayInBackground")
-        val ShowNavLabelsPref = booleanPreferencesKey("ShowNavLabels")
+        val ShowNavLabelsPref = intPreferencesKey("ShowNavLabels")
         val ExercisesPref = stringPreferencesKey("Plans")
     }
 }

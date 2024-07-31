@@ -3,8 +3,10 @@ package jez.stretchping.features.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jez.stretchping.persistence.NavLabelDisplayMode
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.utils.toViewState
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 /**
@@ -17,10 +19,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeScreenVM @Inject constructor(
-    private val settingsRepository: SettingsRepository,
+    settingsRepository: SettingsRepository,
 ) : ViewModel() {
-    val state = settingsRepository.showNavLabels.toViewState(
+    val state: StateFlow<NavLabelDisplayMode> = settingsRepository.showNavLabels.toViewState(
         scope = viewModelScope,
-        initial = false,
+        initial = NavLabelDisplayMode.Unset,
     ) { it }
 }

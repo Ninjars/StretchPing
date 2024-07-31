@@ -28,6 +28,9 @@ import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.features.edittimer.EditTimerVM
 import jez.stretchping.features.planslist.PlansListScreen
 import jez.stretchping.features.planslist.PlansListVM
+import jez.stretchping.features.settings.SettingsScreen
+import jez.stretchping.features.settings.SettingsVM
+import jez.stretchping.persistence.NavLabelDisplayMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -36,9 +39,10 @@ fun HomeScreen(
     homeScreenVM: HomeScreenVM,
     editTimerVM: EditTimerVM,
     plansListVM: PlansListVM,
+    settingsVM: SettingsVM,
 ) {
     val homeScreenState = homeScreenVM.state.collectAsState()
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 3 })
     Column {
         HorizontalPager(
             modifier = Modifier.weight(1f),
@@ -47,6 +51,7 @@ fun HomeScreen(
             when (page) {
                 0 -> EditTimerScreen(viewModel = editTimerVM)
                 1 -> PlansListScreen(viewModel = plansListVM)
+                2 -> SettingsScreen(viewModel = settingsVM)
                 else -> throw IllegalStateException("Page $page unsupported")
             }
         }
@@ -58,30 +63,30 @@ fun HomeScreen(
 @OptIn(ExperimentalFoundationApi::class)
 private fun Navigation(
     pagerState: PagerState,
-    showLabels: () -> Boolean,
+    modeProvider: () -> NavLabelDisplayMode,
 ) {
-    val showLabel = showLabels()
+    val mode = modeProvider()
     NavigationBar {
         NavBarItem(
             pagerState = pagerState,
             index = 0,
             label = R.string.page_simple,
             icon = ImageVector.vectorResource(R.drawable.nav_physical_therapy),
-            showLabel = showLabel,
+            mode = mode,
         )
         NavBarItem(
             pagerState = pagerState,
             index = 1,
             label = R.string.page_plan,
             icon = Icons.Default.FitnessCenter,
-            showLabel = showLabel,
+            mode = mode,
         )
         NavBarItem(
             pagerState = pagerState,
             index = 2,
             label = R.string.page_settings,
             icon = Icons.Default.Settings,
-            showLabel = showLabel,
+            mode = mode,
         )
     }
 }
@@ -93,7 +98,7 @@ private fun RowScope.NavBarItem(
     index: Int,
     @StringRes label: Int,
     icon: ImageVector,
-    showLabel: Boolean,
+    mode: NavLabelDisplayMode,
 ) {
     val scope = rememberCoroutineScope()
     val onClick = remember(index) {
@@ -109,9 +114,17 @@ private fun RowScope.NavBarItem(
                 contentDescription = text
             )
         },
-        alwaysShowLabel = false,
-        label = if (showLabel) {
-            { Text(text = text) }
-        } else null,
+        alwaysShowLabel = when (mode) {
+            NavLabelDisplayMode.Always -> true
+            else -> false
+        },
+        label = when (mode) {
+            NavLabelDisplayMode.Selected,
+            NavLabelDisplayMode.Always -> {
+                { Text(text = text) }
+            }
+
+            else -> null
+        },
     )
 }

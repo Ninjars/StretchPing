@@ -67,9 +67,9 @@ sealed class EditTimerEvent {
     data object Start : EditTimerEvent()
     data class UpdateActiveDuration(val duration: String) : EditTimerEvent()
     data class UpdateTransitionDuration(val duration: String) : EditTimerEvent()
+    data class UpdateRepCount(val count: String) : EditTimerEvent()
     data class UpdateActivePings(val count: Int) : EditTimerEvent()
     data class UpdateTransitionPings(val count: Int) : EditTimerEvent()
-    data class UpdateRepCount(val count: String) : EditTimerEvent()
     data class UpdateTheme(val themeModeIndex: Int) : EditTimerEvent()
     data class UpdatePlayInBackground(val enabled: Boolean) : EditTimerEvent()
 }

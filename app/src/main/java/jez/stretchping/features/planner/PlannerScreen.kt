@@ -66,6 +66,7 @@ import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 import jez.stretchping.utils.toFlooredInt
+import kotlinx.coroutines.job
 import kotlin.math.max
 
 @Composable
@@ -249,7 +250,9 @@ private fun PlanHeaderView(
     }
     LaunchedEffect(Unit) {
         if (planName.isBlank()) {
-            focusRequester.requestFocus()
+            coroutineContext.job.invokeOnCompletion {
+                focusRequester.requestFocus()
+            }
         }
     }
 

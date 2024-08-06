@@ -52,10 +52,10 @@ android {
 
 dependencies {
 
-    implementation "androidx.core:core-ktx:1.12.0"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
-    implementation "androidx.activity:activity-compose:1.7.2"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
+    implementation "androidx.core:core-ktx:1.13.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.4"
+    implementation "androidx.activity:activity-compose:1.9.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4"
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
@@ -67,32 +67,32 @@ dependencies {
 
     // Material
     implementation "androidx.compose.material3:material3"
-    implementation "androidx.compose.material:material-icons-extended:1.5.1"
+    implementation "androidx.compose.material:material-icons-extended:1.6.8"
 
     // Compose
     implementation "androidx.compose.ui:ui"
     implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation "androidx.navigation:navigation-compose:2.7.2"
+    implementation "androidx.navigation:navigation-compose:2.7.7"
     debugImplementation "androidx.compose.ui:ui-tooling"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4"
     debugImplementation "androidx.compose.ui:ui-test-manifest"
 
     implementation "com.jakewharton.timber:timber:5.0.1"
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation "androidx.datastore:datastore-preferences:1.1.1"
 
     // Dagger
     kapt "com.google.dagger:dagger-compiler:$hilt_version"
     implementation "com.google.dagger:dagger:$hilt_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
-    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
     kaptTest "com.google.dagger:hilt-compiler:$hilt_version"
 
-    androidTestImplementation "androidx.test.ext:junit:1.1.5"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
     androidTestImplementation  "com.google.dagger:hilt-android-testing:$hilt_version"
     kaptAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 }

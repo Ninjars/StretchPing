@@ -295,140 +295,130 @@ private fun PlanSectionView(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val focusManager = LocalFocusManager.current
-            // Name
-            SelectOnFocusTextField(
-                text = section.name,
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 22.sp
-                ),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next,
-                ),
-                keyboardActions = KeyboardActions {
-                    focusManager.moveFocus(FocusDirection.Next)
-                },
-                label = {
-                    Text(stringResource(id = R.string.label_section_name))
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Rep Count
-                SelectOnFocusTextField(
-                    modifier = Modifier.weight(1f),
-                    text = section.repCount,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 30.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next,
-                    ),
-                    keyboardActions = KeyboardActions {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    label = {
-                        Text(stringResource(id = R.string.rep_count))
-                    },
-                ) {
-                    it.toFlooredInt()?.let { int ->
-                        eventHandler(PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, int)))
-                    }
-                }
-
-                // Initial Delay
-                SelectOnFocusTextField(
-                    modifier = Modifier.weight(1f),
-                    text = section.entryTransitionDuration,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 30.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next,
-                    ),
-                    keyboardActions = KeyboardActions {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    label = {
-                        Text(stringResource(id = R.string.label_section_start_delay))
-                    },
-                ) {
-                    it.toFlooredInt()?.let { int ->
-                        eventHandler(
-                            PlannerUIEvent.UpdateSectionEntryTransitionDuration(
-                                section.id,
-                                max(0, int)
-                            )
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                // Stretch Duration
-                SelectOnFocusTextField(
-                    modifier = Modifier.weight(1f),
-                    text = section.repDuration,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 30.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next,
-                    ),
-                    keyboardActions = KeyboardActions {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    label = {
-                        Text(stringResource(id = R.string.active_duration))
-                    },
-                ) {
-                    it.toFlooredInt()?.let { int ->
-                        eventHandler(
-                            PlannerUIEvent.UpdateSectionRepDuration(
-                                section.id,
-                                max(0, int)
-                            )
-                        )
-                    }
-                }
-
-                // Break Duration
-                SelectOnFocusTextField(
-                    modifier = Modifier.weight(1f),
-                    text = section.repTransitionDuration,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 30.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Done,
-                    ),
-                    label = {
-                        Text(stringResource(id = R.string.transition_duration))
-                    },
-                ) {
-                    it.toFlooredInt()?.let { int ->
-                        eventHandler(
-                            PlannerUIEvent.UpdateSectionRepTransitionDuration(
-                                section.id,
-                                max(0, int)
-                            )
-                        )
-                    }
-                }
-            }
+            PlanSectionViewContent(section, eventHandler)
         }
+    }
+}
+
+@Composable
+private fun PlanSectionViewContent(
+    section: PlannerViewState.Section,
+    eventHandler: (PlannerUIEvent) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    // Name
+    SelectOnFocusTextField(
+        text = section.name,
+        textStyle = LocalTextStyle.current.copy(
+            fontSize = 22.sp
+        ),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            imeAction = ImeAction.Next,
+        ),
+        keyboardActions = KeyboardActions {
+            focusManager.moveFocus(FocusDirection.Next)
+        },
+        label = {
+            Text(stringResource(id = R.string.label_section_name))
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Rep Count
+        PlanSectionNumberInput(
+            labelText = stringResource(id = R.string.rep_count),
+            text = section.repCount,
+            modifier = Modifier.weight(1f)
+        ) {
+            eventHandler(
+                PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
+            )
+        }
+
+        // Initial Delay
+        PlanSectionNumberInput(
+            labelText = stringResource(id = R.string.label_section_start_delay),
+            text = section.entryTransitionDuration,
+            modifier = Modifier.weight(1f)
+        ) {
+            eventHandler(
+                PlannerUIEvent.UpdateSectionEntryTransitionDuration(
+                    section.id,
+                    max(0, it)
+                )
+            )
+        }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        // Stretch Duration
+        PlanSectionNumberInput(
+            labelText = stringResource(id = R.string.active_duration),
+            text = section.repDuration,
+            modifier = Modifier.weight(1f)
+        ) {
+            eventHandler(
+                PlannerUIEvent.UpdateSectionRepDuration(
+                    section.id,
+                    max(0, it)
+                )
+            )
+        }
+
+        // Break Duration
+        PlanSectionNumberInput(
+            labelText = stringResource(id = R.string.transition_duration),
+            text = section.repTransitionDuration,
+            imeAction = ImeAction.Done,
+            modifier = Modifier.weight(1f)
+        ) {
+            eventHandler(
+                PlannerUIEvent.UpdateSectionRepTransitionDuration(
+                    section.id,
+                    max(0, it)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlanSectionNumberInput(
+    labelText: String,
+    text: String,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction = ImeAction.Next,
+    onChange: (Int) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    SelectOnFocusTextField(
+        modifier = modifier,
+        text = text,
+        textStyle = LocalTextStyle.current.copy(
+            fontSize = 30.sp
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = imeAction,
+        ),
+        keyboardActions = if (imeAction == ImeAction.Next) {
+            KeyboardActions {
+                focusManager.moveFocus(FocusDirection.Next)
+            }
+        } else {
+            KeyboardActions()
+        },
+        label = { Text(labelText) },
+    ) {
+        it.toFlooredInt()?.let { int -> onChange(int) }
     }
 }
 

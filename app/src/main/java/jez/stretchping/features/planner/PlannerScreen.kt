@@ -94,18 +94,6 @@ private fun PlannerScreen(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Content(viewState, eventHandler)
-        FloatingActionButton(
-            onClick = { eventHandler(PlannerUIEvent.NewSectionClicked) },
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.desc_add_plan_section)
-            )
-        }
         with(viewState.value.repeat) {
             FloatingActionButton(
                 onClick = { eventHandler(PlannerUIEvent.UpdateIsRepeated(!this)) },

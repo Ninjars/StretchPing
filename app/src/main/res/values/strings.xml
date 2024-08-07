@@ -52,6 +52,7 @@
     <string name="desc_repeat_toggle_enabled">will repeat</string>
     <string name="desc_repeat_toggle_disabled">single playthrough</string>
     <string name="desc_delete_plan">Delete Plan</string>
+    <string name="desc_drag_section">drag section</string>
 
     <string name="delete_plan_title">Delete Plan?</string>
     <string name="delete_plan_text">Are you sure? There\'s no undo.</string>

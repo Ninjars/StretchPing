@@ -42,6 +42,9 @@ class PlannerEventToState(private val idProvider: IdProvider) :
                     it.copy(repTransitionDuration = event.value)
                 })
 
+            is PlannerUIEvent.RepositionSection ->
+                state.copy(sections = state.sections.reorder(event.fromIndex, event.toIndex))
+
             PlannerUIEvent.StartClicked,
             PlannerUIEvent.DeletePlanClicked -> state
         }
@@ -53,5 +56,10 @@ class PlannerEventToState(private val idProvider: IdProvider) :
             } else {
                 it
             }
+        }
+
+    private fun List<Section>.reorder(fromIndex: Int, toIndex: Int): List<Section> =
+        toMutableList().apply {
+            add(toIndex, removeAt(fromIndex))
         }
 }

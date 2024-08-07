@@ -2,6 +2,7 @@
 
 package jez.stretchping.features.planner
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,12 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.AlertDialog
@@ -67,6 +70,9 @@ import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 import jez.stretchping.utils.toFlooredInt
 import kotlinx.coroutines.job
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.max
 
 @Composable
@@ -149,7 +155,15 @@ private fun Content(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val state = viewState.value
+
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        // offset indexes by 1 to account for title item
+        eventHandler(PlannerUIEvent.RepositionSection(from.index - 1, to.index - 1))
+    }
+
     LazyColumn(
+        state = lazyListState,
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
@@ -161,8 +175,10 @@ private fun Content(
             items = state.sections,
             key = { it.id },
             contentType = { "content" }
-        ) {
-            PlanSectionView(it, eventHandler)
+        ) { section ->
+            ReorderableItem(state = reorderableLazyListState, key = section.id) { isDragging ->
+                PlanSectionView(section, isDragging, eventHandler)
+            }
         }
         item(key = "footer", contentType = "footer") {
             AddSectionItemView { eventHandler(PlannerUIEvent.NewSectionClicked) }
@@ -287,15 +303,28 @@ private fun PlanHeaderView(
 }
 
 @Composable
-private fun PlanSectionView(
+private fun ReorderableCollectionItemScope.PlanSectionView(
     section: PlannerViewState.Section,
+    isDragging: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    Card {
-        Column(
-            modifier = Modifier.fillMaxWidth()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Default.DragHandle,
+            contentDescription = stringResource(id = R.string.desc_drag_section),
+            modifier = Modifier.draggableHandle()
+        )
+        Card(
+            border = if (isDragging) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
         ) {
-            PlanSectionViewContent(section, eventHandler)
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                PlanSectionViewContent(section, eventHandler)
+            }
         }
     }
 }

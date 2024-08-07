@@ -30,6 +30,7 @@ sealed interface PlannerUIEvent {
     data class UpdateSectionEntryTransitionDuration(val id: String, val value: Int) : PlannerUIEvent
     data class UpdateSectionRepDuration(val id: String, val value: Int) : PlannerUIEvent
     data class UpdateSectionRepTransitionDuration(val id: String, val value: Int) : PlannerUIEvent
+    data class RepositionSection(val fromIndex: Int, val toIndex: Int) : PlannerUIEvent
 }
 
 @HiltViewModel

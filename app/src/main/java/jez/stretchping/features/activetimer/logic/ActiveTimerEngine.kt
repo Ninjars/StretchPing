@@ -49,9 +49,9 @@ class ActiveTimerEngine(
 
     private fun ExerciseConfig.parse() =
         sections.flatMapIndexed { index, section ->
-            val hasIntro = section.introDuration > 0
+//            val hasIntro = section.introDuration > 0
             listOfNotNull(
-                getIf(hasIntro) {
+                getIf(section.name.isNotBlank()) {
                     SegmentSpec.Announcement(
                         name = section.name,
                         durationSeconds = section.introDuration,
@@ -59,7 +59,7 @@ class ActiveTimerEngine(
                 },
             ) + (0 until section.repCount).flatMap {
                 listOfNotNull(
-                    getIf((!hasIntro || it > 0) && section.transitionDuration > 0) {
+                    getIf((section.introDuration == 0 || it > 0) && section.transitionDuration > 0) {
                         SegmentSpec.Transition(
                             name = section.name,
                             durationSeconds = section.transitionDuration,

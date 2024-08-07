@@ -103,7 +103,10 @@ class EventScheduler @Inject constructor(
                     when (segmentSpec) {
                         is SegmentSpec.Stretch -> soundManager.playSound(GameSoundEffect.ActiveSection)
                         is SegmentSpec.Transition -> soundManager.playSound(GameSoundEffect.TransitionSection)
-                        is SegmentSpec.Announcement -> soundManager.playSound(GameSoundEffect.TransitionSection)
+                        is SegmentSpec.Announcement ->
+                            if (segmentSpec.durationSeconds > 0) {
+                                soundManager.playSound(GameSoundEffect.TransitionSection)
+                            }
                     }
                 }
             }

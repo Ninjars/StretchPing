@@ -170,7 +170,7 @@ private fun Content(
         modifier = Modifier.fillMaxSize()
     ) {
         item(key = "header", contentType = "header") {
-            PlanHeaderView(state.planName, eventHandler)
+            PlanHeaderView(state.isInitialised, state.planName, eventHandler)
         }
         items(
             items = state.sections,
@@ -222,6 +222,7 @@ private fun AddSectionItemView(
 
 @Composable
 private fun PlanHeaderView(
+    isInitialised: Boolean,
     planName: String,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
@@ -257,8 +258,8 @@ private fun PlanHeaderView(
             eventHandler(PlannerUIEvent.DeletePlanClicked)
         }
     }
-    LaunchedEffect(Unit) {
-        if (planName.isBlank()) {
+    LaunchedEffect(isInitialised) {
+        if (isInitialised && planName.isBlank()) {
             coroutineContext.job.invokeOnCompletion {
                 focusRequester.requestFocus()
             }
@@ -505,6 +506,7 @@ private fun ActiveTimerScreenPreview() {
             PlannerScreen(
                 viewState = previewState {
                     PlannerViewState(
+                        isInitialised = true,
                         planName = "",
                         repeat = false,
                         canStart = false,

@@ -1,6 +1,7 @@
 package jez.stretchping.features.planner
 
 data class PlannerViewState(
+    val isInitialised: Boolean,
     val planName: String,
     val repeat: Boolean,
     val canStart: Boolean,

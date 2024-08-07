@@ -6,6 +6,7 @@ object PlannerStateToViewState : (State) -> PlannerViewState {
     override fun invoke(state: State): PlannerViewState =
         with(state) {
             PlannerViewState(
+                isInitialised = state.id.isNotBlank(),
                 planName = planName,
                 repeat = repeat,
                 canStart = canStart,

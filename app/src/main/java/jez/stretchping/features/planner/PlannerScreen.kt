@@ -9,7 +9,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -142,6 +143,7 @@ private fun PlannerScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
     viewState: State<PlannerViewState>,
@@ -272,161 +274,172 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
     isDragging: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    Card(
-        border = if (isDragging) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(8.dp)
+    Box {
+        Card(
+            border = if (isDragging) {
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            } else null,
         ) {
-            Icon(
-                imageVector = Icons.Default.DragHandle,
-                contentDescription = stringResource(id = R.string.desc_drag_section),
-                modifier = Modifier.draggableHandle()
-            )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .height(IntrinsicSize.Min)
             ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .width(IntrinsicSize.Min)
+
+                ) {
+                    DeleteButton(
+                        contentDescription = stringResource(id = R.string.desc_delete_section),
+                        size = 32.dp,
+                        title = stringResource(R.string.delete_section_title),
+                        text = stringResource(R.string.delete_section_text),
+                        confirm = stringResource(R.string.delete_section_button_confirm),
+                        dismiss = stringResource(R.string.delete_section_button_dismiss),
+                        modifier = Modifier
+
+                    ) {
+                        eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
+                    }
+                    Icon(
+                        imageVector = Icons.Default.DragHandle,
+                        contentDescription = stringResource(id = R.string.desc_drag_section),
+                        modifier = Modifier
+                            .draggableHandle()
+                            .weight(1f)
+                            .fillMaxWidth()
+                    )
+                }
                 PlanSectionViewContent(section, canStartPlan, eventHandler)
             }
+
+
         }
     }
 }
 
 @Composable
-private fun ColumnScope.PlanSectionViewContent(
+private fun PlanSectionViewContent(
     section: PlannerViewState.Section,
     canStartPlan: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
-    ) {
-        // Name
-        SelectOnFocusTextField(
-            text = section.name,
-            textStyle = LocalTextStyle.current.copy(
-                fontSize = 22.sp
-            ),
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-                imeAction = ImeAction.Next,
-            ),
-            keyboardActions = KeyboardActions {
-                focusManager.moveFocus(FocusDirection.Next)
-            },
-            label = {
-                Text(stringResource(id = R.string.label_section_name))
-            },
-            modifier = Modifier.weight(1f)
-        ) {
-            eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
-        }
-
-        DeleteButton(
-            contentDescription = stringResource(id = R.string.desc_delete_section),
-            size = 36.dp,
-            title = stringResource(R.string.delete_section_title),
-            text = stringResource(R.string.delete_section_text),
-            confirm = stringResource(R.string.delete_section_button_confirm),
-            dismiss = stringResource(R.string.delete_section_button_dismiss),
-            modifier = Modifier.padding(end = 8.dp)
-        ) {
-            eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
-        }
-    }
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        // Rep Count
-        PlanSectionNumberInput(
-            labelText = stringResource(id = R.string.rep_count),
-            text = section.repCount,
-            modifier = Modifier.weight(1f)
-        ) {
-            eventHandler(
-                PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
-            )
-        }
-
-        // Initial Delay
-        PlanSectionNumberInput(
-            labelText = stringResource(id = R.string.label_section_start_delay),
-            text = section.entryTransitionDuration,
-            modifier = Modifier.weight(1f)
-        ) {
-            eventHandler(
-                PlannerUIEvent.UpdateSectionEntryTransitionDuration(
-                    section.id,
-                    max(0, it)
-                )
-            )
-        }
-    }
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        // Stretch Duration
-        PlanSectionNumberInput(
-            labelText = stringResource(id = R.string.active_duration),
-            text = section.repDuration,
-            modifier = Modifier.weight(1f)
-        ) {
-            eventHandler(
-                PlannerUIEvent.UpdateSectionRepDuration(
-                    section.id,
-                    max(0, it)
-                )
-            )
-        }
-
-        // Break Duration
-        PlanSectionNumberInput(
-            labelText = stringResource(id = R.string.transition_duration),
-            text = section.repTransitionDuration,
-            imeAction = ImeAction.Done,
-            modifier = Modifier.weight(1f)
-        ) {
-            eventHandler(
-                PlannerUIEvent.UpdateSectionRepTransitionDuration(
-                    section.id,
-                    max(0, it)
-                )
-            )
-        }
-    }
-
-    AnimatedVisibility(
-        visible = canStartPlan,
     ) {
         Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(R.string.play_from_section))
-            Button(
-                onClick = { eventHandler(PlannerUIEvent.StartFromSectionClicked(section.id)) },
-                shape = CircleShape,
-                contentPadding = PaddingValues(8.dp),
-                colors = ButtonDefaults.buttonColors(),
-                modifier = Modifier.size(48.dp)
+            // Name
+            SelectOnFocusTextField(
+                text = section.name,
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 22.sp
+                ),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next,
+                ),
+                keyboardActions = KeyboardActions {
+                    focusManager.moveFocus(FocusDirection.Next)
+                },
+                label = {
+                    Text(stringResource(id = R.string.label_section_name))
+                },
+                modifier = Modifier.weight(1f)
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = stringResource(R.string.play_from_section),
+                eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+            }
+            AnimatedVisibility(
+                visible = canStartPlan,
+            ) {
+                Button(
+                    onClick = { eventHandler(PlannerUIEvent.StartFromSectionClicked(section.id)) },
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(8.dp),
+                    colors = ButtonDefaults.buttonColors(),
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayArrow,
+                        contentDescription = stringResource(R.string.play_from_section),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Rep Count
+            PlanSectionNumberInput(
+                labelText = stringResource(id = R.string.rep_count),
+                text = section.repCount,
+                modifier = Modifier.weight(1f)
+            ) {
+                eventHandler(
+                    PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
+                )
+            }
+
+            // Initial Delay
+            PlanSectionNumberInput(
+                labelText = stringResource(id = R.string.label_section_start_delay),
+                text = section.entryTransitionDuration,
+                modifier = Modifier.weight(1f)
+            ) {
+                eventHandler(
+                    PlannerUIEvent.UpdateSectionEntryTransitionDuration(
+                        section.id,
+                        max(0, it)
+                    )
+                )
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            // Stretch Duration
+            PlanSectionNumberInput(
+                labelText = stringResource(id = R.string.active_duration),
+                text = section.repDuration,
+                modifier = Modifier.weight(1f)
+            ) {
+                eventHandler(
+                    PlannerUIEvent.UpdateSectionRepDuration(
+                        section.id,
+                        max(0, it)
+                    )
+                )
+            }
+
+            // Break Duration
+            PlanSectionNumberInput(
+                labelText = stringResource(id = R.string.transition_duration),
+                text = section.repTransitionDuration,
+                imeAction = ImeAction.Done,
+                modifier = Modifier.weight(1f)
+            ) {
+                eventHandler(
+                    PlannerUIEvent.UpdateSectionRepTransitionDuration(
+                        section.id,
+                        max(0, it)
+                    )
                 )
             }
         }
@@ -483,7 +496,7 @@ private fun DeleteButton(
     Button(
         onClick = { showDialog = true },
         shape = CircleShape,
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(size / 6),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
             contentColor = MaterialTheme.colorScheme.onError,

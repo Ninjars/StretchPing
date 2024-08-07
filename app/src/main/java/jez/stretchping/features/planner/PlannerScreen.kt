@@ -263,19 +263,21 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
     isDragging: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Card(
+        border = if (isDragging) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
-        Icon(
-            imageVector = Icons.Default.DragHandle,
-            contentDescription = stringResource(id = R.string.desc_drag_section),
-            modifier = Modifier.draggableHandle()
-        )
-        Card(
-            border = if (isDragging) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(8.dp)
         ) {
+            Icon(
+                imageVector = Icons.Default.DragHandle,
+                contentDescription = stringResource(id = R.string.desc_drag_section),
+                modifier = Modifier.draggableHandle()
+            )
             Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 PlanSectionViewContent(section, eventHandler)
@@ -331,6 +333,7 @@ private fun PlanSectionViewContent(
     }
 
     Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         // Rep Count
@@ -360,6 +363,7 @@ private fun PlanSectionViewContent(
     }
 
     Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         // Stretch Duration

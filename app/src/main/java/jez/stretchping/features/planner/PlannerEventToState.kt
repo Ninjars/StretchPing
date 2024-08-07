@@ -48,9 +48,10 @@ class PlannerEventToState(private val idProvider: IdProvider) :
             is PlannerUIEvent.DeleteSectionClicked ->
                 state.copy(sections = state.sections.filterNot { it.id == event.id })
 
+
+            is PlannerUIEvent.StartFromSectionClicked,
             PlannerUIEvent.StartClicked,
             PlannerUIEvent.DeletePlanClicked -> state
-
         }
 
     private fun List<Section>.update(id: String, func: (Section) -> Section) =

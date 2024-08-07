@@ -2,12 +2,14 @@
 
 package jez.stretchping.features.planner
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Start
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -167,7 +170,12 @@ private fun Content(
             contentType = { "content" }
         ) { section ->
             ReorderableItem(state = reorderableLazyListState, key = section.id) { isDragging ->
-                PlanSectionView(section, isDragging, eventHandler)
+                PlanSectionView(
+                    section = section,
+                    canStartPlan = state.canStart,
+                    isDragging = isDragging,
+                    eventHandler = eventHandler,
+                )
             }
         }
         item(key = "footer", contentType = "footer") {
@@ -260,6 +268,7 @@ private fun PlanHeaderView(
 @Composable
 private fun ReorderableCollectionItemScope.PlanSectionView(
     section: PlannerViewState.Section,
+    canStartPlan: Boolean,
     isDragging: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
@@ -280,15 +289,16 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                PlanSectionViewContent(section, eventHandler)
+                PlanSectionViewContent(section, canStartPlan, eventHandler)
             }
         }
     }
 }
 
 @Composable
-private fun PlanSectionViewContent(
+private fun ColumnScope.PlanSectionViewContent(
     section: PlannerViewState.Section,
+    canStartPlan: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -395,7 +405,34 @@ private fun PlanSectionViewContent(
             )
         }
     }
+
+    AnimatedVisibility(
+        visible = canStartPlan,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(R.string.play_from_section))
+            Button(
+                onClick = { eventHandler(PlannerUIEvent.StartFromSectionClicked(section.id)) },
+                shape = CircleShape,
+                contentPadding = PaddingValues(8.dp),
+                colors = ButtonDefaults.buttonColors(),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = stringResource(R.string.play_from_section),
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+            }
+        }
+    }
 }
+
 
 @Composable
 private fun PlanSectionNumberInput(
@@ -504,7 +541,7 @@ private fun ActiveTimerScreenPreview() {
                         isInitialised = true,
                         planName = "",
                         repeat = false,
-                        canStart = false,
+                        canStart = true,
                         sections = listOf(
                             PlannerViewState.Section(
                                 id = "",

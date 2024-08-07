@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
 
 sealed interface PlannerUIEvent {
     data object NewSectionClicked : PlannerUIEvent
@@ -32,6 +33,7 @@ sealed interface PlannerUIEvent {
     data class UpdateSectionRepDuration(val id: String, val value: Int) : PlannerUIEvent
     data class UpdateSectionRepTransitionDuration(val id: String, val value: Int) : PlannerUIEvent
     data class RepositionSection(val fromIndex: Int, val toIndex: Int) : PlannerUIEvent
+    data class StartFromSectionClicked(val sectionId: String) : PlannerUIEvent
 }
 
 @HiltViewModel
@@ -84,17 +86,25 @@ class PlannerVM @Inject constructor(
         }
 
         when (event) {
-            PlannerUIEvent.DeletePlanClicked -> {
+            is PlannerUIEvent.DeletePlanClicked -> {
                 viewModelScope.launch {
                     settingsRepository.deleteExercise(planId)
                     navigationDispatcher.navigateTo(Route.Back)
                 }
             }
 
-            PlannerUIEvent.StartClicked -> {
+            is PlannerUIEvent.StartClicked -> {
                 navigationDispatcher.navigateTo(
                     Route.ActiveTimer(
                         config = mutableState.value.toExerciseConfig(),
+                    )
+                )
+            }
+
+            is PlannerUIEvent.StartFromSectionClicked -> {
+                navigationDispatcher.navigateTo(
+                    Route.ActiveTimer(
+                        config = mutableState.value.toExerciseConfig(event.sectionId),
                     )
                 )
             }
@@ -103,16 +113,23 @@ class PlannerVM @Inject constructor(
         }
     }
 
-    private fun State.toExerciseConfig() =
+    private fun State.toExerciseConfig(initialSectionId: String? = null) =
         ExerciseConfig(
             exerciseId = id,
             exerciseName = planName,
             repeat = repeat,
-            sections = sections.toSectionConfig(),
+            sections = sections.toSectionConfig(initialSectionId),
         )
 
-    private fun List<Section>.toSectionConfig() =
-        map {
+    private fun List<Section>.toSectionConfig(initialSectionId: String? = null): List<ExerciseConfig.SectionConfig> {
+        val initialIndex =
+            max(0, initialSectionId?.let { targetId -> indexOfFirst { it.id == targetId } } ?: 0)
+        val list = if (initialIndex > 0) {
+            subList(initialIndex, size)
+        } else {
+            this
+        }
+        return list.map {
             ExerciseConfig.SectionConfig(
                 sectionId = it.id,
                 name = it.name,
@@ -122,6 +139,7 @@ class PlannerVM @Inject constructor(
                 transitionDuration = it.repTransitionDuration,
             )
         }
+    }
 
     private fun ExerciseConfig.toState() =
         State(

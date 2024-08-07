@@ -6,8 +6,8 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +26,7 @@ fun SelectOnFocusTextField(
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
+    colors: TextFieldColors = TextFieldDefaults.colors(),
     label: @Composable (() -> Unit)? = null,
     onValueChanged: (String) -> Unit,
 ) {
@@ -73,13 +74,6 @@ fun SelectOnFocusTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         singleLine = true,
-        colors = with(MaterialTheme.colorScheme) {
-            TextFieldDefaults.colors(
-                focusedContainerColor = secondaryContainer,
-                unfocusedContainerColor = secondaryContainer,
-                focusedTextColor = onSecondaryContainer,
-                unfocusedTextColor = onSecondaryContainer,
-            )
-        },
+        colors = colors,
     )
 }

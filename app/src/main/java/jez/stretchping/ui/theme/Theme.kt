@@ -3,6 +3,7 @@ package jez.stretchping.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -105,5 +106,15 @@ fun StretchPingTheme(
         typography = Typography,
         shapes = Shapes,
         content = content
+    )
+}
+
+@Composable
+fun SecondaryTextFieldColors() = with(MaterialTheme.colorScheme) {
+    TextFieldDefaults.colors(
+        focusedContainerColor = secondaryContainer,
+        unfocusedContainerColor = secondaryContainer,
+        focusedTextColor = onSecondaryContainer,
+        unfocusedTextColor = onSecondaryContainer,
     )
 }

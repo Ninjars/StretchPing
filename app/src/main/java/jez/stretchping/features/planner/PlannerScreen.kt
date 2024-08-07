@@ -66,6 +66,7 @@ import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
+import jez.stretchping.ui.theme.SecondaryTextFieldColors
 import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
@@ -244,6 +245,7 @@ private fun PlanHeaderView(
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Done,
             ),
+            colors = SecondaryTextFieldColors(),
             modifier = Modifier
                 .focusRequester(focusRequester)
                 .weight(1f)
@@ -429,6 +431,7 @@ private fun PlanSectionNumberInput(
         } else {
             KeyboardActions()
         },
+        colors = SecondaryTextFieldColors(),
         label = { Text(labelText) },
     ) {
         it.toFlooredInt()?.let { int -> onChange(int) }

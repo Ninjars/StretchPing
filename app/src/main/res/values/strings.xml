@@ -52,10 +52,16 @@
     <string name="desc_repeat_toggle_enabled">will repeat</string>
     <string name="desc_repeat_toggle_disabled">single playthrough</string>
     <string name="desc_delete_plan">Delete Plan</string>
+    <string name="desc_delete_section">Delete Section</string>
     <string name="desc_drag_section">drag section</string>
 
     <string name="delete_plan_title">Delete Plan?</string>
     <string name="delete_plan_text">Are you sure? There\'s no undo.</string>
     <string name="delete_plan_button_confirm">Delete Plan</string>
     <string name="delete_plan_button_dismiss">Keep Plan</string>
+
+    <string name="delete_section_title">Delete Section?</string>
+    <string name="delete_section_text">Are you sure? There\'s no undo.</string>
+    <string name="delete_section_button_confirm">Delete</string>
+    <string name="delete_section_button_dismiss">Keep</string>
 </resources>

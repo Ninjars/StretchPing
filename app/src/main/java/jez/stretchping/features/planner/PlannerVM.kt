@@ -23,6 +23,7 @@ sealed interface PlannerUIEvent {
     data object NewSectionClicked : PlannerUIEvent
     data object StartClicked : PlannerUIEvent
     data object DeletePlanClicked : PlannerUIEvent
+    data class DeleteSectionClicked(val id: String) : PlannerUIEvent
     data class UpdatePlanName(val value: String) : PlannerUIEvent
     data class UpdateIsRepeated(val value: Boolean) : PlannerUIEvent
     data class UpdateSectionName(val id: String, val value: String) : PlannerUIEvent

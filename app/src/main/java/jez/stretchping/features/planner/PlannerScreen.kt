@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jez.stretchping.R
@@ -224,7 +225,6 @@ private fun PlanHeaderView(
     planName: String,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -247,21 +247,14 @@ private fun PlanHeaderView(
                 .focusRequester(focusRequester)
                 .weight(1f)
         )
-        Button(
-            onClick = { showDialog = true },
-            shape = CircleShape,
-            contentPadding = PaddingValues(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
-            ),
-            modifier = Modifier.size(48.dp),
+        DeleteButton(
+            title = stringResource(R.string.delete_plan_title),
+            text = stringResource(R.string.delete_plan_text),
+            confirm = stringResource(R.string.delete_plan_button_confirm),
+            dismiss = stringResource(R.string.delete_plan_button_dismiss),
+            contentDescription = stringResource(id = R.string.desc_delete_plan),
         ) {
-            Icon(
-                imageVector = Icons.Default.DeleteForever,
-                contentDescription = stringResource(id = R.string.desc_delete_plan),
-                modifier = Modifier.fillMaxSize(),
-            )
+            eventHandler(PlannerUIEvent.DeletePlanClicked)
         }
     }
     LaunchedEffect(Unit) {
@@ -270,35 +263,6 @@ private fun PlanHeaderView(
                 focusRequester.requestFocus()
             }
         }
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = {
-                Text(stringResource(R.string.delete_plan_title))
-            },
-            text = {
-                Text(stringResource(R.string.delete_plan_text))
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                        eventHandler(PlannerUIEvent.DeletePlanClicked)
-                    }) {
-                    Text(text = stringResource(R.string.delete_plan_button_confirm))
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                    }) {
-                    Text(text = stringResource(R.string.delete_plan_button_dismiss))
-                }
-            }
-        )
     }
 }
 
@@ -335,25 +299,44 @@ private fun PlanSectionViewContent(
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    // Name
-    SelectOnFocusTextField(
-        text = section.name,
-        textStyle = LocalTextStyle.current.copy(
-            fontSize = 22.sp
-        ),
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Next,
-        ),
-        keyboardActions = KeyboardActions {
-            focusManager.moveFocus(FocusDirection.Next)
-        },
-        label = {
-            Text(stringResource(id = R.string.label_section_name))
-        },
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+        // Name
+        SelectOnFocusTextField(
+            text = section.name,
+            textStyle = LocalTextStyle.current.copy(
+                fontSize = 22.sp
+            ),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = KeyboardActions {
+                focusManager.moveFocus(FocusDirection.Next)
+            },
+            label = {
+                Text(stringResource(id = R.string.label_section_name))
+            },
+            modifier = Modifier.weight(1f)
+        ) {
+            eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+        }
+
+        DeleteButton(
+            contentDescription = stringResource(id = R.string.desc_delete_section),
+            size = 36.dp,
+            title = stringResource(R.string.delete_section_title),
+            text = stringResource(R.string.delete_section_text),
+            confirm = stringResource(R.string.delete_section_button_confirm),
+            dismiss = stringResource(R.string.delete_section_button_dismiss),
+            modifier = Modifier.padding(end = 8.dp)
+        ) {
+            eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
+        }
     }
 
     Row(
@@ -448,6 +431,66 @@ private fun PlanSectionNumberInput(
         label = { Text(labelText) },
     ) {
         it.toFlooredInt()?.let { int -> onChange(int) }
+    }
+}
+
+@Composable
+private fun DeleteButton(
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    title: String,
+    text: String,
+    confirm: String,
+    dismiss: String,
+    size: Dp = 48.dp,
+    onClick: () -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = { showDialog = true },
+        shape = CircleShape,
+        contentPadding = PaddingValues(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+        ),
+        modifier = modifier.size(size),
+    ) {
+        Icon(
+            imageVector = Icons.Default.DeleteForever,
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(title)
+            },
+            text = {
+                Text(text)
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        onClick()
+                    }) {
+                    Text(confirm)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }) {
+                    Text(dismiss)
+                }
+            }
+        )
     }
 }
 

@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.ui.components.TimerControlsEvent.BackClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PauseClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PlayClicked

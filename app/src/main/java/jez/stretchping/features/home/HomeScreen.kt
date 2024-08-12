@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.features.edittimer.EditTimerVM
 import jez.stretchping.features.planslist.PlansListScreen

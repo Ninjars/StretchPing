@@ -2,6 +2,7 @@ package jez.stretchping
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
+import dev.redfoxstudio.stretchping.BuildConfig
 import timber.log.Timber
 
 @HiltAndroidApp

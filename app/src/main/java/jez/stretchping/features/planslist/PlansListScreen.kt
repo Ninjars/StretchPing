@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer

@@ -8,8 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.MainActivity
-import jez.stretchping.R
 import timber.log.Timber
 
 internal object NotificationsHelper {

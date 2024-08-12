@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.ActiveTimerVM.Event
 import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode

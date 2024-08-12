@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioAttributes.USAGE_GAME
 import android.media.SoundPool
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import timber.log.Timber
 
 enum class GameSoundEffect(val resourceId: Int) {

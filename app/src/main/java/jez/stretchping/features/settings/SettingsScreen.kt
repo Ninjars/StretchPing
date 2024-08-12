@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import jez.stretchping.R
+import dev.redfoxstudio.stretchping.R
 import jez.stretchping.ui.components.IntSliderControl
 import jez.stretchping.ui.components.TriStateToggle
 import jez.stretchping.utils.rememberEventConsumer

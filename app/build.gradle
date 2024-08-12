@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace "jez.stretchping"
+    namespace "dev.redfoxstudio.stretchping"
     compileSdk 34
 
     defaultConfig {
-        applicationId "jez.stretchping"
+        applicationId "dev.redfoxstudio.stretchping"
         minSdk 26
         targetSdk 34
         versionCode 1

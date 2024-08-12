@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +34,10 @@ import jez.stretchping.features.settings.SettingsVM
 import jez.stretchping.persistence.NavLabelDisplayMode
 import kotlinx.coroutines.launch
 
+sealed interface HomeScreenEvent {
+    data object FirstLaunchDisplayed : HomeScreenEvent
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
@@ -43,6 +48,14 @@ fun HomeScreen(
 ) {
     val homeScreenState = homeScreenVM.state.collectAsState()
     val pagerState = rememberPagerState(pageCount = { 3 })
+
+    val launchMode = homeScreenState.value.launchMode
+    LaunchedEffect(launchMode) {
+        if (launchMode == HomeScreenVM.State.LaunchMode.FirstLaunch) {
+            pagerState.animateScrollToPage(2)
+            homeScreenVM.accept(HomeScreenEvent.FirstLaunchDisplayed)
+        }
+    }
     Column {
         HorizontalPager(
             modifier = Modifier.weight(1f),
@@ -55,7 +68,7 @@ fun HomeScreen(
                 else -> throw IllegalStateException("Page $page unsupported")
             }
         }
-        Navigation(pagerState) { homeScreenState.value }
+        Navigation(pagerState) { homeScreenState.value.navLabelDisplayMode }
     }
 }
 

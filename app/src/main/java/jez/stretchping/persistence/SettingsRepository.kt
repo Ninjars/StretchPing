@@ -128,6 +128,16 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[ShowNavLabelsPref]?.toNavLabelDisplayMode() ?: NavLabelDisplayMode.Always
         }
 
+    suspend fun setHasLaunched() =
+        editDataStore {
+            it[HasLaunchedPref] = true
+        }
+
+    val hasLaunched: Flow<Boolean> = context.dataStore.data
+        .map {
+            it[HasLaunchedPref] ?: false
+        }
+
     suspend fun setShowNavLabels(mode: NavLabelDisplayMode) =
         editDataStore {
             it[ShowNavLabelsPref] = mode.toInt()
@@ -245,5 +255,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val PlayInBackgroundPref = booleanPreferencesKey("PlayInBackground")
         val ShowNavLabelsPref = intPreferencesKey("ShowNavLabels")
         val ExercisesPref = stringPreferencesKey("Plans")
+        val HasLaunchedPref = booleanPreferencesKey("FirstLaunch")
     }
 }

@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -26,9 +26,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jez.stretchping.R
+import jez.stretchping.ui.components.TimerControlsEvent.BackClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PauseClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PlayClicked
-import jez.stretchping.ui.components.TimerControlsEvent.BackClicked
 
 private const val SecondaryButtonSize = 60
 private const val PrimaryButtonSize = 84
@@ -65,7 +65,7 @@ fun TimerControls(
             if (showReset) {
                 CircleButton(
                     onClick = { eventHandler(BackClicked) },
-                    imageVector = Icons.Rounded.Undo,
+                    imageVector = Icons.AutoMirrored.Rounded.Undo,
                     contentDescription = stringResource(id = R.string.timer_reset),
                     modifier = Modifier
                         .size(SecondaryButtonSize.dp),

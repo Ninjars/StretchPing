@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +28,6 @@ import jez.stretchping.features.activetimer.view.SegmentDescription
 fun SegmentDescriptionUi(
     state: SegmentDescription,
 ) {
-    val textBackground = MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

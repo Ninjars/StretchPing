@@ -15,8 +15,8 @@ android {
         applicationId "jez.stretchping"
         minSdk 26
         targetSdk 34
-        versionCode 5
-        versionName "Alpha 0.0.5"
+        versionCode 1
+        versionName "Internal 0.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

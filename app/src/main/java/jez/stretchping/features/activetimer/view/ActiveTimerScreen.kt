@@ -123,7 +123,7 @@ private fun MainContent(
             ) { progress ->
                 if (maxWidth > maxHeight) {
                     LinearProgressIndicator(
-                        progress = progress,
+                        progress = { progress },
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .height(16.dp),

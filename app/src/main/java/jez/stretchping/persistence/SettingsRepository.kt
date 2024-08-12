@@ -52,19 +52,17 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
 
     init {
         // pre-cache exercise configs
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                context.dataStore.data.map {
-                    it[ExercisesPref]?.let { json ->
-                        Json.decodeFromString(
-                            json
-                        )
-                    } ?: ExerciseConfigs(emptyList())
-                }
-                    .collect {
-                        cachedExercises.compareAndSet(ExerciseConfigs(emptyList()), it)
-                    }
+        GlobalScope.launch(Dispatchers.IO) {
+            context.dataStore.data.map {
+                it[ExercisesPref]?.let { json ->
+                    Json.decodeFromString(
+                        json
+                    )
+                } ?: ExerciseConfigs(emptyList())
             }
+                .collect {
+                    cachedExercises.compareAndSet(ExerciseConfigs(emptyList()), it)
+                }
         }
     }
 

@@ -1,10 +1,14 @@
 package jez.stretchping.features.settings
 
+import jez.stretchping.BuildConfig
 import jez.stretchping.R
 import jez.stretchping.persistence.NavLabelDisplayMode
 import jez.stretchping.persistence.ThemeMode
 
 object SettingsStateToViewState : (SettingsVM.State) -> SettingsViewState {
+    private val versionCode: String = BuildConfig.VERSION_CODE.toString()
+    private val versionName: String = BuildConfig.VERSION_NAME
+
     override fun invoke(state: SettingsVM.State): SettingsViewState =
         SettingsViewState(
             transitionPings = state.transitionPings,
@@ -21,8 +25,8 @@ object SettingsStateToViewState : (SettingsVM.State) -> SettingsViewState {
                     optionStringResources = map { it.toStringResId() },
                     selectedIndex = indexOf(state.showNavLabels)
                 )
-
             },
+            versionInfo = "- $versionName ($versionCode) -",
         )
 }
 

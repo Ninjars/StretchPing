@@ -20,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -35,6 +36,7 @@ data class SettingsViewState(
     val playInBackground: Boolean,
     val themeState: TriOptionsState,
     val navLabelsState: TriOptionsState,
+    val versionInfo: String,
 ) {
     data class TriOptionsState(
         val optionStringResources: List<Int>,
@@ -146,6 +148,18 @@ private fun Screen(
         ) {
             eventHandler(SettingsScreenEvent.UpdateTheme(it))
         }
+
+        // Version
+        Text(
+            text = state.versionInfo,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

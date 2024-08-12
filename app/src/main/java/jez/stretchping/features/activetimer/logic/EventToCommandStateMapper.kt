@@ -34,10 +34,26 @@ internal class EventToCommand(
                         )
                 }
 
+            is Event.RestartSegmentPressed ->
+                findSegmentStartIndex(state).let { index ->
+                    Command.StartSegment(
+                        System.currentTimeMillis(),
+                        index = index,
+                        segmentSpec = state.segments[index],
+                    )
+                }
+
             is Event.OnSegmentCompleted -> nextSegment(state)
 
             is Event.BackPressed -> Command.GoBack
         }
+    }
+
+    private fun findSegmentStartIndex(state: State): Int {
+        for (i in (0 until state.index).reversed()) {
+            if (state.segments[i].isStartOfSegment) return i
+        }
+        return 0
     }
 
     private fun nextSegment(state: State): Command {

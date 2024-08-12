@@ -49,22 +49,24 @@ class ActiveTimerEngine(
 
     private fun ExerciseConfig.parse() =
         sections.flatMapIndexed { index, section ->
-//            val hasIntro = section.introDuration > 0
+            val hasIntro = section.introDuration > 0 || section.name.isNotBlank()
             listOfNotNull(
-                getIf(section.name.isNotBlank()) {
+                getIf(hasIntro) {
                     SegmentSpec.Announcement(
                         name = section.name,
                         durationSeconds = section.introDuration,
                     )
                 },
             ) + (0 until section.repCount).flatMap {
+                val hasTransition = (!hasIntro || it > 0) && section.transitionDuration > 0
                 listOfNotNull(
-                    getIf((section.introDuration == 0 || it > 0) && section.transitionDuration > 0) {
+                    getIf(hasTransition) {
                         SegmentSpec.Transition(
                             name = section.name,
                             durationSeconds = section.transitionDuration,
                             index = it,
                             repCount = section.repCount,
+                            isStartOfSegment = it == 0 && !hasIntro,
                         )
                     },
                     getIf(section.activityDuration > 0) {
@@ -74,16 +76,17 @@ class ActiveTimerEngine(
                             index = it,
                             isLast = !repeat && index == sections.size - 1 && it == section.repCount - 1,
                             repCount = section.repCount,
+                            isStartOfSegment = it == 0 && !hasIntro && !hasTransition,
                         )
                     },
                 )
             }
         }
 
-    override fun accept(event: ActiveTimerVM.Event) {
+    override fun accept(value: ActiveTimerVM.Event) {
         coroutineScope.launch {
             val currentState = mutableState.value
-            val command = eventToCommand(currentState, event)
+            val command = eventToCommand(currentState, value)
 
             mutableState.compareAndSet(
                 mutableState.value,
@@ -173,18 +176,21 @@ class ActiveTimerEngine(
             val durationSeconds: Int
             val isLast: Boolean
             val position: String
+            val isStartOfSegment: Boolean
 
             data class Announcement(
                 override val name: String?,
                 override val durationSeconds: Int,
             ) : SegmentSpec {
                 override val isLast = false
+                override val isStartOfSegment = true
                 override val position: String = ""
             }
 
             data class Transition(
                 override val name: String?,
                 override val durationSeconds: Int,
+                override val isStartOfSegment: Boolean,
                 val index: Int,
                 val repCount: Int,
             ) : SegmentSpec {
@@ -196,6 +202,7 @@ class ActiveTimerEngine(
                 override val name: String?,
                 override val durationSeconds: Int,
                 override val isLast: Boolean,
+                override val isStartOfSegment: Boolean,
                 val index: Int,
                 val repCount: Int,
             ) : SegmentSpec {

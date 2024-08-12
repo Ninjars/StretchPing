@@ -14,7 +14,8 @@
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>
-    <string name="timer_reset">Resume</string>
+    <string name="timer_back">Back</string>
+    <string name="timer_reset">Restart Segment</string>
 
     <string name="mode_announce">Get Ready</string>
     <string name="mode_active">Go!</string>

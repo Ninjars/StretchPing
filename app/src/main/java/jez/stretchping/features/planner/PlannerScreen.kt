@@ -126,6 +126,7 @@ private fun PlannerScreen(
                 when (it) {
                     TimerControlsEvent.PlayClicked -> eventHandler(PlannerUIEvent.StartClicked)
                     TimerControlsEvent.PauseClicked,
+                    TimerControlsEvent.ResetClicked,
                     TimerControlsEvent.BackClicked -> Unit
                 }
             },
@@ -136,6 +137,7 @@ private fun PlannerScreen(
                     mainButtonEnabled = canStart,
                     showMainButton = true,
                     showBackWhenPaused = false,
+                    showResetSegment = false,
                     isPaused = true,
                 )
             }

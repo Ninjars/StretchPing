@@ -76,6 +76,7 @@ private fun EditTimerScreen(
                 when (it) {
                     TimerControlsEvent.PlayClicked -> eventHandler(EditTimerEvent.Start)
                     TimerControlsEvent.PauseClicked,
+                    TimerControlsEvent.ResetClicked,
                     TimerControlsEvent.BackClicked -> Unit
                 }
             },
@@ -85,6 +86,7 @@ private fun EditTimerScreen(
                     mainButtonEnabled = canStart,
                     showMainButton = true,
                     showBackWhenPaused = false,
+                    showResetSegment = false,
                     isPaused = true,
                 )
             }

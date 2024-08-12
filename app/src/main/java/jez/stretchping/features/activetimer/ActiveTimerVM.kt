@@ -63,8 +63,8 @@ class ActiveTimerVM @Inject constructor(
         }
     }
 
-    override fun accept(event: Event) {
-        engine?.accept(event)
+    override fun accept(value: Event) {
+        engine?.accept(value)
     }
 
     override fun onPause(owner: LifecycleOwner) {
@@ -124,6 +124,7 @@ class ActiveTimerVM @Inject constructor(
         data object Start : Event()
         data object Pause : Event()
         data object BackPressed : Event()
+        data object RestartSegmentPressed : Event()
         data object OnSegmentCompleted : Event()
     }
 }

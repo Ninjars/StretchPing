@@ -83,6 +83,7 @@ private fun ActiveTimerScreen(
                     TimerControlsEvent.PauseClicked -> eventHandler(Event.Pause)
                     TimerControlsEvent.PlayClicked -> eventHandler(Event.Start)
                     TimerControlsEvent.BackClicked -> eventHandler(Event.BackPressed)
+                    TimerControlsEvent.ResetClicked -> eventHandler(Event.RestartSegmentPressed)
                 }
             },
         ) {
@@ -91,6 +92,7 @@ private fun ActiveTimerScreen(
                     mainButtonEnabled = true,
                     showMainButton = true,
                     showBackWhenPaused = true,
+                    showResetSegment = true,
                     isPaused = activeTimer?.isPaused ?: true,
                 )
             }

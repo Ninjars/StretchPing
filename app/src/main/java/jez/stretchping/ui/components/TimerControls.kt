@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -29,20 +30,23 @@ import jez.stretchping.R
 import jez.stretchping.ui.components.TimerControlsEvent.BackClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PauseClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PlayClicked
+import jez.stretchping.ui.components.TimerControlsEvent.ResetClicked
 
 private const val SecondaryButtonSize = 60
 private const val PrimaryButtonSize = 84
 
-sealed class TimerControlsEvent {
-    object PlayClicked : TimerControlsEvent()
-    object PauseClicked : TimerControlsEvent()
-    object BackClicked : TimerControlsEvent()
+sealed interface TimerControlsEvent {
+    data object PlayClicked : TimerControlsEvent
+    data object PauseClicked : TimerControlsEvent
+    data object BackClicked : TimerControlsEvent
+    data object ResetClicked : TimerControlsEvent
 }
 
 data class TimerControlsViewState(
     val showMainButton: Boolean,
     val mainButtonEnabled: Boolean,
     val showBackWhenPaused: Boolean,
+    val showResetSegment: Boolean,
     val isPaused: Boolean,
 )
 
@@ -61,11 +65,11 @@ fun TimerControls(
             .padding(horizontal = 48.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
-        Crossfade(targetState = state.isPaused && state.showBackWhenPaused) { showReset ->
+        Crossfade(targetState = state.showResetSegment) { showReset ->
             if (showReset) {
                 CircleButton(
-                    onClick = { eventHandler(BackClicked) },
-                    imageVector = Icons.AutoMirrored.Rounded.Undo,
+                    onClick = { eventHandler(ResetClicked) },
+                    imageVector = Icons.Rounded.SkipPrevious,
                     contentDescription = stringResource(id = R.string.timer_reset),
                     modifier = Modifier
                         .size(SecondaryButtonSize.dp),
@@ -90,10 +94,26 @@ fun TimerControls(
                 .size(PrimaryButtonSize.dp)
         )
 
-        Spacer(
-            modifier = Modifier
-                .size(SecondaryButtonSize.dp),
-        )
+        Crossfade(targetState = state.isPaused && state.showBackWhenPaused) { showBack ->
+            if (showBack) {
+                CircleButton(
+                    onClick = { eventHandler(BackClicked) },
+                    imageVector = Icons.AutoMirrored.Rounded.Undo,
+                    contentDescription = stringResource(id = R.string.timer_back),
+                    modifier = Modifier
+                        .size(SecondaryButtonSize.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                    )
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .size(SecondaryButtonSize.dp),
+                )
+            }
+        }
     }
 }
 

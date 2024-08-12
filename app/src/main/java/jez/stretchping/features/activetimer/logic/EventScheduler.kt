@@ -87,6 +87,7 @@ class EventScheduler @Inject constructor(
         segmentSpec: SegmentSpec,
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
+        clearAllJobs()
         jobs.add(
             coroutineScope.launch {
                 if (segmentSpec is SegmentSpec.Announcement) {

@@ -30,7 +30,7 @@ import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
-import jez.stretchping.ui.theme.SecondaryTextFieldColors
+import jez.stretchping.ui.theme.secondaryTextFieldColors
 import jez.stretchping.utils.rememberEventConsumer
 
 sealed class EditTimerEvent {
@@ -123,7 +123,7 @@ private fun Settings(
             keyboardActions = KeyboardActions {
                 focusManager.moveFocus(FocusDirection.Next)
             },
-            colors = SecondaryTextFieldColors(),
+            colors = secondaryTextFieldColors(),
             label = {
                 Text(stringResource(id = R.string.active_duration))
             },
@@ -145,7 +145,7 @@ private fun Settings(
             keyboardActions = KeyboardActions {
                 focusManager.moveFocus(FocusDirection.Next)
             },
-            colors = SecondaryTextFieldColors(),
+            colors = secondaryTextFieldColors(),
             label = {
                 Text(stringResource(id = R.string.transition_duration))
             },
@@ -164,7 +164,7 @@ private fun Settings(
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Done,
             ),
-            colors = SecondaryTextFieldColors(),
+            colors = secondaryTextFieldColors(),
             label = {
                 Text(stringResource(id = R.string.rep_count))
             },

@@ -130,7 +130,7 @@ fun StretchPingTheme(
 }
 
 @Composable
-fun SecondaryTextFieldColors() = with(MaterialTheme.colorScheme) {
+fun secondaryTextFieldColors() = with(MaterialTheme.colorScheme) {
     TextFieldDefaults.colors(
         focusedContainerColor = secondaryContainer,
         unfocusedContainerColor = secondaryContainer,

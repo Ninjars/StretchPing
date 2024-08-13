@@ -37,6 +37,8 @@ class HomeScreenVM @Inject constructor(
                     )
                 }
             }
+        }
+        viewModelScope.launch {
             settingsRepository.showNavLabels.collect { displayMode ->
                 with(mutableState.value) {
                     mutableState.value = copy(

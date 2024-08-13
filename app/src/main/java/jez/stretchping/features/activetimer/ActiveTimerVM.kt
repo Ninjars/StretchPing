@@ -88,7 +88,6 @@ class ActiveTimerVM @Inject constructor(
 
     override fun onCleared() {
         serviceDispatcher.unbind()
-        soundManager.dispose()
         ttsManager.destroy()
         super.onCleared()
     }
@@ -101,6 +100,7 @@ class ActiveTimerVM @Inject constructor(
                     eventScheduler,
                     navigationDispatcher,
                     engineSettings,
+                    soundManager,
                     exerciseConfig,
                 )
             }

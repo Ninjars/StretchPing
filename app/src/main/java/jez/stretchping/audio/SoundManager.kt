@@ -2,15 +2,15 @@ package jez.stretchping.audio
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class SoundManager @Inject constructor(
     @ApplicationContext context: Context,
 ) {
 
-    private val soundEffectPlayer = GameSoundEffectPlayer().apply { initialise(context) }
+    private val soundEffectPlayer = GameSoundEffectPlayer(context)
 
     /*
      Needed because android audio handling is apparently trash

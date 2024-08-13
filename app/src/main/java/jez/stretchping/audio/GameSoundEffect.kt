@@ -15,22 +15,26 @@ enum class GameSoundEffect(val resourceId: Int) {
     Completed(R.raw.special_interface_8),
 }
 
-class GameSoundEffectPlayer {
+class GameSoundEffectPlayer(private val appContext: Context) {
     private var soundPool: SoundPool? = null
     private var soundIds: List<Int> = emptyList()
 
-    fun initialise(context: Context): SoundPool {
+    private fun initialiseSoundPool(): SoundPool {
+        Timber.w("initialiseSoundPool()")
         val newSoundPool = SoundPool.Builder()
             .setMaxStreams(6)
             .setAudioAttributes(AudioAttributes.Builder().setUsage(USAGE_GAME).build())
             .build()
 
         soundIds = GameSoundEffect.entries.map { effect ->
-            newSoundPool.load(context, effect.resourceId, 1)
+            newSoundPool.load(appContext, effect.resourceId, 1)
         }
         soundPool = newSoundPool
         return newSoundPool
     }
+
+    private fun getSoundPool(): SoundPool =
+        soundPool ?: initialiseSoundPool()
 
     fun tearDown() {
         soundPool?.release()
@@ -38,20 +42,15 @@ class GameSoundEffectPlayer {
     }
 
     fun play(effect: GameSoundEffect, volume: Float = 1f) {
-        with(soundPool) {
-            if (this == null) {
-                Timber.e("soundPool as been released or not initialised")
-                return
-            }
-            val soundId = soundIds[effect.ordinal]
-            play(
-                soundId,
-                volume,
-                volume,
-                1,
-                0,
-                1f,
-            )
-        }
+        val sp = getSoundPool()
+        val soundId = soundIds[effect.ordinal]
+        sp.play(
+            soundId,
+            volume,
+            volume,
+            1,
+            0,
+            1f,
+        )
     }
 }

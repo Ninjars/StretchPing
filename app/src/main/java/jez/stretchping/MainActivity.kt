@@ -210,22 +210,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-//            AnimatedVisibility(
-//                visible = visible2,
-//                enter = expandHorizontally(
-//                    animationSpec = spring(
-//                        stiffness = Spring.StiffnessMediumLow,
-//                        dampingRatio = Spring.DampingRatioHighBouncy,
-//                    ),
-//                    expandFrom = Alignment.Start,
-//                    clip = false,
-//                ),
-//            ) {
-//                Text(
-//                    text = stringResource(id = R.string.title_part_2),
-//                    style = MaterialTheme.typography.headlineLarge,
-//                )
-//            }
         }
     }
 
@@ -236,15 +220,25 @@ class MainActivity : ComponentActivity() {
     ) {
         val isDarkTheme = when (themeMode) {
             ThemeMode.Unset,
+            ThemeMode.Dynamic,
             ThemeMode.System -> isSystemInDarkTheme()
 
             ThemeMode.Light -> false
             ThemeMode.Dark -> true
         }
+        val useDynamicTheme = when (themeMode) {
+            ThemeMode.Unset,
+            ThemeMode.System,
+            ThemeMode.Light,
+            ThemeMode.Dark -> false
+
+            ThemeMode.Dynamic -> true
+        }
 
         if (themeMode != ThemeMode.Unset) {
             StretchPingTheme(
-                isDarkTheme = isDarkTheme
+                isDarkTheme = isDarkTheme,
+                useDynamicColor = useDynamicTheme,
             ) {
                 content()
             }

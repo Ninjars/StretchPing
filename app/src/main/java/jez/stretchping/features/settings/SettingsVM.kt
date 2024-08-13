@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.persistence.NavLabelDisplayMode
 import jez.stretchping.persistence.SettingsRepository
 import jez.stretchping.persistence.ThemeMode
+import jez.stretchping.utils.SystemConstants
 import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsVM @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    systemConstants: SystemConstants,
 ) : Consumer<SettingsScreenEvent>, ViewModel() {
     private val state = combine(
         settingsRepository.engineSettings,
@@ -30,6 +32,7 @@ class SettingsVM @Inject constructor(
             playInBackground = engineSettings.playInBackground,
             themeMode = themeMode,
             showNavLabels = showNavLabels,
+            dynamicThemeEnabled = systemConstants.isDynamicThemeEnabled,
         )
     }.stateIn(
         viewModelScope,
@@ -43,9 +46,9 @@ class SettingsVM @Inject constructor(
             State.Default
         ) { state -> SettingsStateToViewState(state) }
 
-    override fun accept(event: SettingsScreenEvent) {
+    override fun accept(value: SettingsScreenEvent) {
         viewModelScope.launch {
-            updateSettings(event)
+            updateSettings(value)
         }
     }
 
@@ -73,10 +76,18 @@ class SettingsVM @Inject constructor(
         val activePings: Int,
         val playInBackground: Boolean,
         val themeMode: ThemeMode,
-        val showNavLabels: NavLabelDisplayMode
+        val showNavLabels: NavLabelDisplayMode,
+        val dynamicThemeEnabled: Boolean,
     ) {
         companion object {
-            val Default = State(0, 0, false, ThemeMode.Unset, NavLabelDisplayMode.Unset)
+            val Default = State(
+                transitionPings = 0,
+                activePings = 0,
+                playInBackground = false,
+                themeMode = ThemeMode.Unset,
+                showNavLabels = NavLabelDisplayMode.Unset,
+                dynamicThemeEnabled = false,
+            )
         }
     }
 }

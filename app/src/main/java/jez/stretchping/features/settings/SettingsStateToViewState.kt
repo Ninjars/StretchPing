@@ -16,8 +16,14 @@ object SettingsStateToViewState : (SettingsVM.State) -> SettingsViewState {
             playInBackground = state.playInBackground,
             themeState = with(ThemeMode.displayValues) {
                 SettingsViewState.TriOptionsState(
-                    optionStringResources = this.map { it.toStringResId() },
-                    selectedIndex = this.indexOf(state.themeMode),
+                    optionStringResources = mapNotNull {
+                        if (!state.dynamicThemeEnabled && it == ThemeMode.Dynamic) {
+                            null
+                        } else {
+                            it.toStringResId()
+                        }
+                    },
+                    selectedIndex = indexOf(state.themeMode),
                 )
             },
             navLabelsState = with(NavLabelDisplayMode.displayValues) {
@@ -44,4 +50,5 @@ private fun ThemeMode.toStringResId() =
         ThemeMode.System -> R.string.theme_system
         ThemeMode.Light -> R.string.theme_light
         ThemeMode.Dark -> R.string.theme_dark
+        ThemeMode.Dynamic -> R.string.theme_dynamic
     }

@@ -24,10 +24,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class ThemeMode {
-    Unset, System, Light, Dark;
+    Unset, System, Light, Dark, Dynamic;
 
     companion object {
-        val displayValues = listOf(System, Light, Dark)
+        val displayValues = listOf(System, Light, Dark, Dynamic)
     }
 }
 
@@ -220,12 +220,14 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         ThemeMode.System -> 1
         ThemeMode.Light -> 2
         ThemeMode.Dark -> 3
+        ThemeMode.Dynamic -> 4
     }
 
     private fun Int.toThemeMode() = when (this) {
         1 -> ThemeMode.System
         2 -> ThemeMode.Light
         3 -> ThemeMode.Dark
+        4 -> ThemeMode.Dynamic
         else -> ThemeMode.Unset
     }
 

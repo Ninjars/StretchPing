@@ -112,6 +112,10 @@ private fun MainContent(
         eventHandler(Event.Pause)
     }
 
+    BackHandler(enabled = state.activeTimer?.isPaused ?: false) {
+        eventHandler(Event.BackPressed)
+    }
+
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
     ) {

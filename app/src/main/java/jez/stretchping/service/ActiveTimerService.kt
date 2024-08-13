@@ -18,11 +18,9 @@ class ActiveTimerService : Service() {
     }
 
     private val binder = LocalBinder()
-    private var engine: ActiveTimerEngine ? = null
+    private var engine: ActiveTimerEngine? = null
 
-    override fun onBind(intent: Intent?): IBinder = binder.also{
-        Timber.e("onBind")
-    }
+    override fun onBind(intent: Intent?): IBinder = binder.also { Timber.e("onBind") }
 
     override fun onCreate() {
         super.onCreate()
@@ -61,9 +59,9 @@ class ActiveTimerService : Service() {
     }
 
     fun getOrCreateEngine(factory: (() -> Unit) -> ActiveTimerEngine): ActiveTimerEngine =
-        with (engine) {
-            Timber.e("getOrCreateEngine: already exists? ${engine != null}")
-            this ?: factory {
+        engine.let { existing ->
+            Timber.e("getOrCreateEngine: already exists? ${existing != null}")
+            existing ?: factory {
                 stopForegroundService()
                 engine?.dispose()
                 engine = null

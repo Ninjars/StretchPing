@@ -96,7 +96,6 @@ class EventScheduler @Inject constructor(
                     }
                 }
                 delay(durationMillis.milliseconds)
-                eventConsumer.accept(ActiveTimerVM.Event.OnSegmentCompleted)
 
                 if (segmentSpec.isLast) {
                     soundManager.playSound(GameSoundEffect.Completed)
@@ -110,6 +109,8 @@ class EventScheduler @Inject constructor(
                             }
                     }
                 }
+
+                eventConsumer.accept(ActiveTimerVM.Event.OnSegmentCompleted)
             }
         )
         enqueueCountdownPings(

@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
-import jez.stretchping.audio.SoundManager
 import jez.stretchping.audio.TTSManager
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine
 import jez.stretchping.features.activetimer.logic.EventScheduler
@@ -34,7 +33,6 @@ class ActiveTimerVM @Inject constructor(
     private val serviceDispatcher: ActiveTimerServiceDispatcher,
     private val settingsRepository: SettingsRepository,
     private val ttsManager: TTSManager,
-    private val soundManager: SoundManager,
     savedStateHandle: SavedStateHandle,
 ) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
     private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
@@ -100,7 +98,6 @@ class ActiveTimerVM @Inject constructor(
                     eventScheduler,
                     navigationDispatcher,
                     engineSettings,
-                    soundManager,
                     exerciseConfig,
                 )
             }

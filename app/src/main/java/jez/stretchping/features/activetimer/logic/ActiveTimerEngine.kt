@@ -3,7 +3,6 @@ package jez.stretchping.features.activetimer.logic
 import androidx.core.util.Consumer
 import jez.stretchping.NavigationDispatcher
 import jez.stretchping.Route
-import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.ActiveTimerVM
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.ActiveSegment
 import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.SegmentSpec
@@ -26,7 +25,6 @@ class ActiveTimerEngine(
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
     private val engineSettings: EngineSettings,
-    private val soundManager: SoundManager,
     exerciseConfig: ExerciseConfig,
 ) : Consumer<ActiveTimerVM.Event> {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
@@ -123,7 +121,6 @@ class ActiveTimerEngine(
 
     fun dispose() {
         eventScheduler.dispose()
-        soundManager.dispose()
         coroutineScope.cancel()
     }
 

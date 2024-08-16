@@ -39,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import dev.redfoxstudio.stretchping.R
+import jez.stretchping.audio.SoundManager
 import jez.stretchping.features.activetimer.view.ActiveTimerScreen
 import jez.stretchping.features.edittimer.EditTimerScreen
 import jez.stretchping.features.home.HomeScreen
@@ -66,11 +67,15 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var serviceDispatcher: ActiveTimerServiceDispatcher
 
+    @Inject
+    lateinit var soundManager: SoundManager
+
     private val activeTimerController = ActiveTimerServiceController(this)
 
     override fun onDestroy() {
         serviceDispatcher.unbind()
         activeTimerController.stopService()
+        soundManager.dispose()
         super.onDestroy()
     }
 

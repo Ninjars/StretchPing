@@ -68,4 +68,7 @@
     <string name="delete_section_text">Are you sure? There\'s no undo.</string>
     <string name="delete_section_button_confirm">Delete</string>
     <string name="delete_section_button_dismiss">Keep</string>
+
+    <string name="radial_picker_ok">OK</string>
+    <string name="radial_picker_cancel">Cancel</string>
 </resources>

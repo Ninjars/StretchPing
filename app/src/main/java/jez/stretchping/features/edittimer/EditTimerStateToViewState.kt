@@ -20,7 +20,7 @@ internal object EditTimerStateToViewState :
                     repCount < 1 -> "∞"
                     else -> repCount.toString()
                 },
-                canStart = activeSegmentLength > 0 && transitionDuration > 0 && repCount > Int.MIN_VALUE,
+                canStart = activeSegmentLength > 0 && repCount > Int.MIN_VALUE,
             )
         }
 }

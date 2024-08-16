@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Loop
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
@@ -56,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -258,6 +261,11 @@ private fun PlanHeaderView(
             confirm = stringResource(R.string.delete_plan_button_confirm),
             dismiss = stringResource(R.string.delete_plan_button_dismiss),
             contentDescription = stringResource(id = R.string.desc_delete_plan),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError,
+            ),
+            icon = Icons.Default.DeleteForever,
         ) {
             eventHandler(PlannerUIEvent.DeletePlanClicked)
         }
@@ -304,8 +312,8 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                         text = stringResource(R.string.delete_section_text),
                         confirm = stringResource(R.string.delete_section_button_confirm),
                         dismiss = stringResource(R.string.delete_section_button_dismiss),
+                        icon = Icons.Default.Close,
                         modifier = Modifier
-
                     ) {
                         eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
                     }
@@ -495,6 +503,8 @@ private fun PlanSectionNumberInput(
 private fun DeleteButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
+    colors: ButtonColors = ButtonDefaults.outlinedButtonColors(),
+    icon: ImageVector,
     title: String,
     text: String,
     confirm: String,
@@ -508,14 +518,11 @@ private fun DeleteButton(
         onClick = { showDialog = true },
         shape = CircleShape,
         contentPadding = PaddingValues(size / 6),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
-        ),
+        colors = colors,
         modifier = modifier.size(size),
     ) {
         Icon(
-            imageVector = Icons.Default.DeleteForever,
+            imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(),
         )

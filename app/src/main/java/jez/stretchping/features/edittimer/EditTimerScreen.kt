@@ -31,6 +31,7 @@ import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
 import jez.stretchping.ui.theme.secondaryTextFieldColors
+import jez.stretchping.utils.ExerciseConstants
 import jez.stretchping.utils.rememberEventConsumer
 
 sealed class EditTimerEvent {
@@ -112,9 +113,7 @@ private fun Settings(
         // Edit Stretch Duration
         FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
-            pickerOptions = listOf(
-                "5", "10", "15", "20", "30", "45", "60", "90", "120",
-            ),
+            pickerOptions = ExerciseConstants.StretchDurations,
             text = state.activeDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -137,9 +136,7 @@ private fun Settings(
         // Edit Transition Duration
         FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
-            pickerOptions = listOf(
-                "0", "3", "5", "10",
-            ),
+            pickerOptions = ExerciseConstants.TransitionDurations,
             text = state.transitionDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -162,9 +159,7 @@ private fun Settings(
         // Edit Rep Count
         FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
-            pickerOptions = listOf(
-                "∞", "1", "5", "8", "10", "12", "15", "20", "30",
-            ),
+            pickerOptions = ExerciseConstants.RepCounts,
             text = state.repCount,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp

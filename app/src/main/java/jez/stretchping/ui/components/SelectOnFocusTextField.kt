@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlin.math.max
 
 @Composable
 fun SelectOnFocusTextField(
@@ -37,7 +38,7 @@ fun SelectOnFocusTextField(
     val newTextRange = with(fieldState.value) {
         if (text != this.text) {
             val oldPosition = this.selection.end
-            val newPosition = oldPosition + text.length - this.text.length
+            val newPosition = max(0, oldPosition + text.length - this.text.length)
             TextRange(newPosition)
         } else {
             fieldState.value.selection

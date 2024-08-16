@@ -159,7 +159,7 @@ private fun Settings(
         // Edit Rep Count
         FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
-            pickerOptions = ExerciseConstants.RepCounts,
+            pickerOptions = ExerciseConstants.RepCountsWithInfinite,
             text = state.repCount,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp

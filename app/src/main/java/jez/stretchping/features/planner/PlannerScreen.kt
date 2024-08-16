@@ -347,6 +347,7 @@ private fun PlanSectionViewContent(
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = 22.sp
                 ),
+                useOutlinedTextField = false,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next,

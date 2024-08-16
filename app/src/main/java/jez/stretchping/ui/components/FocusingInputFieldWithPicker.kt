@@ -52,6 +52,7 @@ fun FocusingInputFieldWithPicker(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             colors = colors,
+            useOutlinedTextField = true,
             label = label,
             onValueChanged = onValueChanged,
         )

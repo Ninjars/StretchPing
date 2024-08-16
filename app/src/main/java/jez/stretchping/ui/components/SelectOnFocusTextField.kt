@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ fun SelectOnFocusTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     colors: TextFieldColors = TextFieldDefaults.colors(),
+    useOutlinedTextField: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     onValueChanged: (String) -> Unit,
 ) {
@@ -61,19 +63,37 @@ fun SelectOnFocusTextField(
         )
     }
 
-    OutlinedTextField(
-        modifier = modifier,
-        interactionSource = interactionSource,
-        value = fieldState.value,
-        label = label,
-        textStyle = textStyle,
-        onValueChange = {
-            fieldState.value = it
-            onValueChanged(it.text)
-        },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true,
-        colors = colors,
-    )
+    if (useOutlinedTextField) {
+        OutlinedTextField(
+            modifier = modifier,
+            interactionSource = interactionSource,
+            value = fieldState.value,
+            label = label,
+            textStyle = textStyle,
+            onValueChange = {
+                fieldState.value = it
+                onValueChanged(it.text)
+            },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            colors = colors,
+        )
+    } else {
+        TextField(
+            modifier = modifier,
+            interactionSource = interactionSource,
+            value = fieldState.value,
+            label = label,
+            textStyle = textStyle,
+            onValueChange = {
+                fieldState.value = it
+                onValueChanged(it.text)
+            },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            colors = colors,
+        )
+    }
 }

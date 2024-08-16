@@ -26,7 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.redfoxstudio.stretchping.R
-import jez.stretchping.ui.components.SelectOnFocusTextField
+import jez.stretchping.ui.components.FocusingInputFieldWithPicker
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
@@ -110,8 +110,11 @@ private fun Settings(
         val focusManager = LocalFocusManager.current
 
         // Edit Stretch Duration
-        SelectOnFocusTextField(
+        FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
+            pickerOptions = listOf(
+                "5", "10", "15", "20", "30", "45", "60", "90", "120",
+            ),
             text = state.activeDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -132,8 +135,11 @@ private fun Settings(
         }
 
         // Edit Transition Duration
-        SelectOnFocusTextField(
+        FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
+            pickerOptions = listOf(
+                "0", "3", "5", "10",
+            ),
             text = state.transitionDuration,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
@@ -154,8 +160,11 @@ private fun Settings(
         }
 
         // Edit Rep Count
-        SelectOnFocusTextField(
+        FocusingInputFieldWithPicker(
             modifier = Modifier.fillMaxWidth(),
+            pickerOptions = listOf(
+                "∞", "1", "5", "8", "10", "12", "15", "20", "30",
+            ),
             text = state.repCount,
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp

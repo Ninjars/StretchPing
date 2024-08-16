@@ -7,8 +7,12 @@ internal object EventToSettingsUpdate : (EditTimerEvent) -> SettingsCommand? {
     override fun invoke(event: EditTimerEvent): SettingsCommand? =
         when (event) {
             is EditTimerEvent.Start -> null
-            is EditTimerEvent.UpdateRepCount -> event.count.toFlooredInt()?.let {
-                SettingsCommand.SetRepCount(it)
+            is EditTimerEvent.UpdateRepCount -> if (event.count == "∞") {
+                SettingsCommand.SetRepCount(0)
+            } else {
+                event.count.toFlooredInt()?.let {
+                    SettingsCommand.SetRepCount(it)
+                }
             }
 
             is EditTimerEvent.UpdateActiveDuration -> event.duration.toFlooredInt()?.let {

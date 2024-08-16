@@ -66,12 +66,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.redfoxstudio.stretchping.R
+import jez.stretchping.ui.components.FocusingInputFieldWithPicker
 import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
 import jez.stretchping.ui.theme.StretchPingTheme
 import jez.stretchping.ui.theme.secondaryTextFieldColors
+import jez.stretchping.utils.ExerciseConstants
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
 import jez.stretchping.utils.toFlooredInt
@@ -318,8 +320,6 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                 }
                 PlanSectionViewContent(section, canStartPlan, eventHandler)
             }
-
-
         }
     }
 }
@@ -384,12 +384,14 @@ private fun PlanSectionViewContent(
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier.fillMaxWidth()
         ) {
             // Rep Count
             PlanSectionNumberInput(
                 labelText = stringResource(id = R.string.rep_count),
                 text = section.repCount,
+                pickerOptions = ExerciseConstants.RepCounts,
                 modifier = Modifier.weight(1f)
             ) {
                 eventHandler(
@@ -401,6 +403,7 @@ private fun PlanSectionViewContent(
             PlanSectionNumberInput(
                 labelText = stringResource(id = R.string.label_section_start_delay),
                 text = section.entryTransitionDuration,
+                pickerOptions = ExerciseConstants.TransitionDurations,
                 modifier = Modifier.weight(1f)
             ) {
                 eventHandler(
@@ -414,12 +417,14 @@ private fun PlanSectionViewContent(
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier.fillMaxWidth(),
         ) {
             // Stretch Duration
             PlanSectionNumberInput(
                 labelText = stringResource(id = R.string.active_duration),
                 text = section.repDuration,
+                pickerOptions = ExerciseConstants.StretchDurations,
                 modifier = Modifier.weight(1f)
             ) {
                 eventHandler(
@@ -434,6 +439,7 @@ private fun PlanSectionViewContent(
             PlanSectionNumberInput(
                 labelText = stringResource(id = R.string.transition_duration),
                 text = section.repTransitionDuration,
+                pickerOptions = ExerciseConstants.TransitionDurations,
                 imeAction = ImeAction.Done,
                 modifier = Modifier.weight(1f)
             ) {
@@ -453,13 +459,15 @@ private fun PlanSectionViewContent(
 private fun PlanSectionNumberInput(
     labelText: String,
     text: String,
+    pickerOptions: List<String>,
     modifier: Modifier = Modifier,
     imeAction: ImeAction = ImeAction.Next,
     onChange: (Int) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    SelectOnFocusTextField(
+    FocusingInputFieldWithPicker(
         modifier = modifier,
+        pickerOptions = pickerOptions,
         text = text,
         textStyle = LocalTextStyle.current.copy(
             fontSize = 30.sp

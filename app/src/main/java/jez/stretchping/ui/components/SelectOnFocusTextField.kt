@@ -6,7 +6,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.TextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -61,7 +61,7 @@ fun SelectOnFocusTextField(
         )
     }
 
-    TextField(
+    OutlinedTextField(
         modifier = modifier,
         interactionSource = interactionSource,
         value = fieldState.value,

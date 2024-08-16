@@ -59,7 +59,7 @@ fun FocusingInputFieldWithPicker(
             onClick = { showDialog = true },
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(42.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.AvTimer,

@@ -2,14 +2,11 @@ package jez.stretchping.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -62,25 +58,22 @@ fun RadialPicker(
 ) {
     var currentIndex by remember { mutableIntStateOf(initialSelectedIndex) }
     Dialog(onDismissRequest = onDismissRequest) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 48.dp)
+                .clickable(onClick = onDismissRequest)
+                .padding(vertical = 48.dp)
         ) {
-            RadialPicker(
-                values,
-                { currentIndex },
-            ) { index ->
-                currentIndex = index
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+            Box(
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                Button(
+                RadialPicker(
+                    values = values,
+                    initialSelectedIndex = { currentIndex },
+                    onSelectedIndexChange = { index -> currentIndex = index },
+                    onSelectionMade = { onSelectionConfirmed(currentIndex) }
+                )
+                OutlinedButton(
                     onClick = onDismissRequest,
                     shape = CircleShape,
                     contentPadding = PaddingValues(8.dp),
@@ -91,13 +84,6 @@ fun RadialPicker(
                         contentDescription = stringResource(id = R.string.radial_picker_cancel)
                     )
                 }
-                Button(
-                    onClick = { onSelectionConfirmed(currentIndex) },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(text = stringResource(id = R.string.radial_picker_ok))
-                }
-                Spacer(modifier = Modifier.size(48.dp))
             }
         }
     }
@@ -108,9 +94,11 @@ private fun RadialPicker(
     values: List<String>,
     initialSelectedIndex: () -> Int,
     onSelectedIndexChange: (Int) -> Unit,
+    onSelectionMade: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f)
             .clip(CircleShape)
@@ -120,6 +108,7 @@ private fun RadialPicker(
             values = values,
             currentIndex = initialSelectedIndex,
             onSelectedIndexChange = onSelectedIndexChange,
+            onSelectionMade = onSelectionMade,
         )
     }
 }
@@ -129,6 +118,7 @@ private fun RadialLines(
     values: List<String>,
     currentIndex: () -> Int,
     onSelectedIndexChange: (Int) -> Unit,
+    onSelectionMade: () -> Unit,
 ) {
     val numberOfValues = values.size
     val radiansPerValue = (2 * PI / numberOfValues).toFloat()
@@ -163,6 +153,7 @@ private fun RadialLines(
                     },
                     onDragEnd = {
                         dragPosition = (baseAngle + radiansPerValue * currentIndex()).toOffset()
+                        onSelectionMade()
                     },
                     onDragCancel = {
                         dragPosition = (baseAngle + radiansPerValue * currentIndex()).toOffset()
@@ -175,6 +166,7 @@ private fun RadialLines(
                         (((it - cachedCenter).toRadians() - baseAngle - segmentOffset).mod(2 * PI) / radiansPerValue).toInt()
                     onSelectedIndexChange(segment)
                     dragPosition = (baseAngle + radiansPerValue * currentIndex()).toOffset()
+                    onSelectionMade()
                 }
             }
     ) {

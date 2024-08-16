@@ -69,6 +69,8 @@
     <string name="delete_section_button_confirm">Delete</string>
     <string name="delete_section_button_dismiss">Keep</string>
 
+    <string name="desc_radial_picker">Select</string>
     <string name="radial_picker_ok">OK</string>
     <string name="radial_picker_cancel">Cancel</string>
+    <string name="infinite">∞</string>
 </resources>

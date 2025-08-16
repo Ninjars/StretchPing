@@ -18,3 +18,4 @@ deploymentTargetDropDown.xml
 compiler.xml
 /secrets
 /app/release
+/.idea/deviceManager.xml

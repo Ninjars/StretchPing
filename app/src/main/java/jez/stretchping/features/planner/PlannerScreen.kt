@@ -9,7 +9,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,24 +25,28 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Start
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -58,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -65,17 +68,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.redfoxstudio.stretchping.R
-import jez.stretchping.ui.components.FocusingInputFieldWithPicker
+import jez.stretchping.ui.components.RadialPicker
 import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
 import jez.stretchping.ui.components.TimerControlsViewState
 import jez.stretchping.ui.theme.StretchPingTheme
-import jez.stretchping.ui.theme.secondaryTextFieldColors
 import jez.stretchping.utils.ExerciseConstants
 import jez.stretchping.utils.previewState
 import jez.stretchping.utils.rememberEventConsumer
@@ -166,8 +167,8 @@ private fun Content(
 
     LazyColumn(
         state = lazyListState,
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         item(key = "header", contentType = "header") {
@@ -206,18 +207,19 @@ private fun AddSectionItemView(
                 onDoubleClick = null
             )
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(12.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(24.dp)
             )
+            Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = stringResource(R.string.desc_add_plan_section),
                 style = MaterialTheme.typography.titleMedium,
@@ -234,7 +236,6 @@ private fun PlanHeaderView(
 ) {
     val focusRequester = remember { FocusRequester() }
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -244,28 +245,30 @@ private fun PlanHeaderView(
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 30.sp
             ),
-            label = { Text(text = stringResource(R.string.label_plan_name)) },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.label_plan_name),
+                    fontSize = 30.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Done,
             ),
-            colors = secondaryTextFieldColors(),
+            colors = transparentTextFieldColors(),
             modifier = Modifier
                 .focusRequester(focusRequester)
                 .weight(1f)
         )
-        DeleteButton(
+        ConfirmActionIconButton(
             title = stringResource(R.string.delete_plan_title),
             text = stringResource(R.string.delete_plan_text),
             confirm = stringResource(R.string.delete_plan_button_confirm),
             dismiss = stringResource(R.string.delete_plan_button_dismiss),
             contentDescription = stringResource(id = R.string.desc_delete_plan),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
-            ),
-            icon = Icons.Default.DeleteForever,
+            icon = Icons.Outlined.Delete,
         ) {
             eventHandler(PlannerUIEvent.DeletePlanClicked)
         }
@@ -286,183 +289,162 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
     isDragging: Boolean,
     eventHandler: (PlannerUIEvent) -> Unit,
 ) {
-    Box {
-        Card(
-            border = if (isDragging) {
-                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-            } else null,
+    val focusManager = LocalFocusManager.current
+
+    Card(
+        border = if (isDragging) {
+            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        } else null,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 16.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .height(IntrinsicSize.Min)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                Icon(
+                    imageVector = Icons.Default.DragHandle,
+                    contentDescription = stringResource(id = R.string.desc_drag_section),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
-                        .width(IntrinsicSize.Min)
-
+                        .draggableHandle()
+                        .padding(8.dp)
+                )
+                // Name
+                SelectOnFocusTextField(
+                    text = section.name,
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 22.sp
+                    ),
+                    useOutlinedTextField = false,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next,
+                    ),
+                    keyboardActions = KeyboardActions {
+                        focusManager.moveFocus(FocusDirection.Next)
+                    },
+                    placeholder = {
+                        Text(
+                            text = stringResource(id = R.string.hint_section_name),
+                            fontSize = 22.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    colors = transparentTextFieldColors(),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    DeleteButton(
-                        contentDescription = stringResource(id = R.string.desc_delete_section),
-                        size = 32.dp,
-                        title = stringResource(R.string.delete_section_title),
-                        text = stringResource(R.string.delete_section_text),
-                        confirm = stringResource(R.string.delete_section_button_confirm),
-                        dismiss = stringResource(R.string.delete_section_button_dismiss),
-                        icon = Icons.Default.Close,
-                        modifier = Modifier
+                    eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+                }
+                ConfirmActionIconButton(
+                    contentDescription = stringResource(id = R.string.desc_delete_section),
+                    title = stringResource(R.string.delete_section_title),
+                    text = stringResource(R.string.delete_section_text),
+                    confirm = stringResource(R.string.delete_section_button_confirm),
+                    dismiss = stringResource(R.string.delete_section_button_dismiss),
+                    icon = Icons.Default.Close,
+                ) {
+                    eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
+                }
+                AnimatedVisibility(
+                    visible = canStartPlan,
+                ) {
+                    Button(
+                        onClick = { eventHandler(PlannerUIEvent.StartFromSectionClicked(section.id)) },
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(6.dp),
+                        colors = ButtonDefaults.buttonColors(),
+                        modifier = Modifier.size(40.dp)
                     ) {
-                        eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = stringResource(R.string.play_from_section),
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
-                    Icon(
-                        imageVector = Icons.Default.DragHandle,
-                        contentDescription = stringResource(id = R.string.desc_drag_section),
-                        modifier = Modifier
-                            .draggableHandle()
-                            .weight(1f)
-                            .fillMaxWidth()
-                    )
                 }
-                PlanSectionViewContent(section, canStartPlan, eventHandler)
             }
-        }
-    }
-}
 
-@Composable
-private fun PlanSectionViewContent(
-    section: PlannerViewState.Section,
-    canStartPlan: Boolean,
-    eventHandler: (PlannerUIEvent) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Name
-            SelectOnFocusTextField(
-                text = section.name,
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 22.sp
-                ),
-                useOutlinedTextField = false,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next,
-                ),
-                keyboardActions = KeyboardActions {
-                    focusManager.moveFocus(FocusDirection.Next)
-                },
-                label = {
-                    Text(stringResource(id = R.string.label_section_name))
-                },
-                modifier = Modifier.weight(1f)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp)
             ) {
-                eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
-            }
-            AnimatedVisibility(
-                visible = canStartPlan,
-            ) {
-                Button(
-                    onClick = { eventHandler(PlannerUIEvent.StartFromSectionClicked(section.id)) },
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(8.dp),
-                    colors = ButtonDefaults.buttonColors(),
-                    modifier = Modifier
-                        .size(48.dp)
+                // Rep Count
+                PlanSectionNumberInput(
+                    labelText = stringResource(id = R.string.label_reps),
+                    text = section.repCount,
+                    pickerOptions = ExerciseConstants.RepCounts,
+                    showSecondsSuffix = false,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = stringResource(R.string.play_from_section),
-                        modifier = Modifier
-                            .fillMaxSize()
+                    eventHandler(
+                        PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
+                    )
+                }
+
+                // Initial Delay
+                PlanSectionNumberInput(
+                    labelText = stringResource(id = R.string.label_delay),
+                    text = section.entryTransitionDuration,
+                    pickerOptions = ExerciseConstants.TransitionDurations,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    eventHandler(
+                        PlannerUIEvent.UpdateSectionEntryTransitionDuration(
+                            section.id,
+                            max(0, it)
+                        )
+                    )
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp)
+            ) {
+                // Stretch Duration
+                PlanSectionNumberInput(
+                    labelText = stringResource(id = R.string.label_stretch),
+                    text = section.repDuration,
+                    pickerOptions = ExerciseConstants.StretchDurations,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    eventHandler(
+                        PlannerUIEvent.UpdateSectionRepDuration(
+                            section.id,
+                            max(0, it)
+                        )
+                    )
+                }
+
+                // Break Duration
+                PlanSectionNumberInput(
+                    labelText = stringResource(id = R.string.label_break),
+                    text = section.repTransitionDuration,
+                    pickerOptions = ExerciseConstants.TransitionDurations,
+                    imeAction = ImeAction.Done,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    eventHandler(
+                        PlannerUIEvent.UpdateSectionRepTransitionDuration(
+                            section.id,
+                            max(0, it)
+                        )
                     )
                 }
             }
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Rep Count
-            PlanSectionNumberInput(
-                labelText = stringResource(id = R.string.rep_count),
-                text = section.repCount,
-                pickerOptions = ExerciseConstants.RepCounts,
-                modifier = Modifier.weight(1f)
-            ) {
-                eventHandler(
-                    PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
-                )
-            }
-
-            // Initial Delay
-            PlanSectionNumberInput(
-                labelText = stringResource(id = R.string.label_section_start_delay),
-                text = section.entryTransitionDuration,
-                pickerOptions = ExerciseConstants.TransitionDurations,
-                modifier = Modifier.weight(1f)
-            ) {
-                eventHandler(
-                    PlannerUIEvent.UpdateSectionEntryTransitionDuration(
-                        section.id,
-                        max(0, it)
-                    )
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            // Stretch Duration
-            PlanSectionNumberInput(
-                labelText = stringResource(id = R.string.active_duration),
-                text = section.repDuration,
-                pickerOptions = ExerciseConstants.StretchDurations,
-                modifier = Modifier.weight(1f)
-            ) {
-                eventHandler(
-                    PlannerUIEvent.UpdateSectionRepDuration(
-                        section.id,
-                        max(0, it)
-                    )
-                )
-            }
-
-            // Break Duration
-            PlanSectionNumberInput(
-                labelText = stringResource(id = R.string.transition_duration),
-                text = section.repTransitionDuration,
-                pickerOptions = ExerciseConstants.TransitionDurations,
-                imeAction = ImeAction.Done,
-                modifier = Modifier.weight(1f)
-            ) {
-                eventHandler(
-                    PlannerUIEvent.UpdateSectionRepTransitionDuration(
-                        section.id,
-                        max(0, it)
-                    )
-                )
-            }
-        }
     }
 }
-
 
 @Composable
 private fun PlanSectionNumberInput(
@@ -470,16 +452,18 @@ private fun PlanSectionNumberInput(
     text: String,
     pickerOptions: List<String>,
     modifier: Modifier = Modifier,
+    showSecondsSuffix: Boolean = true,
     imeAction: ImeAction = ImeAction.Next,
     onChange: (Int) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    FocusingInputFieldWithPicker(
-        modifier = modifier,
-        pickerOptions = pickerOptions,
+    var showPicker by remember { mutableStateOf(false) }
+
+    SelectOnFocusTextField(
         text = text,
+        useOutlinedTextField = true,
         textStyle = LocalTextStyle.current.copy(
-            fontSize = 30.sp
+            fontSize = 24.sp
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,
@@ -492,39 +476,72 @@ private fun PlanSectionNumberInput(
         } else {
             KeyboardActions()
         },
-        colors = secondaryTextFieldColors(),
         label = { Text(labelText) },
+        suffix = if (showSecondsSuffix) {
+            {
+                Text(
+                    text = stringResource(R.string.suffix_seconds),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else null,
+        trailingIcon = {
+            IconButton(onClick = { showPicker = true }) {
+                Icon(
+                    imageVector = Icons.Default.AvTimer,
+                    contentDescription = stringResource(R.string.desc_radial_picker),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        },
+        modifier = modifier,
     ) {
         it.toFlooredInt()?.let { int -> onChange(int) }
+    }
+
+    if (showPicker) {
+        RadialPicker(
+            values = pickerOptions,
+            initialSelectedIndex = max(0, pickerOptions.indexOfFirst { it == text }),
+            onDismissRequest = { showPicker = false },
+            title = labelText,
+        ) { index ->
+            pickerOptions[index].toFlooredInt()?.let(onChange)
+            showPicker = false
+        }
     }
 }
 
 @Composable
-private fun DeleteButton(
+private fun transparentTextFieldColors(): TextFieldColors =
+    TextFieldDefaults.colors(
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        disabledContainerColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+    )
+
+@Composable
+private fun ConfirmActionIconButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
-    colors: ButtonColors = ButtonDefaults.outlinedButtonColors(),
     icon: ImageVector,
     title: String,
     text: String,
     confirm: String,
     dismiss: String,
-    size: Dp = 48.dp,
     onClick: () -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Button(
+    IconButton(
         onClick = { showDialog = true },
-        shape = CircleShape,
-        contentPadding = PaddingValues(size / 6),
-        colors = colors,
-        modifier = modifier.size(size),
+        modifier = modifier,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize(),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 
@@ -539,6 +556,10 @@ private fun DeleteButton(
             },
             confirmButton = {
                 Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
                     onClick = {
                         showDialog = false
                         onClick()
@@ -547,7 +568,7 @@ private fun DeleteButton(
                 }
             },
             dismissButton = {
-                Button(
+                TextButton(
                     onClick = {
                         showDialog = false
                     }) {

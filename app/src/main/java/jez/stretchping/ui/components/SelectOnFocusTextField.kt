@@ -31,6 +31,9 @@ fun SelectOnFocusTextField(
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
     useOutlinedTextField: Boolean = false,
     label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
     onValueChanged: (String) -> Unit,
 ) {
     val fieldState = remember { mutableStateOf(TextFieldValue(text)) }
@@ -70,6 +73,9 @@ fun SelectOnFocusTextField(
             interactionSource = interactionSource,
             value = fieldState.value,
             label = label,
+            placeholder = placeholder,
+            trailingIcon = trailingIcon,
+            suffix = suffix,
             textStyle = textStyle,
             onValueChange = {
                 fieldState.value = it
@@ -86,6 +92,9 @@ fun SelectOnFocusTextField(
             interactionSource = interactionSource,
             value = fieldState.value,
             label = label,
+            placeholder = placeholder,
+            trailingIcon = trailingIcon,
+            suffix = suffix,
             textStyle = textStyle,
             onValueChange = {
                 fieldState.value = it

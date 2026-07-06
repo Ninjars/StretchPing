@@ -61,7 +61,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
                 } ?: ExerciseConfigs(emptyList())
             }
                 .collect {
-                    cachedExercises.compareAndSet(ExerciseConfigs(emptyList()), it)
+                    cachedExercises.value = it
                 }
         }
     }
@@ -167,7 +167,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
 
     suspend fun saveExercise(exerciseConfig: ExerciseConfig) {
         editDataStore { prefs ->
-            val current = cachedExercises.value
+            val current = prefs.readExercises()
             val exercises = current.exercises
 
             val existingIndex =
@@ -188,7 +188,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
 
     suspend fun deleteExercise(id: String) {
         editDataStore { prefs ->
-            val current = cachedExercises.value
+            val current = prefs.readExercises()
             val updated = current.copy(
                 exercises = current.exercises.filterNot { it.exerciseId == id }
             )
@@ -196,6 +196,10 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             cachedExercises.value = updated
         }
     }
+
+    private fun Preferences.readExercises(): ExerciseConfigs =
+        this[ExercisesPref]?.let { Json.decodeFromString<ExerciseConfigs>(it) }
+            ?: ExerciseConfigs(emptyList())
 
     private suspend fun editDataStore(func: (MutablePreferences) -> Unit) =
         withContext(Dispatchers.IO) {

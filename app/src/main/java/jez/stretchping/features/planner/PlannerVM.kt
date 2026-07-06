@@ -68,20 +68,20 @@ class PlannerVM @Inject constructor(
                     }
             }
         }
-    }
-
-    override fun accept(event: PlannerUIEvent) {
-        viewModelScope.launch {
-            with(mutableState.value) {
-                mutableState.compareAndSet(this, plannerEventToState(this, event))
-            }
-        }
 
         viewModelScope.launch {
             mutableState.collect {
                 if (it.canStart) {
                     settingsRepository.saveExercise(it.toExerciseConfig())
                 }
+            }
+        }
+    }
+
+    override fun accept(event: PlannerUIEvent) {
+        viewModelScope.launch {
+            with(mutableState.value) {
+                mutableState.compareAndSet(this, plannerEventToState(this, event))
             }
         }
 

@@ -74,7 +74,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         serviceDispatcher.unbind()
-        activeTimerController.stopService()
+        // Only tear down the running timer when the activity is genuinely
+        // finishing; a configuration change (e.g. rotation) recreates the
+        // activity and would otherwise restart the workout from segment 0.
+        if (isFinishing) {
+            activeTimerController.stopService()
+        }
         soundManager.dispose()
         super.onDestroy()
     }

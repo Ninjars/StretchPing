@@ -7,26 +7,29 @@ P0s land. Paths are relative to `app/src/main/java/jez/stretchping/`.
 
 ## P0 — data loss & broken core flows
 
-1. **Plan wipe race in `persistence/SettingsRepository.kt` (~64, 168-186).**
+1. ~~**Plan wipe race in `persistence/SettingsRepository.kt` (~64, 168-186).**
    `cachedExercises.compareAndSet(ExerciseConfigs(emptyList()), it)` drops disk
    emissions once the cache is non-empty. If `saveExercise` runs before the
    initial DataStore read completes (cold start → quick plan edit), the write
    is built from the empty cache and **all previously saved plans are wiped**.
    Fix: read current prefs inside the `edit {}` block rather than trusting the
-   in-memory cache. (S)
+   in-memory cache. (S)~~ **DONE** — `save/deleteExercise` now decode from the
+   `edit {}` `Preferences`; init collector always mirrors disk.
 
-2. **Leaked collectors in `features/planner/PlannerVM.kt` (~80-86).** Every
+2. ~~**Leaked collectors in `features/planner/PlannerVM.kt` (~80-86).** Every
    `accept()` launches a new, never-cancelled `mutableState.collect {}` that
    calls `saveExercise`. N events → N live collectors → O(N²) DataStore writes
    per session, and a leaked collector can re-save a plan *after*
    `DeletePlanClicked`, resurrecting it. Fix: single collector in `init`, or
-   save explicitly per event. (S)
+   save explicitly per event. (S)~~ **DONE** — single save collector moved to
+   `init`.
 
-3. **Rotation restarts the workout — `MainActivity.kt` (~75-80).** `onDestroy()`
+3. ~~**Rotation restarts the workout — `MainActivity.kt` (~75-80).** `onDestroy()`
    calls `stopService()` unconditionally; rotation destroys the service and
    engine, then the surviving VM rebinds, creates a fresh engine, and
    auto-starts from segment 0 (`ActiveTimerVM.kt` ~114-116). Fix: only stop
-   the service when `isFinishing`. (S)
+   the service when `isFinishing`. (S)~~ **DONE** — `stopService()` now guarded
+   by `isFinishing`.
 
 ## P1 — correctness
 

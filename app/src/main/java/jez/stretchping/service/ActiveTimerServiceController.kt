@@ -13,6 +13,15 @@ class ActiveTimerServiceController(private val activity: Activity) {
     private var onConnectedCallback: ((ActiveTimerService) -> Unit)? = null
     private var activeTimerService: ActiveTimerService? = null
 
+    /**
+     * True once [bindService] has been called and not yet unbound. Tracked
+     * separately from [activeTimerService] because a bind can be in-flight
+     * (requested but [onServiceConnected] not yet fired); unbinding must still
+     * call [Activity.unbindService] in that window or the ServiceConnection
+     * leaks and the next bind double-binds.
+     */
+    private var bindRequested = false
+
     /** Defines callbacks for service binding, passed to bindService().  */
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -33,24 +42,28 @@ class ActiveTimerServiceController(private val activity: Activity) {
     fun bind(callback: (ActiveTimerService) -> Unit) {
         Timber.e("bind: already bound? ${isBound()}")
         val existingService = activeTimerService
-        if (existingService == null) {
-            onConnectedCallback = callback
-            with(activity) {
-                bindService(
-                    Intent(this, ActiveTimerService::class.java),
-                    connection,
-                    Context.BIND_AUTO_CREATE
-                )
-            }
-        } else {
+        if (existingService != null) {
             callback(existingService)
+        } else {
+            onConnectedCallback = callback
+            if (!bindRequested) {
+                bindRequested = true
+                with(activity) {
+                    bindService(
+                        Intent(this, ActiveTimerService::class.java),
+                        connection,
+                        Context.BIND_AUTO_CREATE
+                    )
+                }
+            }
         }
     }
 
     fun unbind() {
-        Timber.e("unbind: already bound? ${isBound()}")
-        if (isBound()) {
+        Timber.e("unbind: already bound? ${isBound()}, requested? $bindRequested")
+        if (bindRequested) {
             activity.unbindService(connection)
+            bindRequested = false
         }
         activeTimerService = null
         onConnectedCallback = null

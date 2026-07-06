@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -71,7 +72,12 @@ class PlannerVM @Inject constructor(
 
         viewModelScope.launch {
             mutableState.collect {
-                if (it.canStart) {
+                // Persist as soon as the plan has any content, not only when it's
+                // startable. Otherwise edits made while a plan is temporarily
+                // invalid (e.g. a cleared rep count) are silently dropped. A
+                // brand-new plan with no sections is still not written, so we
+                // don't create empty-plan clutter.
+                if (it.sections.isNotEmpty()) {
                     settingsRepository.saveExercise(it.toExerciseConfig())
                 }
             }
@@ -79,11 +85,9 @@ class PlannerVM @Inject constructor(
     }
 
     override fun accept(event: PlannerUIEvent) {
-        viewModelScope.launch {
-            with(mutableState.value) {
-                mutableState.compareAndSet(this, plannerEventToState(this, event))
-            }
-        }
+        // update {} applies the reducer atomically, retrying on contention, so
+        // concurrent events can't clobber each other's edits (dropped keystrokes).
+        mutableState.update { plannerEventToState(it, event) }
 
         when (event) {
             is PlannerUIEvent.DeletePlanClicked -> {

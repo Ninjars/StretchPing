@@ -15,6 +15,7 @@ import jez.stretchping.utils.toViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,6 +47,21 @@ class ActiveTimerEngine(
         mutableState.toViewState(
             scope = coroutineScope,
         ) { state -> ActiveTimerStateToViewState(state) }
+
+    // Events are funnelled through a single consumer so that computing the
+    // command, applying the state transition and running side effects happen
+    // atomically per event. Handling them concurrently on Dispatchers.Default
+    // let events overwrite each other's state and fire side effects on stale
+    // snapshots.
+    private val events = Channel<ActiveTimerVM.Event>(Channel.UNLIMITED)
+
+    init {
+        coroutineScope.launch {
+            for (event in events) {
+                processEvent(event)
+            }
+        }
+    }
 
     private fun ExerciseConfig.parse() =
         sections.flatMapIndexed { index, section ->
@@ -84,42 +100,42 @@ class ActiveTimerEngine(
         }
 
     override fun accept(value: ActiveTimerVM.Event) {
-        coroutineScope.launch {
-            val currentState = mutableState.value
-            val command = eventToCommand(currentState, value)
+        events.trySend(value)
+    }
 
-            mutableState.compareAndSet(
-                mutableState.value,
-                ActiveTimerStateUpdater(currentState, command),
+    private suspend fun processEvent(value: ActiveTimerVM.Event) {
+        val currentState = mutableState.value
+        val command = eventToCommand(currentState, value)
+
+        mutableState.value = ActiveTimerStateUpdater(currentState, command)
+
+        command?.let {
+            eventScheduler.planFutureActions(
+                coroutineScope = coroutineScope,
+                eventsConfiguration = EventsConfiguration(
+                    engineSettings.activePingsCount,
+                    engineSettings.transitionPingsCount,
+                ),
+                executedCommand = it,
+                eventConsumer = this@ActiveTimerEngine
             )
 
-            command?.let {
-                eventScheduler.planFutureActions(
-                    coroutineScope = this,
-                    eventsConfiguration = EventsConfiguration(
-                        engineSettings.activePingsCount,
-                        engineSettings.transitionPingsCount,
-                    ),
-                    executedCommand = it,
-                    eventConsumer = this@ActiveTimerEngine
-                )
-
-                when (it) {
-                    is Command.GoBack,
-                    is Command.SequenceCompleted -> {
-                        withContext(Dispatchers.Main) {
-                            navigationDispatcher.navigateTo(Route.Back)
-                            onEndCallback()
-                        }
+            when (it) {
+                is Command.GoBack,
+                is Command.SequenceCompleted -> {
+                    withContext(Dispatchers.Main) {
+                        navigationDispatcher.navigateTo(Route.Back)
+                        onEndCallback()
                     }
-
-                    else -> Unit
                 }
+
+                else -> Unit
             }
         }
     }
 
     fun dispose() {
+        events.close()
         eventScheduler.dispose()
         coroutineScope.cancel()
     }

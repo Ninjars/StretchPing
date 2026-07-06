@@ -1,5 +1,6 @@
 package jez.stretchping
 
+import android.net.Uri
 import androidx.navigation.NavOptionsBuilder
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import jez.stretchping.persistence.ExerciseConfig
@@ -19,8 +20,11 @@ sealed class Route {
         val config: ExerciseConfig,
     ) : Route() {
         override val routeId by lazy {
+            // URL-encode the JSON so user-entered plan/section names containing
+            // '/', '?' or '#' can't break nav-route matching. Navigation-Compose
+            // URL-decodes the {config} path arg before it reaches the ViewModel.
             "${ActiveTimer::class.simpleName}/${
-                Json.encodeToString(config)
+                Uri.encode(Json.encodeToString(config))
             }"
         }
 

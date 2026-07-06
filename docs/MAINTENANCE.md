@@ -33,29 +33,36 @@ P0s land. Paths are relative to `app/src/main/java/jez/stretchping/`.
 
 ## P1 — correctness
 
-4. **Ineffective CAS event handling** — `ActiveTimerEngine.kt` (~87-94) and
+4. ~~**Ineffective CAS event handling** — `ActiveTimerEngine.kt` (~87-94) and
    `PlannerVM.kt` (~74-78): `compareAndSet(mutableState.value, …)` re-reads at
    call time so it "succeeds" on stale snapshots; concurrent events on
    `Dispatchers.Default` can overwrite each other (dropped keystrokes in the
    planner), and side effects run regardless. Fix: `MutableStateFlow.update {}`
-   or a single-threaded event channel. (M)
+   or a single-threaded event channel. (M)~~ **DONE** — `PlannerVM` uses
+   `update {}`; `ActiveTimerEngine` funnels events through an unlimited
+   `Channel` consumed by a single coroutine (also removes the latent race on
+   `EventScheduler.jobs`).
 5. **Timer drift / doze stalls** — `features/activetimer/logic/EventScheduler.kt`
    (~98): chained relative `delay()`s accumulate latency and aren't
    doze-exempt; pings drift or stall with the screen off despite the FGS.
    Fix: anchor scheduling to absolute `endAtTime` + hold a partial wake lock
    while running. (M)
-6. **Service connection leak** — `service/ActiveTimerServiceController.kt`
+6. ~~**Service connection leak** — `service/ActiveTimerServiceController.kt`
    (~50-57): `unbind()` skips `unbindService` when binding hasn't completed
    yet → leaked ServiceConnection and double-bind on next resume. Track a
-   `bindRequested` flag. (S)
-7. **Unencoded JSON in nav routes** — `NavigationDispatcher.kt` (~21-24) +
+   `bindRequested` flag. (S)~~ **DONE** — `bindRequested` flag drives both
+   `unbindService` and single-bind guarding.
+7. ~~**Unencoded JSON in nav routes** — `NavigationDispatcher.kt` (~21-24) +
    `MainActivity.kt` (~91): `Route.ActiveTimer` embeds raw JSON (including
    user-entered plan/section names) in the route; `/`, `?`, `#` in a name
-   breaks matching. URL-encode the argument. (S)
-8. **Silent unsaved edits** — `PlannerVM` gates persistence on `canStart`;
+   breaks matching. URL-encode the argument. (S)~~ **DONE** — `Uri.encode()`
+   on the config JSON; Navigation-Compose decodes the path arg back.
+8. ~~**Silent unsaved edits** — `PlannerVM` gates persistence on `canStart`;
    after deleting all sections or clearing a rep count, further edits (even
    the plan name) silently don't save. Decide: save always, or surface the
-   invalid state in the UI. (S/M)
+   invalid state in the UI. (S/M)~~ **DONE** — persistence now gates on
+   `sections.isNotEmpty()` instead of `canStart`, so edits to a temporarily
+   invalid plan still save while a brand-new empty plan stays unsaved.
 9. **Text field desync** — `ui/components/SelectOnFocusTextField.kt` (~39-53)
    resyncs its local `TextFieldValue` from upstream during composition; with
    async event handling, fast typing can transiently revert (permanent drops

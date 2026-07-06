@@ -1,21 +1,18 @@
-*.iml
+# Gradle
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-/.idea/misc.xml
-.DS_Store
 /build
 /captures
+/app/release
+
+# IDE
+/.idea
+*.iml
+.DS_Store
+
+# Local config & secrets
+local.properties
+/secrets
+
+# Native builds
 .externalNativeBuild
 .cxx
-local.properties
-deploymentTargetDropDown.xml
-compiler.xml
-/secrets
-/app/release
-/.idea/deviceManager.xml

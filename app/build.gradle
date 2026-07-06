@@ -89,6 +89,7 @@ dependencies {
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
 
     testImplementation "junit:junit:4.13.2"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"
     testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
     kaptTest "com.google.dagger:hilt-compiler:$hilt_version"
 

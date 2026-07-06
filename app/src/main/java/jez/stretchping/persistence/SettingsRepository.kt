@@ -1,6 +1,5 @@
 package jez.stretchping.persistence
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
@@ -8,8 +7,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -40,12 +37,13 @@ enum class NavLabelDisplayMode {
 }
 
 @Singleton
-class SettingsRepository @Inject constructor(@ApplicationContext private val context: Context) {
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+open class SettingsRepository @Inject constructor(
+    private val dataStore: DataStore<Preferences>,
+) {
 
     private var cachedExercises = MutableStateFlow(ExerciseConfigs(emptyList()))
 
-    private val activityDuration: Flow<Int> = context.dataStore.data
+    private val activityDuration: Flow<Int> = dataStore.data
         .map {
             it[ActivityDurationPref] ?: 30
         }
@@ -53,7 +51,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     init {
         // pre-cache exercise configs
         GlobalScope.launch(Dispatchers.IO) {
-            context.dataStore.data.map {
+            dataStore.data.map {
                 it[ExercisesPref]?.let { json ->
                     Json.decodeFromString(
                         json
@@ -71,7 +69,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[ActivityDurationPref] = durationSeconds
         }
 
-    private val transitionDuration: Flow<Int> = context.dataStore.data
+    private val transitionDuration: Flow<Int> = dataStore.data
         .map {
             it[TransitionDurationPref] ?: 5
         }
@@ -81,7 +79,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[TransitionDurationPref] = durationSeconds
         }
 
-    private val repCount: Flow<Int> = context.dataStore.data
+    private val repCount: Flow<Int> = dataStore.data
         .map {
             it[RepCountPref] ?: -1
         }
@@ -91,7 +89,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[RepCountPref] = count
         }
 
-    private val transitionPingsCount: Flow<Int> = context.dataStore.data
+    private val transitionPingsCount: Flow<Int> = dataStore.data
         .map {
             it[TransitionPingsPref] ?: 3
         }
@@ -101,7 +99,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[TransitionPingsPref] = count
         }
 
-    private val activePingsCount: Flow<Int> = context.dataStore.data
+    private val activePingsCount: Flow<Int> = dataStore.data
         .map {
             it[ActivePingsPref] ?: 5
         }
@@ -111,7 +109,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[ActivePingsPref] = count
         }
 
-    private val playInBackground: Flow<Boolean> = context.dataStore.data
+    private val playInBackground: Flow<Boolean> = dataStore.data
         .map {
             it[PlayInBackgroundPref] ?: false
         }
@@ -121,7 +119,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[PlayInBackgroundPref] = shouldPause
         }
 
-    val showNavLabels: Flow<NavLabelDisplayMode> = context.dataStore.data
+    val showNavLabels: Flow<NavLabelDisplayMode> = dataStore.data
         .map {
             it[ShowNavLabelsPref]?.toNavLabelDisplayMode() ?: NavLabelDisplayMode.Always
         }
@@ -153,7 +151,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             )
         }
 
-    val themeMode: Flow<ThemeMode> = context.dataStore.data
+    val themeMode: Flow<ThemeMode> = dataStore.data
         .map {
             it[ThemePref]?.toThemeMode() ?: ThemeMode.System
         }
@@ -163,9 +161,9 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             it[ThemePref] = mode.toInt()
         }
 
-    val exerciseConfigs: Flow<ExerciseConfigs> = cachedExercises
+    open val exerciseConfigs: Flow<ExerciseConfigs> = cachedExercises
 
-    suspend fun saveExercise(exerciseConfig: ExerciseConfig) {
+    open suspend fun saveExercise(exerciseConfig: ExerciseConfig) {
         editDataStore { prefs ->
             val current = prefs.readExercises()
             val exercises = current.exercises
@@ -186,7 +184,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    suspend fun deleteExercise(id: String) {
+    open suspend fun deleteExercise(id: String) {
         editDataStore { prefs ->
             val current = prefs.readExercises()
             val updated = current.copy(
@@ -203,7 +201,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
 
     private suspend fun editDataStore(func: (MutablePreferences) -> Unit) =
         withContext(Dispatchers.IO) {
-            context.dataStore.edit {
+            dataStore.edit {
                 func(it)
             }
         }

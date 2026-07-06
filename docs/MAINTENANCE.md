@@ -96,8 +96,12 @@ Robolectric needed. In order of value:
 4. `features/edittimer/EventToSettingsUpdate` and
    `utils/KotlinUtils.toFlooredInt` (good first test).
 
-P0 fixes 1-2 should land with regression tests (repository save/read race,
-single-collector behavior).
+~~P0 fixes 1-2 should land with regression tests (repository save/read race,
+single-collector behavior).~~ **DONE** — `SettingsRepositoryTest` (save
+preserves on-disk plans, upsert, delete) and `PlannerVMTest` (one save per
+state change, delete doesn't resurrect). Required making `SettingsRepository`
+take an injected `DataStore` (see `PersistenceModule`); `kotlinx-coroutines-test`
+added.
 
 ## CI
 

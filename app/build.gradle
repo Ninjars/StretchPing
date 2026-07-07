@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
-    id "kotlin-kapt"
+    id "com.google.devtools.ksp"
     id "com.google.dagger.hilt.android"
     id "kotlin-parcelize"
     id "org.jetbrains.kotlin.plugin.serialization" version "1.9.24"
@@ -82,22 +82,22 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.1.1"
 
     // Dagger
-    kapt "com.google.dagger:dagger-compiler:$hilt_version"
+    ksp "com.google.dagger:dagger-compiler:$hilt_version"
     implementation "com.google.dagger:dagger:$hilt_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    ksp "com.google.dagger:hilt-compiler:$hilt_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"
     testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:5.2.1"
-    kaptTest "com.google.dagger:hilt-compiler:$hilt_version"
+    kspTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     androidTestImplementation "androidx.test.ext:junit:1.2.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
     androidTestImplementation  "com.google.dagger:hilt-android-testing:$hilt_version"
-    kaptAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
+    kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Jetpack Compose lint rules for ktlint (mrmans0n/compose-rules)
     ktlintRuleset "io.nlopez.compose.rules:ktlint:0.6.2"
@@ -106,10 +106,6 @@ dependencies {
 ktlint {
     // Pin to the ktlint version the compose ruleset (0.6.2) is built against.
     version = "1.8.0"
-}
-
-kapt {
-    correctErrorTypes true
 }
 
 hilt {

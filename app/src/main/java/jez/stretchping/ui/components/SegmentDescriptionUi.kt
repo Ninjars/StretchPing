@@ -23,7 +23,6 @@ import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode.Stretch
 import jez.stretchping.features.activetimer.view.ActiveTimerState.Mode.Transition
 import jez.stretchping.features.activetimer.view.SegmentDescription
 
-
 @Composable
 fun SegmentDescriptionUi(
     state: SegmentDescription,
@@ -39,7 +38,7 @@ fun SegmentDescriptionUi(
             ) {
                 Text(
                     text = it,
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
                 )
             }
             if (state.name.isNotBlank()) {
@@ -48,7 +47,7 @@ fun SegmentDescriptionUi(
                 ) {
                     Text(
                         text = it,
-                        fontSize = 24.sp
+                        fontSize = 24.sp,
                     )
                 }
             }
@@ -81,25 +80,24 @@ fun SegmentDescriptionUi(
 }
 
 @StringRes
-private fun ActiveTimerState.Mode.toStringRes(): Int =
-    when (this) {
-        Stretch -> R.string.mode_active
-        Transition -> R.string.mode_transition
-        Announce -> R.string.mode_announce
-    }
+private fun ActiveTimerState.Mode.toStringRes(): Int = when (this) {
+    Stretch -> R.string.mode_active
+    Transition -> R.string.mode_transition
+    Announce -> R.string.mode_announce
+}
 
 @Composable
 private fun AnimatedText(
     text: String,
-    content: @Composable (String) -> Unit
+    content: @Composable (String) -> Unit,
 ) {
     AnimatedContent(
         label = "animated text",
         targetState = text,
         transitionSpec = {
             fadeIn(animationSpec = tween(250, delayMillis = 45)) togetherWith
-                    fadeOut(animationSpec = tween(90))
-        }
+                fadeOut(animationSpec = tween(90))
+        },
     ) {
         content(it)
     }

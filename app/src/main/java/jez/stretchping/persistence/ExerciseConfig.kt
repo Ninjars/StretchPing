@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExerciseConfigs(
-    val exercises: List<ExerciseConfig>
+    val exercises: List<ExerciseConfig>,
 )
 
 @Serializable

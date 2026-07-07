@@ -56,7 +56,7 @@ sealed interface SettingsScreenEvent {
 fun SettingsScreen(viewModel: SettingsVM) {
     Screen(
         viewModel.viewState.collectAsState(),
-        rememberEventConsumer(viewModel)
+        rememberEventConsumer(viewModel),
     )
 }
 
@@ -74,7 +74,7 @@ private fun Screen(
         modifier = modifier
             .padding(horizontal = 16.dp)
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         // Edit number of pings during active sections
@@ -103,7 +103,7 @@ private fun Screen(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = stringResource(R.string.background_play),
@@ -117,7 +117,7 @@ private fun Screen(
                     } else {
                         eventHandler(SettingsScreenEvent.UpdatePlayInBackground(enabled))
                     }
-                }
+                },
             )
         }
 
@@ -125,29 +125,31 @@ private fun Screen(
         Text(
             text = stringResource(R.string.nav_label_title),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         TriStateToggle(
             states = state.navLabelsState.optionStringResources.map { stringResource(id = it) },
             selectedIndex = state.navLabelsState.selectedIndex,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            eventHandler(SettingsScreenEvent.UpdateShowLabels(it))
-        }
+            modifier = Modifier.fillMaxWidth(),
+            onSelectionChange = {
+                eventHandler(SettingsScreenEvent.UpdateShowLabels(it))
+            },
+        )
 
         // Theme Selection
         Text(
             text = stringResource(R.string.theme_title),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         TriStateToggle(
             states = state.themeState.optionStringResources.map { stringResource(id = it) },
             selectedIndex = state.themeState.selectedIndex,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            eventHandler(SettingsScreenEvent.UpdateTheme(it))
-        }
+            modifier = Modifier.fillMaxWidth(),
+            onSelectionChange = {
+                eventHandler(SettingsScreenEvent.UpdateTheme(it))
+            },
+        )
 
         // Version
         Text(
@@ -157,7 +159,7 @@ private fun Screen(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 16.dp),
         )
 
         Spacer(modifier = Modifier.height(16.dp))

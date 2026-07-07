@@ -92,7 +92,7 @@ fun PlannerScreen(
 ) {
     PlannerScreen(
         viewModel.viewState.collectAsState(),
-        rememberEventConsumer(viewModel)
+        rememberEventConsumer(viewModel),
     )
 }
 
@@ -110,7 +110,7 @@ private fun PlannerScreen(
                 containerColor = if (this) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Icon(
                     imageVector = if (this) {
@@ -122,7 +122,7 @@ private fun PlannerScreen(
                         stringResource(R.string.desc_repeat_toggle_enabled)
                     } else {
                         stringResource(R.string.desc_repeat_toggle_disabled)
-                    }
+                    },
                 )
             }
         }
@@ -130,12 +130,14 @@ private fun PlannerScreen(
             eventHandler = {
                 when (it) {
                     TimerControlsEvent.PlayClicked -> eventHandler(PlannerUIEvent.StartClicked)
+
                     TimerControlsEvent.PauseClicked,
                     TimerControlsEvent.ResetClicked,
-                    TimerControlsEvent.BackClicked -> Unit
+                    TimerControlsEvent.BackClicked,
+                    -> Unit
                 }
             },
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             with(viewState.value) {
                 TimerControlsViewState(
@@ -168,7 +170,7 @@ private fun Content(
         state = lazyListState,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         item(key = "header", contentType = "header") {
             PlanHeaderView(state.isInitialised, state.planName, eventHandler)
@@ -176,7 +178,7 @@ private fun Content(
         items(
             items = state.sections,
             key = { it.id },
-            contentType = { "content" }
+            contentType = { "content" },
         ) { section ->
             ReorderableItem(state = reorderableLazyListState, key = section.id) { isDragging ->
                 PlanSectionView(
@@ -203,20 +205,20 @@ private fun AddSectionItemView(
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,
-                onDoubleClick = null
-            )
+                onDoubleClick = null,
+            ),
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(12.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
@@ -236,13 +238,13 @@ private fun PlanHeaderView(
     val focusRequester = remember { FocusRequester() }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         TextField(
             value = planName,
             onValueChange = { eventHandler(PlannerUIEvent.UpdatePlanName(it)) },
             textStyle = LocalTextStyle.current.copy(
-                fontSize = 30.sp
+                fontSize = 30.sp,
             ),
             placeholder = {
                 Text(
@@ -259,7 +261,7 @@ private fun PlanHeaderView(
             colors = transparentTextFieldColors(),
             modifier = Modifier
                 .focusRequester(focusRequester)
-                .weight(1f)
+                .weight(1f),
         )
         ConfirmActionIconButton(
             title = stringResource(R.string.delete_plan_title),
@@ -268,9 +270,10 @@ private fun PlanHeaderView(
             dismiss = stringResource(R.string.delete_plan_button_dismiss),
             contentDescription = stringResource(id = R.string.desc_delete_plan),
             icon = Icons.Outlined.Delete,
-        ) {
-            eventHandler(PlannerUIEvent.DeletePlanClicked)
-        }
+            onClick = {
+                eventHandler(PlannerUIEvent.DeletePlanClicked)
+            },
+        )
     }
     LaunchedEffect(isInitialised) {
         if (isInitialised && planName.isBlank()) {
@@ -293,16 +296,18 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
     Card(
         border = if (isDragging) {
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        } else null,
+        } else {
+            null
+        },
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 16.dp)
+            modifier = Modifier.padding(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 16.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(
                     imageVector = Icons.Default.DragHandle,
@@ -310,13 +315,13 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .draggableHandle()
-                        .padding(8.dp)
+                        .padding(8.dp),
                 )
                 // Name
                 SelectOnFocusTextField(
                     text = section.name,
                     textStyle = LocalTextStyle.current.copy(
-                        fontSize = 22.sp
+                        fontSize = 22.sp,
                     ),
                     useOutlinedTextField = false,
                     keyboardOptions = KeyboardOptions(
@@ -334,10 +339,11 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                         )
                     },
                     colors = transparentTextFieldColors(),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
-                }
+                    modifier = Modifier.weight(1f),
+                    onValueChange = {
+                        eventHandler(PlannerUIEvent.UpdateSectionName(section.id, it))
+                    },
+                )
                 ConfirmActionIconButton(
                     contentDescription = stringResource(id = R.string.desc_delete_section),
                     title = stringResource(R.string.delete_section_title),
@@ -345,9 +351,10 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                     confirm = stringResource(R.string.delete_section_button_confirm),
                     dismiss = stringResource(R.string.delete_section_button_dismiss),
                     icon = Icons.Default.Close,
-                ) {
-                    eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
-                }
+                    onClick = {
+                        eventHandler(PlannerUIEvent.DeleteSectionClicked(section.id))
+                    },
+                )
                 AnimatedVisibility(
                     visible = canStartPlan,
                 ) {
@@ -356,12 +363,12 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                         shape = CircleShape,
                         contentPadding = PaddingValues(6.dp),
                         colors = ButtonDefaults.buttonColors(),
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(40.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.PlayArrow,
                             contentDescription = stringResource(R.string.play_from_section),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
                 }
@@ -372,7 +379,7 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp)
+                    .padding(start = 12.dp),
             ) {
                 // Rep Count
                 PlanSectionNumberInput(
@@ -380,27 +387,29 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                     text = section.repCount,
                     pickerOptions = ExerciseConstants.RepCounts,
                     showSecondsSuffix = false,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    eventHandler(
-                        PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it))
-                    )
-                }
+                    modifier = Modifier.weight(1f),
+                    onChange = {
+                        eventHandler(
+                            PlannerUIEvent.UpdateSectionRepCount(section.id, max(0, it)),
+                        )
+                    },
+                )
 
                 // Initial Delay
                 PlanSectionNumberInput(
                     labelText = stringResource(id = R.string.label_delay),
                     text = section.entryTransitionDuration,
                     pickerOptions = ExerciseConstants.TransitionDurations,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    eventHandler(
-                        PlannerUIEvent.UpdateSectionEntryTransitionDuration(
-                            section.id,
-                            max(0, it)
+                    modifier = Modifier.weight(1f),
+                    onChange = {
+                        eventHandler(
+                            PlannerUIEvent.UpdateSectionEntryTransitionDuration(
+                                section.id,
+                                max(0, it),
+                            ),
                         )
-                    )
-                }
+                    },
+                )
             }
 
             Row(
@@ -408,22 +417,23 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp)
+                    .padding(start = 12.dp),
             ) {
                 // Stretch Duration
                 PlanSectionNumberInput(
                     labelText = stringResource(id = R.string.label_stretch),
                     text = section.repDuration,
                     pickerOptions = ExerciseConstants.StretchDurations,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    eventHandler(
-                        PlannerUIEvent.UpdateSectionRepDuration(
-                            section.id,
-                            max(0, it)
+                    modifier = Modifier.weight(1f),
+                    onChange = {
+                        eventHandler(
+                            PlannerUIEvent.UpdateSectionRepDuration(
+                                section.id,
+                                max(0, it),
+                            ),
                         )
-                    )
-                }
+                    },
+                )
 
                 // Break Duration
                 PlanSectionNumberInput(
@@ -431,15 +441,16 @@ private fun ReorderableCollectionItemScope.PlanSectionView(
                     text = section.repTransitionDuration,
                     pickerOptions = ExerciseConstants.TransitionDurations,
                     imeAction = ImeAction.Done,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    eventHandler(
-                        PlannerUIEvent.UpdateSectionRepTransitionDuration(
-                            section.id,
-                            max(0, it)
+                    modifier = Modifier.weight(1f),
+                    onChange = {
+                        eventHandler(
+                            PlannerUIEvent.UpdateSectionRepTransitionDuration(
+                                section.id,
+                                max(0, it),
+                            ),
                         )
-                    )
-                }
+                    },
+                )
             }
         }
     }
@@ -450,10 +461,10 @@ private fun PlanSectionNumberInput(
     labelText: String,
     text: String,
     pickerOptions: List<String>,
+    onChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     showSecondsSuffix: Boolean = true,
     imeAction: ImeAction = ImeAction.Next,
-    onChange: (Int) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -462,7 +473,7 @@ private fun PlanSectionNumberInput(
         pickerOptions = pickerOptions,
         modifier = modifier,
         textStyle = LocalTextStyle.current.copy(
-            fontSize = 24.sp
+            fontSize = 24.sp,
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,
@@ -484,31 +495,33 @@ private fun PlanSectionNumberInput(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        } else null,
-    ) {
-        it.toFlooredInt()?.let { int -> onChange(int) }
-    }
+        } else {
+            null
+        },
+        onValueChange = {
+            it.toFlooredInt()?.let { int -> onChange(int) }
+        },
+    )
 }
 
 @Composable
-private fun transparentTextFieldColors(): TextFieldColors =
-    TextFieldDefaults.colors(
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        disabledContainerColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-    )
+private fun transparentTextFieldColors(): TextFieldColors = TextFieldDefaults.colors(
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+)
 
 @Composable
 private fun ConfirmActionIconButton(
     contentDescription: String,
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     title: String,
     text: String,
     confirm: String,
     dismiss: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -541,18 +554,18 @@ private fun ConfirmActionIconButton(
                     onClick = {
                         showDialog = false
                         onClick()
-                    }) {
+                    },
+                ) {
                     Text(confirm)
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDialog = false
-                    }) {
+                TextButton(onClick = {
+                    showDialog = false
+                }) {
                     Text(dismiss)
                 }
-            }
+            },
         )
     }
 }
@@ -563,7 +576,7 @@ private fun ActiveTimerScreenPreview() {
     StretchPingTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             PlannerScreen(
                 viewState = previewState {
@@ -580,10 +593,10 @@ private fun ActiveTimerScreenPreview() {
                                 entryTransitionDuration = "12",
                                 repDuration = "10",
                                 repTransitionDuration = "5",
-                            )
-                        )
+                            ),
+                        ),
                     )
-                }
+                },
             ) {}
         }
     }

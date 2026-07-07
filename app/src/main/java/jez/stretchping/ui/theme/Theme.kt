@@ -97,7 +97,7 @@ private val darkScheme = darkColorScheme(
 fun StretchPingTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -106,6 +106,7 @@ fun StretchPingTheme(
         }
 
         isDarkTheme -> darkScheme
+
         else -> lightScheme
     }
 
@@ -125,7 +126,7 @@ fun StretchPingTheme(
         colorScheme = colorScheme,
         typography = Typography,
         shapes = Shapes,
-        content = content
+        content = content,
     )
 }
 

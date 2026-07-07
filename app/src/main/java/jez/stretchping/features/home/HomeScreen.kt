@@ -112,7 +112,7 @@ private fun RowScope.NavBarItem(
         icon = {
             Icon(
                 imageVector = icon,
-                contentDescription = text
+                contentDescription = text,
             )
         },
         alwaysShowLabel = when (mode) {
@@ -121,7 +121,8 @@ private fun RowScope.NavBarItem(
         },
         label = when (mode) {
             NavLabelDisplayMode.Selected,
-            NavLabelDisplayMode.Always -> {
+            NavLabelDisplayMode.Always,
+            -> {
                 { Text(text = text) }
             }
 

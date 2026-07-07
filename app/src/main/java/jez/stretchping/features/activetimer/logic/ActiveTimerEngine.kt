@@ -41,7 +41,7 @@ class ActiveTimerEngine(
                 activeSegment = null,
                 completedReps = 0,
             )
-        }
+        },
     )
 
     val viewState: StateFlow<ActiveTimerViewState> =
@@ -64,41 +64,40 @@ class ActiveTimerEngine(
         }
     }
 
-    private fun ExerciseConfig.parse() =
-        sections.flatMapIndexed { index, section ->
-            val hasIntro = section.introDuration > 0 || section.name.isNotBlank()
+    private fun ExerciseConfig.parse() = sections.flatMapIndexed { index, section ->
+        val hasIntro = section.introDuration > 0 || section.name.isNotBlank()
+        listOfNotNull(
+            getIf(hasIntro) {
+                SegmentSpec.Announcement(
+                    name = section.name,
+                    durationSeconds = section.introDuration,
+                )
+            },
+        ) + (0 until section.repCount).flatMap {
+            val hasTransition = (!hasIntro || it > 0) && section.transitionDuration > 0
             listOfNotNull(
-                getIf(hasIntro) {
-                    SegmentSpec.Announcement(
+                getIf(hasTransition) {
+                    SegmentSpec.Transition(
                         name = section.name,
-                        durationSeconds = section.introDuration,
+                        durationSeconds = section.transitionDuration,
+                        index = it,
+                        repCount = section.repCount,
+                        isStartOfSegment = it == 0 && !hasIntro,
                     )
                 },
-            ) + (0 until section.repCount).flatMap {
-                val hasTransition = (!hasIntro || it > 0) && section.transitionDuration > 0
-                listOfNotNull(
-                    getIf(hasTransition) {
-                        SegmentSpec.Transition(
-                            name = section.name,
-                            durationSeconds = section.transitionDuration,
-                            index = it,
-                            repCount = section.repCount,
-                            isStartOfSegment = it == 0 && !hasIntro,
-                        )
-                    },
-                    getIf(section.activityDuration > 0) {
-                        SegmentSpec.Stretch(
-                            name = section.name,
-                            durationSeconds = section.activityDuration,
-                            index = it,
-                            isLast = !repeat && index == sections.size - 1 && it == section.repCount - 1,
-                            repCount = section.repCount,
-                            isStartOfSegment = it == 0 && !hasIntro && !hasTransition,
-                        )
-                    },
-                )
-            }
+                getIf(section.activityDuration > 0) {
+                    SegmentSpec.Stretch(
+                        name = section.name,
+                        durationSeconds = section.activityDuration,
+                        index = it,
+                        isLast = !repeat && index == sections.size - 1 && it == section.repCount - 1,
+                        repCount = section.repCount,
+                        isStartOfSegment = it == 0 && !hasIntro && !hasTransition,
+                    )
+                },
+            )
         }
+    }
 
     override fun accept(value: ActiveTimerVM.Event) {
         events.trySend(value)
@@ -123,12 +122,13 @@ class ActiveTimerEngine(
                     engineSettings.transitionPingsCount,
                 ),
                 executedCommand = it,
-                eventConsumer = this@ActiveTimerEngine
+                eventConsumer = this@ActiveTimerEngine,
             )
 
             when (it) {
                 is Command.GoBack,
-                is Command.SequenceCompleted -> {
+                is Command.SequenceCompleted,
+                -> {
                     withContext(Dispatchers.Main) {
                         navigationDispatcher.navigateTo(Route.Back)
                         onEndCallback()

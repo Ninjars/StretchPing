@@ -13,7 +13,6 @@ data class SegmentDescription(
     val position: String,
 )
 
-
 data class Duration(
     val minutes: Int,
     val seconds: Int,
@@ -30,6 +29,8 @@ data class ActiveTimerState(
     val isPaused = pausedAtFraction != null
 
     enum class Mode {
-        Announce, Stretch, Transition,
+        Announce,
+        Stretch,
+        Transition,
     }
 }

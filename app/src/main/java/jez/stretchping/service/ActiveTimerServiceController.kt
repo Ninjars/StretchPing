@@ -8,7 +8,6 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import timber.log.Timber
 
-
 class ActiveTimerServiceController(private val activity: Activity) {
     private var onConnectedCallback: ((ActiveTimerService) -> Unit)? = null
     private var activeTimerService: ActiveTimerService? = null
@@ -52,7 +51,7 @@ class ActiveTimerServiceController(private val activity: Activity) {
                     bindService(
                         Intent(this, ActiveTimerService::class.java),
                         connection,
-                        Context.BIND_AUTO_CREATE
+                        Context.BIND_AUTO_CREATE,
                     )
                 }
             }

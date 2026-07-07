@@ -29,19 +29,19 @@ sealed class Route {
         }
 
         companion object {
-            val baseRouteId by lazy { "${ActiveTimer::class.simpleName}/{$routeConfig}" }
-            const val routeConfig = "config"
+            val baseRouteId by lazy { "${ActiveTimer::class.simpleName}/{$ROUTE_CONFIG}" }
+            const val ROUTE_CONFIG = "config"
         }
     }
 
     data class Planner(
-        val planId: String
+        val planId: String,
     ) : Route() {
         override val routeId by lazy { "${Planner::class.java}/$planId" }
 
         companion object {
-            val baseRouteId by lazy { "${Planner::class.java}/{$routePlanId}" }
-            const val routePlanId = "id"
+            val baseRouteId by lazy { "${Planner::class.java}/{$ROUTE_PLAN_ID}" }
+            const val ROUTE_PLAN_ID = "id"
         }
     }
 }

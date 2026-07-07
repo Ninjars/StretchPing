@@ -89,13 +89,11 @@ class SettingsRepositoryTest {
         }
     }
 
-    private suspend fun readDisk(): ExerciseConfigs =
-        dataStore.data.first()[plansKey]
-            ?.let { Json.decodeFromString<ExerciseConfigs>(it) }
-            ?: ExerciseConfigs(emptyList())
+    private suspend fun readDisk(): ExerciseConfigs = dataStore.data.first()[plansKey]
+        ?.let { Json.decodeFromString<ExerciseConfigs>(it) }
+        ?: ExerciseConfigs(emptyList())
 
-    private suspend fun diskPlanIds(): Set<String> =
-        readDisk().exercises.map { it.exerciseId }.toSet()
+    private suspend fun diskPlanIds(): Set<String> = readDisk().exercises.map { it.exerciseId }.toSet()
 
     private fun config(id: String, name: String = id) = ExerciseConfig(
         exerciseId = id,
@@ -109,7 +107,7 @@ class SettingsRepositoryTest {
                 introDuration = 5,
                 activityDuration = 30,
                 transitionDuration = 3,
-            )
+            ),
         ),
     )
 }

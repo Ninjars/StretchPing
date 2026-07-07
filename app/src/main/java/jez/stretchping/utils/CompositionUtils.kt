@@ -28,8 +28,7 @@ fun <LO : LifecycleObserver> LO.observeLifecycle(lifecycle: Lifecycle) {
  * treated as Stable by Jetpack Compose and avoid introducing unnecessary recompositions.
  */
 @Composable
-fun <T> rememberEventConsumer(consumer: Consumer<T>) =
-    remember<(T) -> Unit>(consumer) { { consumer.accept(it) } }
+fun <T> rememberEventConsumer(consumer: Consumer<T>) = remember<(T) -> Unit>(consumer) { { consumer.accept(it) } }
 
 /**
  * Keeps screen on whilst part of the composition.

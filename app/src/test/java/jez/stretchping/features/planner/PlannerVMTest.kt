@@ -79,11 +79,10 @@ class PlannerVMTest {
         navigationDispatcher = nav,
         settingsRepository = repo,
         idProvider = IdProvider(),
-        savedStateHandle = SavedStateHandle(mapOf(Route.Planner.routePlanId to "plan-1")),
+        savedStateHandle = SavedStateHandle(mapOf(Route.Planner.ROUTE_PLAN_ID to "plan-1")),
     )
 
-    private fun recordingNav(routes: MutableList<Route>) =
-        NavigationDispatcher().apply { setNavListener { routes.add(it) } }
+    private fun recordingNav(routes: MutableList<Route>) = NavigationDispatcher().apply { setNavListener { routes.add(it) } }
 
     private class FakeSettingsRepository : SettingsRepository(NoOpDataStore) {
         var saveCount = 0

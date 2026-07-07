@@ -14,7 +14,9 @@ import jez.stretchping.features.activetimer.logic.RunningStateController
 import jez.stretchping.notification.NotificationsHelper
 import timber.log.Timber
 
-class ActiveTimerService : Service(), RunningStateController {
+class ActiveTimerService :
+    Service(),
+    RunningStateController {
 
     inner class LocalBinder : Binder() {
         fun getService(): ActiveTimerService = this@ActiveTimerService
@@ -50,7 +52,7 @@ class ActiveTimerService : Service(), RunningStateController {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
             } else {
                 0
-            }
+            },
         )
     }
 
@@ -95,16 +97,15 @@ class ActiveTimerService : Service(), RunningStateController {
 
     fun getOrCreateEngine(
         factory: (onEndCallback: () -> Unit, runningStateController: RunningStateController) -> ActiveTimerEngine,
-    ): ActiveTimerEngine =
-        engine.let { existing ->
-            Timber.e("getOrCreateEngine: already exists? ${existing != null}")
-            existing ?: factory(
-                {
-                    stopForegroundService()
-                    engine?.dispose()
-                    engine = null
-                },
-                this,
-            ).also { engine = it }
-        }
+    ): ActiveTimerEngine = engine.let { existing ->
+        Timber.e("getOrCreateEngine: already exists? ${existing != null}")
+        existing ?: factory(
+            {
+                stopForegroundService()
+                engine?.dispose()
+                engine = null
+            },
+            this,
+        ).also { engine = it }
+    }
 }

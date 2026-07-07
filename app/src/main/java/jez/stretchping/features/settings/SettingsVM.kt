@@ -20,7 +20,8 @@ import javax.inject.Inject
 class SettingsVM @Inject constructor(
     private val settingsRepository: SettingsRepository,
     systemConstants: SystemConstants,
-) : Consumer<SettingsScreenEvent>, ViewModel() {
+) : ViewModel(),
+    Consumer<SettingsScreenEvent> {
     private val state = combine(
         settingsRepository.engineSettings,
         settingsRepository.themeMode,
@@ -37,13 +38,13 @@ class SettingsVM @Inject constructor(
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        State.Default
+        State.Default,
     )
 
     val viewState: StateFlow<SettingsViewState> =
         state.toViewState(
             viewModelScope,
-            State.Default
+            State.Default,
         ) { state -> SettingsStateToViewState(state) }
 
     override fun accept(value: SettingsScreenEvent) {

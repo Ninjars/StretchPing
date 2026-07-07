@@ -26,6 +26,7 @@ internal class EventToCommand(
             is Event.Start ->
                 when {
                     activeSegment != null -> resume(activeSegment)
+
                     else ->
                         Command.StartSegment(
                             System.currentTimeMillis(),
@@ -76,17 +77,15 @@ internal class EventToCommand(
         }
     }
 
-
     private fun resume(
-        activeSegment: State.ActiveSegment
-    ): Command? =
-        if (activeSegment.pausedAtFraction == null) {
-            null
-        } else {
-            Command.ResumeSegment(
-                startMillis = System.currentTimeMillis(),
-                startFraction = activeSegment.pausedAtFraction,
-                pausedSegment = activeSegment,
-            )
-        }
+        activeSegment: State.ActiveSegment,
+    ): Command? = if (activeSegment.pausedAtFraction == null) {
+        null
+    } else {
+        Command.ResumeSegment(
+            startMillis = System.currentTimeMillis(),
+            startFraction = activeSegment.pausedAtFraction,
+            pausedSegment = activeSegment,
+        )
+    }
 }

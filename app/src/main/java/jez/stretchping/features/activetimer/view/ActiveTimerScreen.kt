@@ -43,7 +43,7 @@ import jez.stretchping.utils.rememberEventConsumer
 
 @Composable
 fun ActiveTimerScreen(
-    viewModel: ActiveTimerVM
+    viewModel: ActiveTimerVM,
 ) {
     viewModel.observeLifecycle(LocalLifecycleOwner.current.lifecycle)
     ActiveTimerScreen(viewModel.viewState.collectAsState(), rememberEventConsumer(viewModel))
@@ -73,7 +73,7 @@ private fun ActiveTimerScreen(
                 stringResource(id = R.string.rep_count_heading, it)
             } ?: "",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         MainContent(eventHandler) { state.value }
         Spacer(modifier = Modifier.weight(1f))
@@ -137,7 +137,7 @@ private fun MainContent(
                 } else {
                     ArcProgressBar(
                         progress = progress,
-                        modifier = Modifier.fillMaxWidth(0.9f)
+                        modifier = Modifier.fillMaxWidth(0.9f),
                     )
                 }
             }
@@ -155,7 +155,7 @@ private fun ActiveTimerScreenPreview() {
     StretchPingTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             ActiveTimerScreen(
                 state = previewState {
@@ -174,7 +174,7 @@ private fun ActiveTimerScreenPreview() {
                         ),
                         repCompleteHeading = "2",
                     )
-                }
+                },
             ) {}
         }
     }

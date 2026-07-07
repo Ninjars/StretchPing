@@ -28,12 +28,12 @@ import androidx.compose.ui.unit.dp
 fun TriStateToggle(
     states: List<String>,
     selectedIndex: Int,
+    onSelectionChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    onSelectionChanged: (Int) -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -48,7 +48,7 @@ fun TriStateToggle(
                     targetState = index == selectedIndex,
                     transitionSpec = {
                         fadeIn(animationSpec = tween(250, delayMillis = 45)) togetherWith
-                                fadeOut(animationSpec = tween(90))
+                            fadeOut(animationSpec = tween(90))
                     },
                 ) { isSelected ->
                     val textColor = if (isSelected) {
@@ -67,7 +67,7 @@ fun TriStateToggle(
                         color = textColor,
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(24.dp))
-                            .clickable { onSelectionChanged(index) }
+                            .clickable { onSelectionChange(index) }
                             .background(backgroundColor)
                             .padding(
                                 vertical = 12.dp,

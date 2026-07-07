@@ -78,7 +78,7 @@ files); prefer the full shape for new screens.
 
 `ActiveTimerService` is a `mediaPlayback` foreground service owning an
 `ActiveTimerEngine` — the same event→command→state pattern as VMs
-(`EventToCommandStateMapper`, `ActiveTimerStateUpdater`), plus an
+(`EventToCommand`, `ActiveTimerStateUpdater`), plus an
 `EventScheduler` that schedules pings/TTS for upcoming segment boundaries.
 The screen binds to the service via `ActiveTimerServiceDispatcher` and feeds
 events to the engine. Timer logic under `features/activetimer/logic/` is pure

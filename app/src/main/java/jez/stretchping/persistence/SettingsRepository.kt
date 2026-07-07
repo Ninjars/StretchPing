@@ -21,7 +21,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class ThemeMode {
-    Unset, System, Light, Dark, Dynamic;
+    Unset,
+    System,
+    Light,
+    Dark,
+    Dynamic,
+    ;
 
     companion object {
         val displayValues = listOf(System, Light, Dark, Dynamic)
@@ -29,7 +34,11 @@ enum class ThemeMode {
 }
 
 enum class NavLabelDisplayMode {
-    Unset, Always, Selected, Never;
+    Unset,
+    Always,
+    Selected,
+    Never,
+    ;
 
     companion object {
         val displayValues = listOf(Always, Selected, Never)
@@ -54,7 +63,7 @@ open class SettingsRepository @Inject constructor(
             dataStore.data.map {
                 it[ExercisesPref]?.let { json ->
                     Json.decodeFromString(
-                        json
+                        json,
                     )
                 } ?: ExerciseConfigs(emptyList())
             }
@@ -64,70 +73,63 @@ open class SettingsRepository @Inject constructor(
         }
     }
 
-    suspend fun setActivityDuration(durationSeconds: Int) =
-        editDataStore {
-            it[ActivityDurationPref] = durationSeconds
-        }
+    suspend fun setActivityDuration(durationSeconds: Int) = editDataStore {
+        it[ActivityDurationPref] = durationSeconds
+    }
 
     private val transitionDuration: Flow<Int> = dataStore.data
         .map {
             it[TransitionDurationPref] ?: 5
         }
 
-    suspend fun setTransitionDuration(durationSeconds: Int) =
-        editDataStore {
-            it[TransitionDurationPref] = durationSeconds
-        }
+    suspend fun setTransitionDuration(durationSeconds: Int) = editDataStore {
+        it[TransitionDurationPref] = durationSeconds
+    }
 
     private val repCount: Flow<Int> = dataStore.data
         .map {
             it[RepCountPref] ?: -1
         }
 
-    suspend fun setRepCount(count: Int) =
-        editDataStore {
-            it[RepCountPref] = count
-        }
+    suspend fun setRepCount(count: Int) = editDataStore {
+        it[RepCountPref] = count
+    }
 
     private val transitionPingsCount: Flow<Int> = dataStore.data
         .map {
             it[TransitionPingsPref] ?: 3
         }
 
-    suspend fun setTransitionPingsCount(count: Int) =
-        editDataStore {
-            it[TransitionPingsPref] = count
-        }
+    suspend fun setTransitionPingsCount(count: Int) = editDataStore {
+        it[TransitionPingsPref] = count
+    }
 
     private val activePingsCount: Flow<Int> = dataStore.data
         .map {
             it[ActivePingsPref] ?: 5
         }
 
-    suspend fun setActivePingsCount(count: Int) =
-        editDataStore {
-            it[ActivePingsPref] = count
-        }
+    suspend fun setActivePingsCount(count: Int) = editDataStore {
+        it[ActivePingsPref] = count
+    }
 
     private val playInBackground: Flow<Boolean> = dataStore.data
         .map {
             it[PlayInBackgroundPref] ?: false
         }
 
-    suspend fun setPlayInBackground(shouldPause: Boolean) =
-        editDataStore {
-            it[PlayInBackgroundPref] = shouldPause
-        }
+    suspend fun setPlayInBackground(shouldPause: Boolean) = editDataStore {
+        it[PlayInBackgroundPref] = shouldPause
+    }
 
     val showNavLabels: Flow<NavLabelDisplayMode> = dataStore.data
         .map {
             it[ShowNavLabelsPref]?.toNavLabelDisplayMode() ?: NavLabelDisplayMode.Always
         }
 
-    suspend fun setShowNavLabels(mode: NavLabelDisplayMode) =
-        editDataStore {
-            it[ShowNavLabelsPref] = mode.toInt()
-        }
+    suspend fun setShowNavLabels(mode: NavLabelDisplayMode) = editDataStore {
+        it[ShowNavLabelsPref] = mode.toInt()
+    }
 
     val engineSettings: Flow<EngineSettings> =
         combine(
@@ -156,10 +158,9 @@ open class SettingsRepository @Inject constructor(
             it[ThemePref]?.toThemeMode() ?: ThemeMode.System
         }
 
-    suspend fun setThemeMode(mode: ThemeMode) =
-        editDataStore {
-            it[ThemePref] = mode.toInt()
-        }
+    suspend fun setThemeMode(mode: ThemeMode) = editDataStore {
+        it[ThemePref] = mode.toInt()
+    }
 
     open val exerciseConfigs: Flow<ExerciseConfigs> = cachedExercises
 
@@ -188,24 +189,21 @@ open class SettingsRepository @Inject constructor(
         editDataStore { prefs ->
             val current = prefs.readExercises()
             val updated = current.copy(
-                exercises = current.exercises.filterNot { it.exerciseId == id }
+                exercises = current.exercises.filterNot { it.exerciseId == id },
             )
             prefs[ExercisesPref] = Json.encodeToString(updated)
             cachedExercises.value = updated
         }
     }
 
-    private fun Preferences.readExercises(): ExerciseConfigs =
-        this[ExercisesPref]?.let { Json.decodeFromString<ExerciseConfigs>(it) }
-            ?: ExerciseConfigs(emptyList())
+    private fun Preferences.readExercises(): ExerciseConfigs = this[ExercisesPref]?.let { Json.decodeFromString<ExerciseConfigs>(it) }
+        ?: ExerciseConfigs(emptyList())
 
-    private suspend fun editDataStore(func: (MutablePreferences) -> Unit) =
-        withContext(Dispatchers.IO) {
-            dataStore.edit {
-                func(it)
-            }
+    private suspend fun editDataStore(func: (MutablePreferences) -> Unit) = withContext(Dispatchers.IO) {
+        dataStore.edit {
+            func(it)
         }
-
+    }
 
     private fun ThemeMode.toInt() = when (this) {
         ThemeMode.Unset -> 0

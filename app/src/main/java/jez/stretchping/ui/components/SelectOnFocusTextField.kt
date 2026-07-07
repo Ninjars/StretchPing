@@ -1,6 +1,5 @@
 package jez.stretchping.ui.components
 
-
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,6 +23,7 @@ import kotlin.math.max
 @Composable
 fun SelectOnFocusTextField(
     text: String,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -34,10 +34,9 @@ fun SelectOnFocusTextField(
     placeholder: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     suffix: @Composable (() -> Unit)? = null,
-    onValueChanged: (String) -> Unit,
 ) {
     // The local TextFieldValue is the single source of truth while the user is
-    // typing. Upstream `text` updates arrive asynchronously (onValueChanged ->
+    // typing. Upstream `text` updates arrive asynchronously (onValueChange ->
     // VM state flow -> recomposition), so a recomposition can carry a stale
     // echo of a value from *before* the keystroke currently in flight. Blindly
     // resyncing local state from `text` on every composition (as the previous
@@ -73,8 +72,8 @@ fun SelectOnFocusTextField(
             fieldState.value.copy(
                 selection = TextRange(
                     start = 0,
-                    end = fieldState.value.text.length
-                )
+                    end = fieldState.value.text.length,
+                ),
             )
         } else {
             // On blur, re-sync from the authoritative upstream value in case
@@ -84,9 +83,9 @@ fun SelectOnFocusTextField(
         }
     }
 
-    val onValueChange: (TextFieldValue) -> Unit = {
+    val onFieldValueChange: (TextFieldValue) -> Unit = {
         fieldState.value = it
-        onValueChanged(it.text)
+        onValueChange(it.text)
     }
 
     if (useOutlinedTextField) {
@@ -99,7 +98,7 @@ fun SelectOnFocusTextField(
             trailingIcon = trailingIcon,
             suffix = suffix,
             textStyle = textStyle,
-            onValueChange = onValueChange,
+            onValueChange = onFieldValueChange,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
@@ -115,7 +114,7 @@ fun SelectOnFocusTextField(
             trailingIcon = trailingIcon,
             suffix = suffix,
             textStyle = textStyle,
-            onValueChange = onValueChange,
+            onValueChange = onFieldValueChange,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,

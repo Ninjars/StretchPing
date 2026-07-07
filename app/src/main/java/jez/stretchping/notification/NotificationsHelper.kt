@@ -24,30 +24,31 @@ internal object NotificationsHelper {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             context.getString(R.string.service_notification_name),
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_DEFAULT,
         )
         notificationManager.createNotificationChannel(channel)
 
         Timber.e("createNotificationChannel: $NOTIFICATION_CHANNEL_ID")
     }
 
-    fun buildNotification(context: Context): Notification =
-        NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(context.getString(R.string.service_notification_title))
-            .setContentText(context.getString(R.string.service_notification_text))
-            .setSmallIcon(R.drawable.ic_stretch_notification)
-            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .setOngoing(true)
-            .setContentIntent(Intent(context, MainActivity::class.java).let { notificationIntent ->
+    fun buildNotification(context: Context): Notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+        .setContentTitle(context.getString(R.string.service_notification_title))
+        .setContentText(context.getString(R.string.service_notification_text))
+        .setSmallIcon(R.drawable.ic_stretch_notification)
+        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        .setOngoing(true)
+        .setContentIntent(
+            Intent(context, MainActivity::class.java).let { notificationIntent ->
                 PendingIntent.getActivity(
                     context,
                     0,
                     notificationIntent,
-                    PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_IMMUTABLE,
                 )
-            })
-            .build()
-            .also {
-                Timber.e("built notification $it")
-            }
+            },
+        )
+        .build()
+        .also {
+            Timber.e("built notification $it")
+        }
 }

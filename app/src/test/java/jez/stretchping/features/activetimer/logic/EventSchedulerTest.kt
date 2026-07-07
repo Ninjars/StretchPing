@@ -30,15 +30,14 @@ class EventSchedulerTest {
 
     private val fired = mutableListOf<SoundEvent>()
 
-    private fun stretch(durationSeconds: Int, isLast: Boolean = false) =
-        SegmentSpec.Stretch(
-            name = null,
-            durationSeconds = durationSeconds,
-            index = 0,
-            isLast = isLast,
-            repCount = 1,
-            isStartOfSegment = true,
-        )
+    private fun stretch(durationSeconds: Int, isLast: Boolean = false) = SegmentSpec.Stretch(
+        name = null,
+        durationSeconds = durationSeconds,
+        index = 0,
+        isLast = isLast,
+        repCount = 1,
+        isStartOfSegment = true,
+    )
 
     /** Builds a scheduler whose clock is the [TestScope] virtual clock. */
     private fun TestScope.newScheduler(): EventScheduler {

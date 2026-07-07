@@ -118,7 +118,7 @@ Robolectric needed. In order of value:
 
 1. `features/activetimer/logic/ActiveTimerStateUpdater` — core timer state
    machine (pause/resume math is subtle and currently correct; lock it in).
-2. `features/activetimer/logic/EventToCommandStateMapper`.
+2. `features/activetimer/logic/EventToCommand`.
 3. `features/planner/PlannerEventToState` + `PlannerStateToViewState`.
 4. `features/edittimer/EventToSettingsUpdate` and
    `utils/KotlinUtils.toFlooredInt` (good first test).

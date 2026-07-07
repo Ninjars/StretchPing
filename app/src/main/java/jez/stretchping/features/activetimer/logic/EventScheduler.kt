@@ -134,7 +134,9 @@ class EventScheduler @Inject constructor(
                 } else {
                     when (segmentSpec) {
                         is SegmentSpec.Stretch -> soundManager.playSound(GameSoundEffect.ActiveSection)
+
                         is SegmentSpec.Transition -> soundManager.playSound(GameSoundEffect.TransitionSection)
+
                         is SegmentSpec.Announcement ->
                             if (segmentSpec.durationSeconds > 0) {
                                 soundManager.playSound(GameSoundEffect.TransitionSection)
@@ -143,7 +145,7 @@ class EventScheduler @Inject constructor(
                 }
 
                 eventConsumer.accept(ActiveTimerVM.Event.OnSegmentCompleted)
-            }
+            },
         )
         enqueueCountdownPings(
             coroutineScope = coroutineScope,
@@ -151,8 +153,10 @@ class EventScheduler @Inject constructor(
             durationMillis = durationMillis,
             pingCount = when (segmentSpec) {
                 is SegmentSpec.Stretch -> eventsConfiguration.activePings
+
                 is SegmentSpec.Transition,
-                is SegmentSpec.Announcement -> eventsConfiguration.transitionPings
+                is SegmentSpec.Announcement,
+                -> eventsConfiguration.transitionPings
             },
             pingIntervalMillis = 1000L,
         )
@@ -171,7 +175,7 @@ class EventScheduler @Inject constructor(
                 coroutineScope.launch {
                     delayUntil(fireAtMillis)
                     soundManager.playSound(GameSoundEffect.CountdownBeep)
-                }
+                },
             )
         }
     }

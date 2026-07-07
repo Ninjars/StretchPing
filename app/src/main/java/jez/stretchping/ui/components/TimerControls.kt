@@ -32,8 +32,8 @@ import jez.stretchping.ui.components.TimerControlsEvent.PauseClicked
 import jez.stretchping.ui.components.TimerControlsEvent.PlayClicked
 import jez.stretchping.ui.components.TimerControlsEvent.ResetClicked
 
-private const val SecondaryButtonSize = 60
-private const val PrimaryButtonSize = 84
+private const val SECONDARY_BUTTON_SIZE = 60
+private const val PRIMARY_BUTTON_SIZE = 84
 
 sealed interface TimerControlsEvent {
     data object PlayClicked : TimerControlsEvent
@@ -63,7 +63,7 @@ fun TimerControls(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .padding(horizontal = 48.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         Crossfade(targetState = state.showResetSegment) { showReset ->
             if (showReset) {
@@ -72,16 +72,16 @@ fun TimerControls(
                     imageVector = Icons.Rounded.SkipPrevious,
                     contentDescription = stringResource(id = R.string.timer_reset),
                     modifier = Modifier
-                        .size(SecondaryButtonSize.dp),
+                        .size(SECONDARY_BUTTON_SIZE.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
-                    )
+                    ),
                 )
             } else {
                 Spacer(
                     modifier = Modifier
-                        .size(SecondaryButtonSize.dp),
+                        .size(SECONDARY_BUTTON_SIZE.dp),
                 )
             }
         }
@@ -91,7 +91,7 @@ fun TimerControls(
             state = state,
             enabled = state.mainButtonEnabled,
             modifier = Modifier
-                .size(PrimaryButtonSize.dp)
+                .size(PRIMARY_BUTTON_SIZE.dp),
         )
 
         Crossfade(targetState = state.isPaused && state.showBackWhenPaused) { showBack ->
@@ -101,16 +101,16 @@ fun TimerControls(
                     imageVector = Icons.AutoMirrored.Rounded.Undo,
                     contentDescription = stringResource(id = R.string.timer_back),
                     modifier = Modifier
-                        .size(SecondaryButtonSize.dp),
+                        .size(SECONDARY_BUTTON_SIZE.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
-                    )
+                    ),
                 )
             } else {
                 Spacer(
                     modifier = Modifier
-                        .size(SecondaryButtonSize.dp),
+                        .size(SECONDARY_BUTTON_SIZE.dp),
                 )
             }
         }
@@ -152,7 +152,7 @@ private fun CircleButton(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: ButtonColors = ButtonDefaults.buttonColors()
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
 ) {
     Button(
         onClick = onClick,
@@ -160,13 +160,13 @@ private fun CircleButton(
         colors = colors,
         contentPadding = PaddingValues(8.dp),
         enabled = enabled,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Crossfade(targetState = imageVector) {
             Icon(
                 imageVector = it,
                 contentDescription = contentDescription,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

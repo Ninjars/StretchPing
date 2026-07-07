@@ -1,0 +1,28 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+# Follow the project's declared Kotlin code style (see gradle.properties).
+ktlint_code_style = intellij_idea
+max_line_length = off
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# --- Compose-friendly ktlint standard rules ---
+# Composables are PascalCase, which the standard function-naming rule would flag.
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# --- Jetpack Compose rules (mrmans0n/compose-rules) ---
+# The ruleset is enabled by having it on the ktlintRuleset classpath.
+# @Preview / VM-facing composables intentionally omit a Modifier param.
+ktlint_compose_modifier-missing-check = disabled
+# Screens deliberately take the VM's State<T> and pass it down; this pattern is
+# core to the app's unidirectional feature architecture (see AGENTS.md).
+ktlint_compose_state-param-check = disabled

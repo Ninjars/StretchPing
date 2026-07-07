@@ -27,7 +27,7 @@ class HomeScreenVM @Inject constructor(
             settingsRepository.showNavLabels.collect { displayMode ->
                 with(mutableState.value) {
                     mutableState.value = copy(
-                        navLabelDisplayMode = displayMode
+                        navLabelDisplayMode = displayMode,
                     )
                 }
             }

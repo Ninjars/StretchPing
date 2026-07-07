@@ -33,19 +33,20 @@ class PlansListVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
     private val settingsRepository: SettingsRepository,
     private val idProvider: IdProvider,
-) : Consumer<PlansListUIEvent>, ViewModel() {
+) : ViewModel(),
+    Consumer<PlansListUIEvent> {
 
     private val state = settingsRepository.exerciseConfigs
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = ExerciseConfigs(emptyList())
+            initialValue = ExerciseConfigs(emptyList()),
         ).map { State(it.exercises) }
 
     val viewState: StateFlow<PlansListViewState> =
         state.toViewState(
             scope = viewModelScope,
-            initial = State(emptyList())
+            initial = State(emptyList()),
         ) { state -> PlansListStateToViewState(state) }
 
     override fun accept(event: PlansListUIEvent) {
@@ -63,19 +64,19 @@ class PlansListVM @Inject constructor(
                     }
                     navigationDispatcher.navigateTo(
                         Route.ActiveTimer(
-                            config = config
-                        )
+                            config = config,
+                        ),
                     )
                 }
 
             is PlansListUIEvent.NewPlanClicked ->
                 navigationDispatcher.navigateTo(
-                    Route.Planner(idProvider.getId())
+                    Route.Planner(idProvider.getId()),
                 )
 
             is PlansListUIEvent.OpenPlanClicked ->
                 navigationDispatcher.navigateTo(
-                    Route.Planner(event.id)
+                    Route.Planner(event.id),
                 )
         }
     }

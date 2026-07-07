@@ -52,7 +52,7 @@ fun PlansListScreen(
 ) {
     PlansListScreen(
         viewModel.viewState.collectAsState(),
-        rememberEventConsumer(viewModel)
+        rememberEventConsumer(viewModel),
     )
 }
 
@@ -68,11 +68,11 @@ private fun PlansListScreen(
             shape = CircleShape,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add_plan)
+                contentDescription = stringResource(R.string.add_plan),
             )
         }
     }
@@ -99,12 +99,12 @@ private fun PopulatedState(
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         items(
             items = plans,
             key = { it.id },
-            contentType = { "content" }
+            contentType = { "content" },
         ) {
             PlanSectionView(it, eventHandler)
         }
@@ -118,11 +118,11 @@ private fun EmptyState(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -132,13 +132,13 @@ private fun EmptyState(
                     .aspectRatio(1f)
                     .clip(CircleShape)
                     .clickable { eventHandler(PlansListUIEvent.NewPlanClicked) }
-                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant),
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    modifier = Modifier.size(72.dp)
+                    modifier = Modifier.size(72.dp),
                 )
                 Text(
                     text = stringResource(R.string.add_plan),
@@ -160,26 +160,26 @@ private fun PlanSectionView(
         modifier = Modifier
             .combinedClickable(
                 onClick = { eventHandler(PlansListUIEvent.OpenPlanClicked(plan.id)) },
-                onDoubleClick = null
-            )
+                onDoubleClick = null,
+            ),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Text(
                 text = plan.name,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             if (plan.isLooping) {
                 Icon(
                     imageVector = Icons.Default.Loop,
                     contentDescription = stringResource(R.string.desc_repeat_toggle_enabled),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             Button(
@@ -188,13 +188,13 @@ private fun PlanSectionView(
                 shape = CircleShape,
                 contentPadding = PaddingValues(8.dp),
                 colors = ButtonDefaults.buttonColors(),
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(56.dp),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.PlayArrow,
                     contentDescription = stringResource(R.string.desc_start_plan),
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxSize(),
                 )
             }
         }
@@ -218,24 +218,23 @@ class PreviewPlansProvider : PreviewParameterProvider<PlansListViewState> {
                     isLooping = false,
                     canStart = false,
                 ),
-            )
+            ),
         ),
     )
-
 }
 
 @Preview
 @Composable
 private fun ActiveTimerScreenPopulatedPreview(
-    @PreviewParameter(PreviewPlansProvider::class) planState: PlansListViewState
+    @PreviewParameter(PreviewPlansProvider::class) planState: PlansListViewState,
 ) {
     StretchPingTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             PlansListScreen(
-                viewState = previewState { planState }
+                viewState = previewState { planState },
             ) {}
         }
     }

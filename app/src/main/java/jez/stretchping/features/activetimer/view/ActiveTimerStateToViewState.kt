@@ -7,27 +7,24 @@ import jez.stretchping.features.activetimer.logic.ActiveTimerEngine.State.Segmen
 internal object ActiveTimerStateToViewState : (State) -> ActiveTimerViewState {
     override fun invoke(
         state: State,
-    ): ActiveTimerViewState =
-        ActiveTimerViewState(
-            activeTimer = state.activeSegment?.toState(),
-            segmentDescription = state.toSegmentDescription(),
-            repCompleteHeading = state.completedReps.toHeadingString(),
-        )
+    ): ActiveTimerViewState = ActiveTimerViewState(
+        activeTimer = state.activeSegment?.toState(),
+        segmentDescription = state.toSegmentDescription(),
+        repCompleteHeading = state.completedReps.toHeadingString(),
+    )
 
-    private fun ActiveSegment.toState(): ActiveTimerState =
-        ActiveTimerState(
-            startAtFraction = startedAtFraction,
-            endTimeMillis = endAtTime,
-            pausedAtFraction = pausedAtFraction,
-            mode = spec.toMode()
-        )
+    private fun ActiveSegment.toState(): ActiveTimerState = ActiveTimerState(
+        startAtFraction = startedAtFraction,
+        endTimeMillis = endAtTime,
+        pausedAtFraction = pausedAtFraction,
+        mode = spec.toMode(),
+    )
 
-    private fun SegmentSpec.toMode() =
-        when (this) {
-            is SegmentSpec.Announcement -> ActiveTimerState.Mode.Announce
-            is SegmentSpec.Stretch -> ActiveTimerState.Mode.Stretch
-            is SegmentSpec.Transition -> ActiveTimerState.Mode.Transition
-        }
+    private fun SegmentSpec.toMode() = when (this) {
+        is SegmentSpec.Announcement -> ActiveTimerState.Mode.Announce
+        is SegmentSpec.Stretch -> ActiveTimerState.Mode.Stretch
+        is SegmentSpec.Transition -> ActiveTimerState.Mode.Transition
+    }
 
     private fun State.toSegmentDescription(): SegmentDescription {
         val segment = activeSegment
@@ -43,7 +40,7 @@ internal object ActiveTimerStateToViewState : (State) -> ActiveTimerViewState {
                 name = segment.spec.name ?: "",
                 mode = segment.spec.toMode(),
                 duration = segment.spec.durationSeconds.toDuration(),
-                position = segment.spec.position
+                position = segment.spec.position,
             )
         }
     }
@@ -55,10 +52,9 @@ internal object ActiveTimerStateToViewState : (State) -> ActiveTimerViewState {
         return Duration(minutes, seconds)
     }
 
-    private fun Int.toHeadingString(): String? =
-        if (this > 0) {
-            this.toString()
-        } else {
-            null
-        }
+    private fun Int.toHeadingString(): String? = if (this > 0) {
+        this.toString()
+    } else {
+        null
+    }
 }

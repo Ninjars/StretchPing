@@ -43,8 +43,9 @@ class PlannerVM @Inject constructor(
     private val settingsRepository: SettingsRepository,
     idProvider: IdProvider,
     savedStateHandle: SavedStateHandle,
-) : Consumer<PlannerUIEvent>, ViewModel() {
-    private val planId = savedStateHandle.get<String>(Route.Planner.routePlanId)!!
+) : ViewModel(),
+    Consumer<PlannerUIEvent> {
+    private val planId = savedStateHandle.get<String>(Route.Planner.ROUTE_PLAN_ID)!!
     private val initialState: State = State()
     private val mutableState = MutableStateFlow(initialState)
     private val plannerEventToState = PlannerEventToState(idProvider)
@@ -52,7 +53,7 @@ class PlannerVM @Inject constructor(
     val viewState: StateFlow<PlannerViewState> =
         mutableState.toViewState(
             scope = viewModelScope,
-            initial = State()
+            initial = State(),
         ) { state -> PlannerStateToViewState(state) }
 
     init {
@@ -101,7 +102,7 @@ class PlannerVM @Inject constructor(
                 navigationDispatcher.navigateTo(
                     Route.ActiveTimer(
                         config = mutableState.value.toExerciseConfig(),
-                    )
+                    ),
                 )
             }
 
@@ -109,7 +110,7 @@ class PlannerVM @Inject constructor(
                 navigationDispatcher.navigateTo(
                     Route.ActiveTimer(
                         config = mutableState.value.toExerciseConfig(event.sectionId),
-                    )
+                    ),
                 )
             }
 
@@ -117,13 +118,12 @@ class PlannerVM @Inject constructor(
         }
     }
 
-    private fun State.toExerciseConfig(initialSectionId: String? = null) =
-        ExerciseConfig(
-            exerciseId = id,
-            exerciseName = planName,
-            repeat = repeat,
-            sections = sections.toSectionConfig(initialSectionId),
-        )
+    private fun State.toExerciseConfig(initialSectionId: String? = null) = ExerciseConfig(
+        exerciseId = id,
+        exerciseName = planName,
+        repeat = repeat,
+        sections = sections.toSectionConfig(initialSectionId),
+    )
 
     private fun List<Section>.toSectionConfig(initialSectionId: String? = null): List<ExerciseConfig.SectionConfig> {
         val initialIndex =
@@ -145,25 +145,23 @@ class PlannerVM @Inject constructor(
         }
     }
 
-    private fun ExerciseConfig.toState() =
-        State(
-            id = exerciseId,
-            planName = exerciseName,
-            repeat = repeat,
-            sections = sections.toState(),
-        )
+    private fun ExerciseConfig.toState() = State(
+        id = exerciseId,
+        planName = exerciseName,
+        repeat = repeat,
+        sections = sections.toState(),
+    )
 
-    private fun List<ExerciseConfig.SectionConfig>.toState() =
-        map {
-            Section(
-                id = it.sectionId,
-                name = it.name,
-                repCount = it.repCount,
-                entryTransitionDuration = it.introDuration,
-                repDuration = it.activityDuration,
-                repTransitionDuration = it.transitionDuration,
-            )
-        }
+    private fun List<ExerciseConfig.SectionConfig>.toState() = map {
+        Section(
+            id = it.sectionId,
+            name = it.name,
+            repCount = it.repCount,
+            entryTransitionDuration = it.introDuration,
+            repDuration = it.activityDuration,
+            repTransitionDuration = it.transitionDuration,
+        )
+    }
 
     data class State(
         val id: String = "",
@@ -171,13 +169,13 @@ class PlannerVM @Inject constructor(
         val repeat: Boolean = false,
         val sections: List<Section> = emptyList(),
     ) {
-        val canStart = sections.isNotEmpty()
-                && sections.none {
-            it.repCount < 1
-                    || it.repDuration < 1
-                    || it.entryTransitionDuration < 0
-                    || it.repTransitionDuration < 0
-        }
+        val canStart = sections.isNotEmpty() &&
+            sections.none {
+                it.repCount < 1 ||
+                    it.repDuration < 1 ||
+                    it.entryTransitionDuration < 0 ||
+                    it.repTransitionDuration < 0
+            }
     }
 
     data class Section(

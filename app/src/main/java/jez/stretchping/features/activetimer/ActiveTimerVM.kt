@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-
 @HiltViewModel
 class ActiveTimerVM @Inject constructor(
     private val eventScheduler: EventScheduler,
@@ -34,8 +33,10 @@ class ActiveTimerVM @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val ttsManager: TTSManager,
     savedStateHandle: SavedStateHandle,
-) : Consumer<ActiveTimerVM.Event>, ViewModel(), DefaultLifecycleObserver {
-    private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.routeConfig)!!
+) : ViewModel(),
+    Consumer<ActiveTimerVM.Event>,
+    DefaultLifecycleObserver {
+    private val exerciseConfig = savedStateHandle.get<String>(Route.ActiveTimer.ROUTE_CONFIG)!!
         .let { Json.decodeFromString<ExerciseConfig>(it) }
 
     private var engine: ActiveTimerEngine? = null

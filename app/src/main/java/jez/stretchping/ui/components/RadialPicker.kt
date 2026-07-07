@@ -53,7 +53,7 @@ fun RadialPicker(
     initialSelectedIndex: Int,
     onDismissRequest: () -> Unit,
     title: String? = null,
-    onSelectionConfirmed: (Int) -> Unit,
+    onSelectionConfirm: (Int) -> Unit,
 ) {
     var currentIndex by remember { mutableIntStateOf(initialSelectedIndex) }
     Dialog(onDismissRequest = onDismissRequest) {
@@ -64,7 +64,7 @@ fun RadialPicker(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier.padding(24.dp),
             ) {
                 if (title != null) {
                     Text(
@@ -73,19 +73,19 @@ fun RadialPicker(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp)
+                            .padding(bottom = 20.dp),
                     )
                 }
                 Dial(
                     values = values,
                     currentIndex = { currentIndex },
                     onSelectedIndexChange = { index -> currentIndex = index },
-                    onSelectionMade = { onSelectionConfirmed(currentIndex) },
+                    onSelectionConfirm = { onSelectionConfirm(currentIndex) },
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(text = stringResource(id = R.string.radial_picker_cancel))
@@ -101,7 +101,7 @@ private fun Dial(
     values: List<String>,
     currentIndex: () -> Int,
     onSelectedIndexChange: (Int) -> Unit,
-    onSelectionMade: () -> Unit,
+    onSelectionConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val numberOfValues = values.size
@@ -131,8 +131,7 @@ private fun Dial(
     val selectedValueColor = MaterialTheme.colorScheme.onPrimary
     val selectorColor = MaterialTheme.colorScheme.primary
 
-    fun selectSegmentAt(position: Offset, center: Offset): Int =
-        (((position - center).toRadians() - baseAngle - segmentOffset).mod(2 * PI) / radiansPerValue).toInt()
+    fun selectSegmentAt(position: Offset, center: Offset): Int = (((position - center).toRadians() - baseAngle - segmentOffset).mod(2 * PI) / radiansPerValue).toInt()
 
     Canvas(
         modifier = modifier
@@ -154,7 +153,7 @@ private fun Dial(
                         }
                     },
                     onDragEnd = {
-                        onSelectionMade()
+                        onSelectionConfirm()
                     },
                 )
             }
@@ -162,9 +161,9 @@ private fun Dial(
                 val center = Offset(size.width * 0.5f, size.height * 0.5f)
                 detectTapGestures {
                     onSelectedIndexChange(selectSegmentAt(it, center))
-                    onSelectionMade()
+                    onSelectionConfirm()
                 }
-            }
+            },
     ) {
         val valueRadius = size.width * 0.5f - 28.dp.toPx()
         val selectorRadius = 24.dp.toPx()
@@ -197,21 +196,19 @@ private fun Dial(
                 color = if (index == currentIndex()) selectedValueColor else valueColor,
                 topLeft = textCenter + Offset(
                     -result.size.width * 0.5f,
-                    -result.size.height * 0.5f
+                    -result.size.height * 0.5f,
                 ),
             )
         }
     }
 }
 
-private fun Float.toOffset() =
-    Offset(
-        x = cos(this),
-        y = sin(this),
-    )
+private fun Float.toOffset() = Offset(
+    x = cos(this),
+    y = sin(this),
+)
 
-private fun Offset.toRadians() =
-    atan2(y = y, x = x)
+private fun Offset.toRadians() = atan2(y = y, x = x)
 
 @Preview
 @Composable
@@ -219,14 +216,14 @@ private fun RadialNumberPickerPreview() {
     StretchPingTheme(isDarkTheme = true) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             RadialPicker(
                 values = listOf("5", "10", "15", "20", "30", "45", "60", "90", "120"),
                 initialSelectedIndex = 4,
                 onDismissRequest = {},
                 title = "Stretch",
-                onSelectionConfirmed = {},
+                onSelectionConfirm = {},
             )
         }
     }

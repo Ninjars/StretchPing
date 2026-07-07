@@ -20,10 +20,9 @@ object PersistenceModule {
     @Singleton
     fun provideSettingsDataStore(
         @ApplicationContext context: Context,
-    ): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            // Same file the `preferencesDataStore(name = "settings")` delegate used,
-            // so existing users' plans and settings carry over untouched.
-            produceFile = { context.preferencesDataStoreFile("settings") }
-        )
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        // Same file the `preferencesDataStore(name = "settings")` delegate used,
+        // so existing users' plans and settings carry over untouched.
+        produceFile = { context.preferencesDataStoreFile("settings") },
+    )
 }

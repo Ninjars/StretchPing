@@ -33,8 +33,7 @@ class GameSoundEffectPlayer(private val appContext: Context) {
         return newSoundPool
     }
 
-    private fun getSoundPool(): SoundPool =
-        soundPool ?: initialiseSoundPool()
+    private fun getSoundPool(): SoundPool = soundPool ?: initialiseSoundPool()
 
     fun tearDown() {
         soundPool?.release()

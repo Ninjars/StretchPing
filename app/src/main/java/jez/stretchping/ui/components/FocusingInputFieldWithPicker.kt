@@ -26,6 +26,7 @@ import kotlin.math.max
 fun FocusingInputFieldWithPicker(
     text: String,
     pickerOptions: List<String>,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -34,7 +35,6 @@ fun FocusingInputFieldWithPicker(
     label: @Composable (() -> Unit)? = null,
     pickerTitle: String? = null,
     suffix: @Composable (() -> Unit)? = null,
-    onValueChanged: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -57,7 +57,7 @@ fun FocusingInputFieldWithPicker(
                     // blur the field underneath it.
                     focusManager.clearFocus()
                     showDialog = true
-                }
+                },
             ) {
                 Icon(
                     imageVector = Icons.Default.AvTimer,
@@ -66,7 +66,7 @@ fun FocusingInputFieldWithPicker(
                 )
             }
         },
-        onValueChanged = onValueChanged,
+        onValueChange = onValueChange,
     )
     if (showDialog) {
         RadialPicker(
@@ -75,7 +75,7 @@ fun FocusingInputFieldWithPicker(
             onDismissRequest = { showDialog = false },
             title = pickerTitle,
         ) {
-            onValueChanged(pickerOptions[it])
+            onValueChange(pickerOptions[it])
             showDialog = false
         }
     }

@@ -22,7 +22,8 @@ import kotlin.math.max
 class EditTimerVM @Inject constructor(
     private val navigationDispatcher: NavigationDispatcher,
     private val settingsRepository: SettingsRepository,
-) : Consumer<EditTimerEvent>, ViewModel() {
+) : ViewModel(),
+    Consumer<EditTimerEvent> {
     private val state = combine(
         settingsRepository.engineSettings,
         settingsRepository.simpleTimerConfig,
@@ -40,13 +41,13 @@ class EditTimerVM @Inject constructor(
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        State.Default
+        State.Default,
     )
 
     val viewState: StateFlow<EditTimerViewState> =
         state.toViewState(
             scope = viewModelScope,
-            initial = State.Default
+            initial = State.Default,
         ) { state -> EditTimerStateToViewState(state) }
 
     override fun accept(event: EditTimerEvent) {
@@ -65,12 +66,12 @@ class EditTimerVM @Inject constructor(
                                     introDuration = 0,
                                     activityDuration = activeSegmentLength,
                                     transitionDuration = transitionDuration,
-                                )
+                                ),
                             ),
                             repeat = repCount < 1,
                         ),
                     )
-                }
+                },
             )
 
             else ->

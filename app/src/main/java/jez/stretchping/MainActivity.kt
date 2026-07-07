@@ -105,18 +105,18 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     Column {
                         Title(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 36.dp)
-                                .defaultMinSize(minHeight = 42.dp)
+                                .defaultMinSize(minHeight = 42.dp),
                         )
                         NavHost(
                             navController = navController,
-                            startDestination = Route.Home.routeId
+                            startDestination = Route.Home.routeId,
                         ) {
                             composable(Route.Home.routeId) {
                                 HomeScreen(
@@ -135,20 +135,20 @@ class MainActivity : ComponentActivity() {
                             composable(
                                 Route.ActiveTimer.baseRouteId,
                                 arguments = listOf(
-                                    navArgument(Route.ActiveTimer.routeConfig) {
+                                    navArgument(Route.ActiveTimer.ROUTE_CONFIG) {
                                         type = NavType.StringType
-                                    }
-                                )
+                                    },
+                                ),
                             ) {
                                 ActiveTimerScreen(hiltViewModel())
                             }
                             composable(
                                 Route.Planner.baseRouteId,
                                 arguments = listOf(
-                                    navArgument(Route.Planner.routePlanId) {
+                                    navArgument(Route.Planner.ROUTE_PLAN_ID) {
                                         type = NavType.StringType
-                                    }
-                                )
+                                    },
+                                ),
                             ) {
                                 PlannerScreen(hiltViewModel())
                             }
@@ -185,7 +185,7 @@ class MainActivity : ComponentActivity() {
                         titlePingText = titlePart2
                     }
                 }
-                .animateContentSize()
+                .animateContentSize(),
         ) {
             AnimatedVisibility(
                 visible = visible,
@@ -194,9 +194,9 @@ class MainActivity : ComponentActivity() {
                         stiffness = Spring.StiffnessMediumLow,
                         dampingRatio = Spring.DampingRatioMediumBouncy,
                     ),
-                    initialOffsetX = { -it * 2 }
+                    initialOffsetX = { -it * 2 },
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -204,7 +204,7 @@ class MainActivity : ComponentActivity() {
                     Text(
                         text = stringResource(R.string.title_part_1),
                         style = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                     Text(
                         text = titlePingText,
@@ -214,9 +214,9 @@ class MainActivity : ComponentActivity() {
                                 spring(
                                     stiffness = Spring.StiffnessMediumLow,
                                     dampingRatio = Spring.DampingRatioHighBouncy,
-                                )
+                                ),
                             )
-                            .padding(end = 16.dp)
+                            .padding(end = 16.dp),
                     )
                 }
             }
@@ -231,16 +231,19 @@ class MainActivity : ComponentActivity() {
         val isDarkTheme = when (themeMode) {
             ThemeMode.Unset,
             ThemeMode.Dynamic,
-            ThemeMode.System -> isSystemInDarkTheme()
+            ThemeMode.System,
+            -> isSystemInDarkTheme()
 
             ThemeMode.Light -> false
+
             ThemeMode.Dark -> true
         }
         val useDynamicTheme = when (themeMode) {
             ThemeMode.Unset,
             ThemeMode.System,
             ThemeMode.Light,
-            ThemeMode.Dark -> false
+            ThemeMode.Dark,
+            -> false
 
             ThemeMode.Dynamic -> true
         }

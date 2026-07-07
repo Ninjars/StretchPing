@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import jez.stretchping.ui.theme.StretchPingTheme
 import java.lang.Float.min
 
-private const val ArcStartDeg = 120f
-private const val ArcSweepDeg = 300f
-private val ArcBackThickness = 4.dp
-private val ArcForeThickness = 12.dp
+private const val ARC_START_DEG = 120f
+private const val ARC_SWEEP_DEG = 300f
+private val ARC_BACK_THICKNESS = 4.dp
+private val ARC_FORE_THICKNESS = 12.dp
 
 @Composable
 fun ArcProgressBar(
@@ -33,40 +33,40 @@ fun ArcProgressBar(
 
     Canvas(
         modifier = modifier
-            .aspectRatio(1f)
+            .aspectRatio(1f),
     ) {
-        val originOffset = Offset(ArcForeThickness.toPx(), ArcForeThickness.toPx())
+        val originOffset = Offset(ARC_FORE_THICKNESS.toPx(), ARC_FORE_THICKNESS.toPx())
         val arcBoundsSize = Size(
-            size.width - (ArcForeThickness * 2).toPx(),
-            size.height - (ArcForeThickness * 2).toPx()
+            size.width - (ARC_FORE_THICKNESS * 2).toPx(),
+            size.height - (ARC_FORE_THICKNESS * 2).toPx(),
         )
 
         // Background Arc
         drawArc(
             color = arcBackground,
-            startAngle = ArcStartDeg,
-            sweepAngle = ArcSweepDeg,
+            startAngle = ARC_START_DEG,
+            sweepAngle = ARC_SWEEP_DEG,
             useCenter = false,
             topLeft = originOffset,
             size = arcBoundsSize,
             style = Stroke(
-                width = ArcBackThickness.toPx(),
+                width = ARC_BACK_THICKNESS.toPx(),
                 cap = StrokeCap.Round,
-            )
+            ),
         )
 
         // Foreground Arc
         drawArc(
             color = arcForeground,
-            startAngle = ArcStartDeg,
-            sweepAngle = ArcSweepDeg * min(progress, 1f),
+            startAngle = ARC_START_DEG,
+            sweepAngle = ARC_SWEEP_DEG * min(progress, 1f),
             useCenter = false,
             topLeft = originOffset,
             size = arcBoundsSize,
             style = Stroke(
-                width = ArcForeThickness.toPx(),
+                width = ARC_FORE_THICKNESS.toPx(),
                 cap = StrokeCap.Round,
-            )
+            ),
         )
     }
 }
@@ -77,7 +77,7 @@ private fun ArcProgressBarPreview() {
     StretchPingTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 ArcProgressBar(0.33f)

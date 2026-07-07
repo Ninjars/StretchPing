@@ -42,14 +42,13 @@ sealed class EditTimerEvent {
     data class UpdateRepCount(val count: String) : EditTimerEvent()
 }
 
-
 @Composable
 fun EditTimerScreen(
-    viewModel: EditTimerVM
+    viewModel: EditTimerVM,
 ) {
     EditTimerScreen(
         viewModel.viewState.collectAsState(),
-        rememberEventConsumer(viewModel)
+        rememberEventConsumer(viewModel),
     )
 }
 
@@ -77,9 +76,11 @@ private fun EditTimerScreen(
             eventHandler = {
                 when (it) {
                     TimerControlsEvent.PlayClicked -> eventHandler(EditTimerEvent.Start)
+
                     TimerControlsEvent.PauseClicked,
                     TimerControlsEvent.ResetClicked,
-                    TimerControlsEvent.BackClicked -> Unit
+                    TimerControlsEvent.BackClicked,
+                    -> Unit
                 }
             },
         ) {
@@ -117,7 +118,7 @@ private fun Settings(
             pickerOptions = ExerciseConstants.StretchDurations,
             text = state.activeDuration,
             textStyle = LocalTextStyle.current.copy(
-                fontSize = 30.sp
+                fontSize = 30.sp,
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -137,9 +138,10 @@ private fun Settings(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
-        ) {
-            eventHandler(EditTimerEvent.UpdateActiveDuration(it))
-        }
+            onValueChange = {
+                eventHandler(EditTimerEvent.UpdateActiveDuration(it))
+            },
+        )
 
         // Edit Transition Duration
         FocusingInputFieldWithPicker(
@@ -147,7 +149,7 @@ private fun Settings(
             pickerOptions = ExerciseConstants.TransitionDurations,
             text = state.transitionDuration,
             textStyle = LocalTextStyle.current.copy(
-                fontSize = 30.sp
+                fontSize = 30.sp,
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -167,9 +169,10 @@ private fun Settings(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
-        ) {
-            eventHandler(EditTimerEvent.UpdateTransitionDuration(it))
-        }
+            onValueChange = {
+                eventHandler(EditTimerEvent.UpdateTransitionDuration(it))
+            },
+        )
 
         // Edit Rep Count
         FocusingInputFieldWithPicker(
@@ -177,7 +180,7 @@ private fun Settings(
             pickerOptions = ExerciseConstants.RepCountsWithInfinite,
             text = state.repCount,
             textStyle = LocalTextStyle.current.copy(
-                fontSize = 30.sp
+                fontSize = 30.sp,
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -188,8 +191,9 @@ private fun Settings(
                 Text(stringResource(id = R.string.label_reps))
             },
             pickerTitle = stringResource(id = R.string.label_reps),
-        ) {
-            eventHandler(EditTimerEvent.UpdateRepCount(it))
-        }
+            onValueChange = {
+                eventHandler(EditTimerEvent.UpdateRepCount(it))
+            },
+        )
     }
 }

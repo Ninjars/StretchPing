@@ -16,7 +16,7 @@ class TTSManager @Inject constructor(
 
     fun initialise() {
         ttsEngine = TextToSpeech(
-            context
+            context,
         ) {
             if (it == TextToSpeech.SUCCESS) {
                 Timber.d("TTS engine initialised")

@@ -1,5 +1,6 @@
 package jez.stretchping.features.activetimer.view
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -97,9 +98,11 @@ private fun ActiveTimerScreen(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @ExperimentalAnimationApi
 @Composable
 private fun MainContent(

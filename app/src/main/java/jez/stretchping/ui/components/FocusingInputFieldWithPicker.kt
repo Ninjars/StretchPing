@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ fun FocusingInputFieldWithPicker(
     onValueChanged: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -57,7 +59,14 @@ fun FocusingInputFieldWithPicker(
             onValueChanged = onValueChanged,
         )
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                // Clear focus so the text field adopts the picked value:
+                // SelectOnFocusTextField treats the local text as
+                // authoritative while focused, and a Compose Dialog does not
+                // blur the field underneath it.
+                focusManager.clearFocus()
+                showDialog = true
+            },
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier.size(42.dp)

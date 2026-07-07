@@ -81,7 +81,10 @@ P0s land. Paths are relative to `app/src/main/java/jez/stretchping/`.
    single source of truth while the field is focused (the user owns the text;
    stale upstream echoes are ignored). Upstream is only adopted when the field
    is unfocused (external changes: radial picker, VM normalisation, initial
-   value) and on blur. Select-all-on-focus behaviour is unchanged. Verified
+   value) and on blur. `FocusingInputFieldWithPicker` clears focus before
+   opening the radial picker (a Dialog doesn't blur the field beneath it), so
+   picked values render immediately even when the field was being edited.
+   Select-all-on-focus behaviour is unchanged. Verified
    on-device (rapid-input bursts show no dropped/reordered characters or cursor
    jumps; select-all, propagation, persistence across navigation, and blur
    re-sync all still work).

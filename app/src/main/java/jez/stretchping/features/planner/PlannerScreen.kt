@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Loop
@@ -71,7 +70,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.redfoxstudio.stretchping.R
-import jez.stretchping.ui.components.RadialPicker
+import jez.stretchping.ui.components.FocusingInputFieldWithPicker
 import jez.stretchping.ui.components.SelectOnFocusTextField
 import jez.stretchping.ui.components.TimerControls
 import jez.stretchping.ui.components.TimerControlsEvent
@@ -457,11 +456,11 @@ private fun PlanSectionNumberInput(
     onChange: (Int) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var showPicker by remember { mutableStateOf(false) }
 
-    SelectOnFocusTextField(
+    FocusingInputFieldWithPicker(
         text = text,
-        useOutlinedTextField = true,
+        pickerOptions = pickerOptions,
+        modifier = modifier,
         textStyle = LocalTextStyle.current.copy(
             fontSize = 24.sp
         ),
@@ -477,6 +476,7 @@ private fun PlanSectionNumberInput(
             KeyboardActions()
         },
         label = { Text(labelText) },
+        pickerTitle = labelText,
         suffix = if (showSecondsSuffix) {
             {
                 Text(
@@ -485,30 +485,8 @@ private fun PlanSectionNumberInput(
                 )
             }
         } else null,
-        trailingIcon = {
-            IconButton(onClick = { showPicker = true }) {
-                Icon(
-                    imageVector = Icons.Default.AvTimer,
-                    contentDescription = stringResource(R.string.desc_radial_picker),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-        },
-        modifier = modifier,
     ) {
         it.toFlooredInt()?.let { int -> onChange(int) }
-    }
-
-    if (showPicker) {
-        RadialPicker(
-            values = pickerOptions,
-            initialSelectedIndex = max(0, pickerOptions.indexOfFirst { it == text }),
-            onDismissRequest = { showPicker = false },
-            title = labelText,
-        ) { index ->
-            pickerOptions[index].toFlooredInt()?.let(onChange)
-            showPicker = false
-        }
     }
 }
 

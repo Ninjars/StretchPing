@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -127,7 +128,14 @@ private fun Settings(
             },
             colors = secondaryTextFieldColors(),
             label = {
-                Text(stringResource(id = R.string.active_duration))
+                Text(stringResource(id = R.string.label_stretch))
+            },
+            pickerTitle = stringResource(id = R.string.label_stretch),
+            suffix = {
+                Text(
+                    text = stringResource(R.string.suffix_seconds),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             },
         ) {
             eventHandler(EditTimerEvent.UpdateActiveDuration(it))
@@ -150,7 +158,14 @@ private fun Settings(
             },
             colors = secondaryTextFieldColors(),
             label = {
-                Text(stringResource(id = R.string.transition_duration))
+                Text(stringResource(id = R.string.label_break))
+            },
+            pickerTitle = stringResource(id = R.string.label_break),
+            suffix = {
+                Text(
+                    text = stringResource(R.string.suffix_seconds),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             },
         ) {
             eventHandler(EditTimerEvent.UpdateTransitionDuration(it))
@@ -170,8 +185,9 @@ private fun Settings(
             ),
             colors = secondaryTextFieldColors(),
             label = {
-                Text(stringResource(id = R.string.rep_count))
+                Text(stringResource(id = R.string.label_reps))
             },
+            pickerTitle = stringResource(id = R.string.label_reps),
         ) {
             eventHandler(EditTimerEvent.UpdateRepCount(it))
         }

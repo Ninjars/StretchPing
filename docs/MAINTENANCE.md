@@ -42,11 +42,21 @@ P0s land. Paths are relative to `app/src/main/java/jez/stretchping/`.
    `update {}`; `ActiveTimerEngine` funnels events through an unlimited
    `Channel` consumed by a single coroutine (also removes the latent race on
    `EventScheduler.jobs`).
-5. **Timer drift / doze stalls** — `features/activetimer/logic/EventScheduler.kt`
+5. ~~**Timer drift / doze stalls** — `features/activetimer/logic/EventScheduler.kt`
    (~98): chained relative `delay()`s accumulate latency and aren't
    doze-exempt; pings drift or stall with the screen off despite the FGS.
    Fix: anchor scheduling to absolute `endAtTime` + hold a partial wake lock
-   while running. (M)
+   while running. (M)~~ **DONE** — `EventScheduler` now anchors every ping and
+   the segment boundary to a single absolute monotonic deadline (via an
+   injected `TimeProvider` backed by `SystemClock.elapsedRealtime()`); a
+   self-correcting `delayUntil` and per-chain deadline carry-over stop drift
+   from accumulating. `ActiveTimerService` implements `RunningStateController`
+   and holds a `PARTIAL_WAKE_LOCK` while a segment is running (acquired on
+   Start/Resume/Repeat, released on Pause/Complete/Back/destroy; added the
+   `WAKE_LOCK` permission). Verified on-device: pings keep firing every ~1s
+   through 100s of forced doze with the screen off (was previously prone to
+   stall), and `dumpsys power` confirms the lock is held only while running.
+   Covered by `EventSchedulerTest` (pure-JVM, fake clock).
 6. ~~**Service connection leak** — `service/ActiveTimerServiceController.kt`
    (~50-57): `unbind()` skips `unbindService` when binding hasn't completed
    yet → leaked ServiceConnection and double-bind on next resume. Track a

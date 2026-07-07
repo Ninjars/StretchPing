@@ -25,6 +25,7 @@ class ActiveTimerEngine(
     private val onEndCallback: () -> Unit,
     private val eventScheduler: EventScheduler,
     private val navigationDispatcher: NavigationDispatcher,
+    private val runningStateController: RunningStateController,
     private val engineSettings: EngineSettings,
     exerciseConfig: ExerciseConfig,
 ) : Consumer<ActiveTimerVM.Event> {
@@ -110,6 +111,11 @@ class ActiveTimerEngine(
         mutableState.value = ActiveTimerStateUpdater(currentState, command)
 
         command?.let {
+            // A partial wake lock is held (via the host service) only while the
+            // timer is actively counting down so pings keep firing with the
+            // screen off, and released the moment it pauses or completes.
+            runningStateController.onRunningStateChanged(it.isRunning)
+
             eventScheduler.planFutureActions(
                 coroutineScope = coroutineScope,
                 eventsConfiguration = EventsConfiguration(
@@ -135,6 +141,7 @@ class ActiveTimerEngine(
     }
 
     fun dispose() {
+        runningStateController.onRunningStateChanged(false)
         events.close()
         eventScheduler.dispose()
         coroutineScope.cancel()
@@ -143,30 +150,46 @@ class ActiveTimerEngine(
     fun hasStarted() = mutableState.value.hasStarted
 
     sealed class Command {
+        /** True while the timer is actively counting down (wake lock should be held). */
+        abstract val isRunning: Boolean
+
         data class StartSegment(
             val startMillis: Long,
             val index: Int,
             val segmentSpec: SegmentSpec,
-        ) : Command()
+        ) : Command() {
+            override val isRunning = true
+        }
 
         data class RepeatExercise(
             val startMillis: Long,
             val segmentSpec: SegmentSpec,
-        ) : Command()
+        ) : Command() {
+            override val isRunning = true
+        }
 
         data class ResumeSegment(
             val startMillis: Long,
             val startFraction: Float,
             val pausedSegment: ActiveSegment,
-        ) : Command()
+        ) : Command() {
+            override val isRunning = true
+        }
 
         data class PauseSegment(
             val pauseMillis: Long,
             val runningSegment: ActiveSegment,
-        ) : Command()
+        ) : Command() {
+            override val isRunning = false
+        }
 
-        data object GoBack : Command()
-        data object SequenceCompleted : Command()
+        data object GoBack : Command() {
+            override val isRunning = false
+        }
+
+        data object SequenceCompleted : Command() {
+            override val isRunning = false
+        }
     }
 
     data class State(

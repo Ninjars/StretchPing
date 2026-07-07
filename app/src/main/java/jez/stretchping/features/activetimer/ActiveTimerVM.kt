@@ -92,11 +92,12 @@ class ActiveTimerVM @Inject constructor(
 
     private fun bindService(engineSettings: EngineSettings) {
         serviceDispatcher.bind { boundService ->
-            val serviceEngine = boundService.getOrCreateEngine { onEndCallback ->
+            val serviceEngine = boundService.getOrCreateEngine { onEndCallback, runningStateController ->
                 ActiveTimerEngine(
                     onEndCallback,
                     eventScheduler,
                     navigationDispatcher,
+                    runningStateController,
                     engineSettings,
                     exerciseConfig,
                 )

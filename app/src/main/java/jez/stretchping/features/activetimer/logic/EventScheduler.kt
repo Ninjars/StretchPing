@@ -23,8 +23,17 @@ data class EventsConfiguration(
 class EventScheduler @Inject constructor(
     private val soundManager: SoundManager,
     private val ttsManager: TTSManager,
+    private val timeProvider: TimeProvider,
 ) {
     private val jobs: MutableList<Job> = mutableListOf()
+
+    // Monotonic deadline of the segment currently scheduled. A segment that
+    // chains straight off the previous one (i.e. StartSegment/RepeatExercise
+    // fired by OnSegmentCompleted) anchors to this exact instant instead of
+    // `now()`, so per-boundary wake-up latency can't compound across a long
+    // sequence. Reset (null) whenever the chain breaks — pause, resume, stop,
+    // back — or when a fresh start begins far from the last deadline.
+    private var lastDeadlineMillis: Long? = null
 
     suspend fun planFutureActions(
         coroutineScope: CoroutineScope,
@@ -34,14 +43,18 @@ class EventScheduler @Inject constructor(
     ) {
         soundManager.playSilence()
         when (executedCommand) {
-            is Command.GoBack ->
+            is Command.GoBack -> {
+                lastDeadlineMillis = null
                 clearAllJobs()
+            }
 
             is Command.SequenceCompleted -> {
+                lastDeadlineMillis = null
                 clearAllJobs()
             }
 
             is Command.PauseSegment -> {
+                lastDeadlineMillis = null
                 clearAllJobs()
                 soundManager.playSound(GameSoundEffect.Stop)
             }
@@ -80,7 +93,7 @@ class EventScheduler @Inject constructor(
         jobs.clear()
     }
 
-    private suspend fun scheduleNextSegmentEvents(
+    private fun scheduleNextSegmentEvents(
         coroutineScope: CoroutineScope,
         eventsConfiguration: EventsConfiguration,
         durationMillis: Long,
@@ -88,6 +101,25 @@ class EventScheduler @Inject constructor(
         eventConsumer: Consumer<ActiveTimerVM.Event>,
     ) {
         clearAllJobs()
+
+        // Anchor everything to a single absolute deadline. Firing times are
+        // computed as absolute instants (see [delayUntil]) rather than chained
+        // relative delays, so a late wake-up on one ping never shifts the
+        // segment boundary or the pings around it.
+        val now = timeProvider.nowMillis()
+        // When this segment chains straight off the previous boundary, anchor
+        // its start to that boundary's deadline so drift doesn't accumulate
+        // across the whole sequence. `now` is used for a fresh/resumed start.
+        val previousDeadline = lastDeadlineMillis
+        val startMillis =
+            if (previousDeadline != null && now - previousDeadline in 0..CHAIN_TOLERANCE_MILLIS) {
+                previousDeadline
+            } else {
+                now
+            }
+        val deadlineMillis = startMillis + durationMillis
+        lastDeadlineMillis = deadlineMillis
+
         jobs.add(
             coroutineScope.launch {
                 if (segmentSpec is SegmentSpec.Announcement) {
@@ -95,7 +127,7 @@ class EventScheduler @Inject constructor(
                         ttsManager.announce(it)
                     }
                 }
-                delay(durationMillis.milliseconds)
+                delayUntil(deadlineMillis)
 
                 if (segmentSpec.isLast) {
                     soundManager.playSound(GameSoundEffect.Completed)
@@ -115,6 +147,7 @@ class EventScheduler @Inject constructor(
         )
         enqueueCountdownPings(
             coroutineScope = coroutineScope,
+            deadlineMillis = deadlineMillis,
             durationMillis = durationMillis,
             pingCount = when (segmentSpec) {
                 is SegmentSpec.Stretch -> eventsConfiguration.activePings
@@ -125,23 +158,46 @@ class EventScheduler @Inject constructor(
         )
     }
 
-    private suspend fun enqueueCountdownPings(
+    private fun enqueueCountdownPings(
         coroutineScope: CoroutineScope,
+        deadlineMillis: Long,
         durationMillis: Long,
         pingCount: Int,
         pingIntervalMillis: Long,
     ) {
         (1 until (min(pingCount, (durationMillis / pingIntervalMillis).toInt()))).forEach {
+            val fireAtMillis = deadlineMillis - it * pingIntervalMillis
             jobs.add(
                 coroutineScope.launch {
-                    delay((durationMillis - it * pingIntervalMillis).milliseconds)
+                    delayUntil(fireAtMillis)
                     soundManager.playSound(GameSoundEffect.CountdownBeep)
                 }
             )
         }
     }
 
+    /**
+     * Suspends until the monotonic clock reaches [targetMillis]. Recomputes the
+     * remaining time after each wake so an over- or under-shoot (e.g. the CPU
+     * being throttled in doze) is corrected against the absolute target instead
+     * of accumulating into later events.
+     */
+    private suspend fun delayUntil(targetMillis: Long) {
+        while (true) {
+            val remaining = targetMillis - timeProvider.nowMillis()
+            if (remaining <= 0) return
+            delay(remaining.milliseconds)
+        }
+    }
+
     fun dispose() {
+        lastDeadlineMillis = null
         jobs.forEach { it.cancel() }
+    }
+
+    private companion object {
+        // A chained segment starts within roughly a wake-up-latency window of the
+        // previous deadline; beyond this we treat the start as fresh and anchor to now.
+        const val CHAIN_TOLERANCE_MILLIS = 750L
     }
 }

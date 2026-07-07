@@ -6,6 +6,7 @@ plugins {
     id "kotlin-parcelize"
     id "org.jetbrains.kotlin.plugin.serialization" version "1.9.24"
     id "org.jlleitschuh.gradle.ktlint"
+    id 'org.jetbrains.kotlin.plugin.compose'
 }
 
 android {
@@ -41,9 +42,6 @@ android {
     buildFeatures {
         compose true
         buildConfig true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion "1.5.14"
     }
     packagingOptions {
         resources {

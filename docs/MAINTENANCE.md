@@ -73,11 +73,18 @@ P0s land. Paths are relative to `app/src/main/java/jez/stretchping/`.
    invalid state in the UI. (S/M)~~ **DONE** — persistence now gates on
    `sections.isNotEmpty()` instead of `canStart`, so edits to a temporarily
    invalid plan still save while a brand-new empty plan stays unsaved.
-9. **Text field desync** — `ui/components/SelectOnFocusTextField.kt` (~39-53)
+9. ~~**Text field desync** — `ui/components/SelectOnFocusTextField.kt` (~39-53)
    resyncs its local `TextFieldValue` from upstream during composition; with
    async event handling, fast typing can transiently revert (permanent drops
    when combined with item 4). Revisit after item 4; consider state-hoisting
-   or `TextFieldState`. (M)
+   or `TextFieldState`. (M)~~ **DONE** — the local `TextFieldValue` is now the
+   single source of truth while the field is focused (the user owns the text;
+   stale upstream echoes are ignored). Upstream is only adopted when the field
+   is unfocused (external changes: radial picker, VM normalisation, initial
+   value) and on blur. Select-all-on-focus behaviour is unchanged. Verified
+   on-device (rapid-input bursts show no dropped/reordered characters or cursor
+   jumps; select-all, propagation, persistence across navigation, and blur
+   re-sync all still work).
 
 ## P2 — platform & toolchain
 

@@ -36,35 +36,57 @@ fun SelectOnFocusTextField(
     suffix: @Composable (() -> Unit)? = null,
     onValueChanged: (String) -> Unit,
 ) {
-    val fieldState = remember { mutableStateOf(TextFieldValue(text)) }
-
-    val newTextRange = with(fieldState.value) {
-        if (text != this.text) {
-            val oldPosition = this.selection.end
-            val newPosition = max(0, oldPosition + text.length - this.text.length)
-            TextRange(newPosition)
-        } else {
-            fieldState.value.selection
-        }
-    }
-    fieldState.value = fieldState.value.copy(
-        text = text,
-        selection = newTextRange
-    )
-
+    // The local TextFieldValue is the single source of truth while the user is
+    // typing. Upstream `text` updates arrive asynchronously (onValueChanged ->
+    // VM state flow -> recomposition), so a recomposition can carry a stale
+    // echo of a value from *before* the keystroke currently in flight. Blindly
+    // resyncing local state from `text` on every composition (as the previous
+    // implementation did) would revert freshly-typed characters or jump the
+    // cursor whenever typing outran the round-trip.
+    //
+    // While the field is focused the local value therefore always wins: the
+    // user owns the text and upstream is only ever catching up to it. Upstream
+    // is authoritative again once the field loses focus (see the focus
+    // LaunchedEffect below) and while unfocused (external changes such as a
+    // radial-picker selection, VM normalisation, or the initial value), which
+    // is handled here.
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val fieldState = remember { mutableStateOf(TextFieldValue(text)) }
+
+    if (!isFocused && text != fieldState.value.text) {
+        // Unfocused: upstream is authoritative. Adopt the external value and
+        // place the cursor sensibly relative to the previous content.
+        val current = fieldState.value
+        val oldPosition = current.selection.end
+        val newPosition = max(0, oldPosition + text.length - current.text.length)
+        fieldState.value = current.copy(
+            text = text,
+            selection = TextRange(newPosition),
+        )
+    }
+
     LaunchedEffect(isFocused) {
-        fieldState.value = fieldState.value.copy(
-            selection = if (isFocused) {
-                TextRange(
+        fieldState.value = if (isFocused) {
+            // Select-all on focus so a new value replaces the old one.
+            fieldState.value.copy(
+                selection = TextRange(
                     start = 0,
                     end = fieldState.value.text.length
                 )
-            } else {
-                TextRange.Zero
-            }
-        )
+            )
+        } else {
+            // On blur, re-sync from the authoritative upstream value in case
+            // local and upstream diverged (e.g. the VM normalised the input),
+            // and collapse the selection.
+            TextFieldValue(text = text, selection = TextRange.Zero)
+        }
+    }
+
+    val onValueChange: (TextFieldValue) -> Unit = {
+        fieldState.value = it
+        onValueChanged(it.text)
     }
 
     if (useOutlinedTextField) {
@@ -77,10 +99,7 @@ fun SelectOnFocusTextField(
             trailingIcon = trailingIcon,
             suffix = suffix,
             textStyle = textStyle,
-            onValueChange = {
-                fieldState.value = it
-                onValueChanged(it.text)
-            },
+            onValueChange = onValueChange,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
@@ -96,10 +115,7 @@ fun SelectOnFocusTextField(
             trailingIcon = trailingIcon,
             suffix = suffix,
             textStyle = textStyle,
-            onValueChange = {
-                fieldState.value = it
-                onValueChanged(it.text)
-            },
+            onValueChange = onValueChange,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
